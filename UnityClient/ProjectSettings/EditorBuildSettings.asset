@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/ARAndCameraQueryTest.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/AudioQueryTest.unity
+    guid: b5d15be1109064341a80a382c43c352b
+  - enabled: 0
+    path: Assets/Scenes/StreamingReplyTest.unity
+    guid: 160b2201eb38a0548a52166bc7551773
+  - enabled: 1
+    path: Assets/Scenes/SpeechReplyTest.unity
+    guid: 0c2609731a8a3c846817e36d4683bee7
+  m_configObjects:
+    AR Foundation RemoteARFoundationRemoteLoaderSettings: {fileID: 11400000, guid: 503782968678e62458900510d41f13d3, type: 2}
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 41e5899e59e357d4991663b6502e3031, type: 2}
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: dd81d0dcc0e1867408bd5c503517c214, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 19909fcefdbd4254db2b153592d729ad, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: afbf977e000b6da498a69dd1738c8dec, type: 2}

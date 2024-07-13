@@ -1,0 +1,40 @@
+lib to do:
+
+x-get up and running with unit tests
+x-integrate with visual studio
+n-set up to build a dll
+x-push everything up to repo
+x-observable interfaces
+x-serial executor tests
+x-serial executor queueable
+x-parallel executor queueable
+x-message bus
+	x-tests
+	x-implementation
+	x-fix needing to cast message in subscriber methods
+x-ObservableProperty
+x-BriLib namespace
+x-observable collection
+	x-extend Collection
+	x-support object and generics for everything
+	x-override insert, remove, clear
+	x-map
+	x-filter
+	x-sort
+	x-reduce
+	x-union
+x-collection tests
+	x-main tests
+	x-filter tests
+	x-map tests
+	x-sort tests
+	x-union tests
+	x-generic main tests
+-promises
+	-queueable wrapper around coroutines
+	-can be chained
+
+unity lib to do:
+
+-debug console
+-coroutine queueable wrapper?
