@@ -79,7 +79,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
     GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
     GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
     GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
-    GCTextToSpeech.Instance.Synthesize(response.candidates[0].content.parts[0].text, new VoiceConfig()
+    GCTextToSpeech.Instance.Synthesize((response.candidates[0].content.parts[0] as TextPart).text, new VoiceConfig()
       {
         gender = Enumerators.SsmlVoiceGender.MALE,
         languageCode = GCTextToSpeech.Instance.PrepareLanguage(Enumerators.LanguageCode.en_GB),
@@ -91,7 +91,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
       16000, 
       new Enumerators.EffectsProfileId[] { });
     Debug.Log($"Got LLM response:\n{response}");
-    _outputText.text = response.candidates[0].content.parts[0].text;
+    _outputText.text = (response.candidates[0].content.parts[0] as TextPart).text;
   }
 
   private void OnVoiceSynthesizeFail(string arg1, long arg2)
@@ -102,7 +102,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
   private void OnVoiceSynthesizeSuccess(PostSynthesizeResponse response, long arg2)
   {
     Debug.Log("Succeeded in voice synthesis");
-    _audioSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, Constants.DEFAULT_AUDIO_ENCODING);
+    _audioSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, FrostweepGames.Plugins.GoogleCloud.TextToSpeech.Constants.DEFAULT_AUDIO_ENCODING);
     _audioSource.Play();
   }
 }

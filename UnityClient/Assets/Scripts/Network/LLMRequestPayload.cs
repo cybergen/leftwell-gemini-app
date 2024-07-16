@@ -8,6 +8,9 @@ namespace LLM.Network
   public class LLMRequestPayload
   {
     public List<Content> contents;
+    public List<SafetySetting> safetySettings;
+    public Content systemInstruction;
+    public GenerationConfig generationConfig;
 
     public string ToJSON()
     {
@@ -87,6 +90,7 @@ namespace LLM.Network
   public class Content
   {
     public List<BasePart> parts;
+    public string role; //Must be either user or model
   }
 
   [Serializable]
@@ -123,5 +127,41 @@ namespace LLM.Network
   {
     public string mimeType;
     public string fileUri;
+  }
+
+  [Serializable]
+  public class GenerationConfig
+  {
+    public float temperature;
+  }
+
+  [Serializable]
+  public class SafetySetting
+  {
+    public HarmCategory category;
+    public HarmBlockThreshold threshold;
+  }
+
+  public enum HarmCategory
+  {
+    HARM_CATEGORY_UNSPECIFIED,
+    HARM_CATEGORY_DEROGATORY,
+    HARM_CATEGORY_TOXICITY,
+    HARM_CATEGORY_VIOLENCE,
+    HARM_CATEGORY_SEXUAL,
+    HARM_CATEGORY_MEDICAL,
+    HARM_CATEGORY_DANGEROUS,
+    HARM_CATEGORY_HARASSMENT,
+    HARM_CATEGORY_HATE_SPEECH,
+    HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    HARM_CATEGORY_DANGEROUS_CONTENT
+  }
+
+  public enum HarmBlockThreshold
+  {
+    HARM_BLOCK_THRESHOLD_UNSPECIFIED,
+    BLOCK_LOW_AND_ABOVE,
+    BLOCK_MEDIUM_AND_ABOVE,
+    BLOCK_NONE
   }
 }

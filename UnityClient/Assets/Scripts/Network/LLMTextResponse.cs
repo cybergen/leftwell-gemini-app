@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,19 +20,6 @@ namespace LLM.Network
       public List<SafetyRating> safetyRatings;
 
       [Serializable]
-      public class Content
-      {
-        public List<Part> parts;
-        public string role;
-
-        [Serializable]
-        public class Part
-        {
-          public string text;
-        }
-      }
-
-      [Serializable]
       public class SafetyRating
       {
         public string category;
@@ -49,7 +37,10 @@ namespace LLM.Network
 
     public override string ToString()
     {
-      return JsonUtility.ToJson(this);
+      return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
+      {
+        TypeNameHandling = TypeNameHandling.None
+      });
     }
 
     public static LLMTextResponse FromJson(string json)
