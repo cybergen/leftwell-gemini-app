@@ -35,7 +35,7 @@ public class AudioQueryTester : MonoBehaviour, IPointerDownHandler, IPointerUpHa
       Debug.Log($"Finished upload with file {file}");
       partList.Add(new FilePart
       {
-        fileData = new FileInfo
+        fileData = new FilePartData
         {
           mimeType = file.file.mimeType,
           fileUri = file.file.uri
@@ -74,6 +74,6 @@ public class AudioQueryTester : MonoBehaviour, IPointerDownHandler, IPointerUpHa
     var payload = LLMRequestPayload.GetRequestWithMultipleParts(partList.ToArray());
     var response = await LLMInteractionManager.Instance.RequestLLMCompletion(payload);
     Debug.Log($"Got LLM response:\n{response}");
-    _outputText.text = (response.candidates[0].content.parts[0] as TextPart).text;
+    _outputText.text = response.candidates[0].content.parts[0].text;
   }
 }

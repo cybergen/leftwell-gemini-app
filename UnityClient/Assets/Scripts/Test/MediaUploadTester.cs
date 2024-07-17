@@ -30,7 +30,7 @@ public class MediaUploadTester : MonoBehaviour
     InfoText.text = "Making request to Gemini with image";
     var dataPart = new FilePart
     {
-      fileData = new FileInfo
+      fileData = new FilePartData
       {
         mimeType = file.file.mimeType,
         fileUri = file.file.uri
@@ -43,6 +43,6 @@ public class MediaUploadTester : MonoBehaviour
     var payload = LLMRequestPayload.GetRequestWithMultipleParts(dataPart, textPart);
     var response = await LLMInteractionManager.Instance.RequestLLMCompletion(payload);
     Debug.Log($"Resolved LLM request with response {response}");
-    InfoText.text = (response.candidates[0].content.parts[0] as TextPart).text;
+    InfoText.text = response.candidates[0].content.parts[0].text;
   }
 }

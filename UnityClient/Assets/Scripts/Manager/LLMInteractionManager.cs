@@ -20,7 +20,7 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
       try
       {
         string jsonPayload = request.ToJSON();
-        Debug.Log($"Sending LLM generate content request");
+        Debug.Log($"Sending LLM generate content request with payload:\n{jsonPayload}");
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         string urlWithKey = string.Format(INFERENCE_URL, MODEL, Config.Instance.ApiKey);
         HttpResponseMessage response = await client.PostAsync(urlWithKey, content);

@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace LLM.Network
 {
@@ -14,7 +13,7 @@ namespace LLM.Network
     [Serializable]
     public class Candidate
     {
-      public Content content;
+      public ResponseContent content;
       public string finishReason;
       public int index;
       public List<SafetyRating> safetyRatings;
@@ -25,6 +24,13 @@ namespace LLM.Network
         public string category;
         public string probability;
       }
+    }
+
+    [Serializable]
+    public class ResponseContent
+    {
+      public List<TextPart> parts;
+      public string role;
     }
 
     [Serializable]
@@ -45,7 +51,10 @@ namespace LLM.Network
 
     public static LLMTextResponse FromJson(string json)
     {
-      return JsonUtility.FromJson<LLMTextResponse>(json);
+      return JsonConvert.DeserializeObject<LLMTextResponse>(json, new JsonSerializerSettings
+      {
+        TypeNameHandling = TypeNameHandling.Auto
+      });
     }
   }
 }

@@ -37,7 +37,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
       Debug.Log($"Finished upload with file {file}");
       partList.Add(new FilePart
       {
-        fileData = new FileInfo
+        fileData = new FilePartData
         {
           mimeType = file.file.mimeType,
           fileUri = file.file.uri
@@ -79,7 +79,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
     GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
     GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
     GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
-    GCTextToSpeech.Instance.Synthesize((response.candidates[0].content.parts[0] as TextPart).text, new VoiceConfig()
+    GCTextToSpeech.Instance.Synthesize(response.candidates[0].content.parts[0].text, new VoiceConfig()
       {
         gender = Enumerators.SsmlVoiceGender.MALE,
         languageCode = GCTextToSpeech.Instance.PrepareLanguage(Enumerators.LanguageCode.en_GB),

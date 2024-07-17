@@ -35,7 +35,7 @@ public class StreamingReplyTester : MonoBehaviour, IPointerDownHandler, IPointer
       Debug.Log($"Finished upload with file {file}");
       partList.Add(new FilePart
       {
-        fileData = new FileInfo
+        fileData = new FilePartData
         {
           mimeType = file.file.mimeType,
           fileUri = file.file.uri

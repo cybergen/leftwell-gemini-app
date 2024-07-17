@@ -5,6 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Test/MultiTurnChatTest.unity
+    guid: 4b1bccbda714f43419fb716ea57af016
   - enabled: 0
     path: Assets/Scenes/Test/ARAndCameraQueryTest.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
@@ -14,7 +17,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Test/StreamingReplyTest.unity
     guid: 160b2201eb38a0548a52166bc7551773
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Test/SpeechReplyTest.unity
     guid: 0c2609731a8a3c846817e36d4683bee7
   m_configObjects:

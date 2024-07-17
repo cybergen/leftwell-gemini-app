@@ -78,17 +78,5 @@ namespace BriLib
       if (dict.ContainsKey(key)) return dict[key];
       return null;
     }
-
-    public static async Task ActionCompletion(this Action action)
-    {
-      bool triggered = false;
-      void callback()
-      {
-        action -= callback;
-        triggered = true;
-      }
-      action += callback;
-      while (!triggered) { await Task.Delay(10); }
-    }
   }
 }

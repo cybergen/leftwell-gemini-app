@@ -112,7 +112,7 @@ namespace LLM.Network
   [Serializable]
   public class FilePart : BasePart
   {
-    public FileInfo fileData;
+    public FilePartData fileData;
   }
 
   [Serializable]
@@ -123,7 +123,7 @@ namespace LLM.Network
   }
 
   [Serializable]
-  public class FileInfo
+  public class FilePartData
   {
     public string mimeType;
     public string fileUri;
@@ -138,8 +138,8 @@ namespace LLM.Network
   [Serializable]
   public class SafetySetting
   {
-    public HarmCategory category;
-    public HarmBlockThreshold threshold;
+    public string category;
+    public string threshold;
   }
 
   public enum HarmCategory

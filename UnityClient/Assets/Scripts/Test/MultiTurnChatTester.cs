@@ -6,56 +6,102 @@ using UnityEngine.EventSystems;
 using TMPro;
 using LLM.Network;
 using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
-using BriLib;
-using System.IO;
+using TTSConstants = FrostweepGames.Plugins.GoogleCloud.TextToSpeech.Constants;
 
 public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
   [SerializeField] private TMP_Text _outputText;
-  [SerializeField] private AudioSource _audioSource;
-  private const int MAX_FILE_BYTES = 20000000;
+  [SerializeField] private AudioSource _audio;
   private LLMRequestPayload _chatInProgress;
   private Action _onSpeakingSuccessful;
   private Action _onSpeakingFailed;
-  private Action _onAudioCaptured;
+  private bool _audioReady = false;
 
   public void OnPointerDown(PointerEventData eventData)
   {
-    _outputText.text = "Starting audio capture";
+    _audioReady = false;
     AudioCaptureManager.Instance.StartAudioCapture();
   }
 
   public void OnPointerUp(PointerEventData eventData)
   {
-
-    _outputText.text = "Capturing image";
     AudioCaptureManager.Instance.EndAudioCapture();
-    _onAudioCaptured!();
+    _audioReady = true;
+  }
+
+  private void Awake()
+  {
+    Debug.Log($"LEFTWELL Awake was called");
   }
 
   private void Start()
   {
+    Debug.Log($"LEFTWELL Start was called");
+    GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
+    GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
+    GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
     PlayAdventureSequence();
   }
 
   private async void PlayAdventureSequence()
   {
     //1. Construct payload with system prompt, settings info, and initial prompt
+    Debug.Log($"LEFTWELL Creating payload");
     _chatInProgress = CreateInitialPayload();
+
     //2. Send out initial request to start a random adventure (pre-select)
+    Debug.Log($"LEFTWELL Sending initial story request");
     _chatInProgress.contents[_chatInProgress.contents.Count - 1].parts.Add(new TextPart
     {
       text = Constants.STORY_START_PRECEDENT + "Defeat the dark lord"
     });
-    _chatInProgress = await SendRequestAndUpdateSequence(_chatInProgress);
-    //3. Audio synth play for initial reply and first item request
 
-    //4. Send a picture and audio, or just audio, or just a picture for item 1
-    //5. Wait for completion of audio clip play
-    //6. Repeat 2 more times
-    //7. Send audio to start story
-    //8. Wait for completion of story audio
-    //9. Go back to beginning
+    while (true)
+    {
+      var reply = await SendRequestAndUpdateSequence(_chatInProgress);
+      _chatInProgress = reply.Item1;
+
+      //3. Audio synth play for initial reply and first item request
+      Debug.Log($"LEFTWELL Requesting synth voice");
+      await SpeakSSML(reply.Item2);
+
+      for (int i = 0; i < 3; i++)
+      {
+        Debug.Log($"LEFTWELL Awaiting audio capture");
+        await NextAudioReady();
+
+        //4. Send a picture and audio for each item
+        Debug.Log($"LEFTWELL Capturing screenshot and uploading");
+        _chatInProgress = await GetScreenshotAndAddToRequest(_chatInProgress);
+        Debug.Log($"LEFTWELL Encoding audio and uploading");
+        _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+        Debug.Log($"LEFTWELL Pushing up item info");
+        reply = await SendRequestAndUpdateSequence(_chatInProgress);
+        _chatInProgress = reply.Item1;
+
+        //5. Wait for completion of audio clip play
+        Debug.Log($"LEFTWELL Item response voice synth");
+        await SpeakSSML(reply.Item2);
+        //6. Repeat 2 more times
+      }
+
+      //7. Send audio to start story
+      Debug.Log($"LEFTWELL Waiting for audio to start story");
+      await NextAudioReady();
+      _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+
+      //8. Wait for completion of story audio
+      Debug.Log($"LEFTWELL Sending start audio to LLM");
+      reply = await SendRequestAndUpdateSequence(_chatInProgress);
+      _chatInProgress = reply.Item1;
+
+      Debug.Log($"LEFTWELL Synth voicing the story result");
+      await SpeakSSML(reply.Item2);
+
+      //9. Go back to beginning
+      await NextAudioReady();
+      _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+    }
   }
 
   private async Task<LLMRequestPayload> GetAudioAndAddToRequest(LLMRequestPayload currentPayload)
@@ -64,7 +110,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     var fileInfo = await FileUploadManager.Instance.UploadFile("audio/wav", "Device audio during AR session", audioBytes);
     var part = new FilePart
     {
-      fileData = new LLM.Network.FileInfo
+      fileData = new FilePartData
       {
         mimeType = fileInfo.file.mimeType,
         fileUri = fileInfo.file.uri
@@ -81,7 +127,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
     var part = new FilePart
     {
-      fileData = new LLM.Network.FileInfo
+      fileData = new FilePartData
       {
         mimeType = fileInfo.file.mimeType,
         fileUri = fileInfo.file.uri
@@ -91,17 +137,14 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     return currentPayload;
   }
 
-  private async void SpeakSSML(string something)
+  private async Task SpeakSSML(string something)
   {
-    GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
-    GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
-    GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
     GCTextToSpeech.Instance.Synthesize(something, new VoiceConfig()
-    {
-      gender = Constants.SYNTH_GENDER,
-      languageCode = GCTextToSpeech.Instance.PrepareLanguage(Constants.SYNTH_LOCALE),
-      name = Constants.SYNTH_VOICE
-    },
+        {
+          gender = Constants.SYNTH_GENDER,
+          languageCode = GCTextToSpeech.Instance.PrepareLanguage(Constants.SYNTH_LOCALE),
+          name = Constants.SYNTH_VOICE
+        },
       true,
       Constants.SYNTH_PITCH,
       Constants.SYNTH_SPEAKING_RATE,
@@ -111,7 +154,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     var outcomeTriggered = false;
 
     void onFailed() { outcomeTriggered = true; }
-    void onSucceeded() {  outcomeTriggered = true; }
+    void onSucceeded() { outcomeTriggered = true; }
     _onSpeakingFailed += onFailed;
     _onSpeakingSuccessful += onSucceeded;
 
@@ -121,44 +164,54 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     _onSpeakingSuccessful -= onSucceeded;
   }
 
-  private async Task<LLMRequestPayload> SendRequestAndUpdateSequence(LLMRequestPayload request)
+  private async Task<Tuple<LLMRequestPayload, string>> SendRequestAndUpdateSequence(LLMRequestPayload request)
   {
     var response = await LLMInteractionManager.Instance.RequestLLMCompletion(request);
-    request.contents.Add(response.candidates[0].content);
+    var newCompletion = response.candidates[0].content.parts[0].text;
+    request.contents.Add(new Content
+    {
+      role = response.candidates[0].content.role,
+      parts = new List<BasePart> { new TextPart { text = newCompletion} }
+    });
     request.contents.Add(new Content
     {
       parts = new List<BasePart>(),
       role = "user"
     });
-    return request;
+    return new Tuple<LLMRequestPayload, string>(request, newCompletion);
   }
 
   private LLMRequestPayload CreateInitialPayload()
   {
     var payload = new LLMRequestPayload();
+
     payload.generationConfig = new GenerationConfig
     {
       temperature = Constants.STORY_TEMPERATURE
     };
+
     payload.safetySettings = new List<SafetySetting>();
-    foreach (var category in Enum.GetValues(typeof(HarmCategory)))
+    var relevantSettings = new List<HarmCategory>
+    {
+      HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      HarmCategory.HARM_CATEGORY_HARASSMENT,
+      HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT
+    };
+    foreach (var category in relevantSettings)
     {
       payload.safetySettings.Add(new SafetySetting
       {
-        category = (HarmCategory)category,
-        threshold = HarmBlockThreshold.BLOCK_NONE
+        category = Enum.GetName(typeof(HarmCategory), category),
+        threshold = Enum.GetName(typeof(HarmBlockThreshold), HarmBlockThreshold.BLOCK_NONE)
       });
     }
+
     payload.systemInstruction = new Content
     {
-      parts = new List<BasePart>
-      {
-        new TextPart
-        {
-          text = Constants.STORY_PROMPT
-        }
-      }
+      parts = new List<BasePart> { new TextPart { text = Constants.STORY_PROMPT } }
     };
+
     payload.contents = new List<Content>
     {
       new Content
@@ -167,21 +220,28 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
         role = "user"
       }
     };
+
     return payload;
+  }
+
+  private async Task NextAudioReady()
+  {
+    while (!_audioReady) { await Task.Delay(10); }
+    _audioReady = false;
   }
 
   private void OnVoiceSynthesizeFail(string arg1, long arg2)
   {
     Debug.LogError($"Failed to synthesize voice with arg {arg1}");
-    _onSpeakingFailed!();
+    _onSpeakingFailed?.Invoke();
   }
 
   private async void OnVoiceSynthesizeSuccess(PostSynthesizeResponse response, long arg2)
   {
     Debug.Log("Succeeded in voice synthesis");
-    _audioSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, FrostweepGames.Plugins.GoogleCloud.TextToSpeech.Constants.DEFAULT_AUDIO_ENCODING);
-    _audioSource.Play();
-    await Task.Delay((int)(_audioSource.clip.length * 1000));
-    _onSpeakingSuccessful!();
+    _audio.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, TTSConstants.DEFAULT_AUDIO_ENCODING);
+    _audio.Play();
+    await Task.Delay((int)(_audio.clip.length * 1000));
+    _onSpeakingSuccessful?.Invoke();
   }
 }
