@@ -24,4 +24,9 @@ public static class Constants
   public const Enumerators.SsmlVoiceGender SYNTH_GENDER = Enumerators.SsmlVoiceGender.MALE;
   public const Enumerators.LanguageCode SYNTH_LOCALE = Enumerators.LanguageCode.en_GB;
   public const string SYNTH_VOICE = "en-GB-Studio-B";
+
+  public const int IMAGE_GEN_SAMPLES = 4;
+  public const string IMAGE_GEN_ASPECT = "16:9";
+  public const string IMAGE_GEN_PERSON_GEN = "allow_all";
+  public const string IMAGE_GEN_SAFETY = "block_few";
 }

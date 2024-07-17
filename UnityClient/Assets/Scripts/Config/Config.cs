@@ -6,7 +6,10 @@ using UnityEngine.Networking;
 
 public class Config : Singleton<Config>
 {
+  //TODO: GET THESE OUT OF HERE OH GOD
+  //Create a proxy server to manage client requests instead and get secrets out of client
   public string ApiKey { get; private set; }
+  public string OauthToken { get; private set; }
 
   public override void OnCreate()
   {
@@ -31,14 +34,14 @@ public class Config : Singleton<Config>
     }
     var configData = JsonUtility.FromJson<EnvData>(envText);
 
-    // TODO: Eliminate API keys from build entirely by moving to proxy server for all
-    // credentialed calls to API's
     ApiKey = configData.ApiKey;
+    OauthToken = configData.OauthToken;
   }
 
   [Serializable]
   private class EnvData
   {
     public string ApiKey;
+    public string OauthToken;
   }
 }
