@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Test/MultiTurnChatTest.unity
     guid: 4b1bccbda714f43419fb716ea57af016
   - enabled: 0
@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Test/SpeechReplyTest.unity
     guid: 0c2609731a8a3c846817e36d4683bee7
+  - enabled: 1
+    path: Assets/Scenes/Test/ShadowReceivingPlaneTest.unity
+    guid: 30f07aeefc59d8d40a6ef2ab9848ade8
   m_configObjects:
     AR Foundation RemoteARFoundationRemoteLoaderSettings: {fileID: 11400000, guid: 503782968678e62458900510d41f13d3, type: 2}
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 41e5899e59e357d4991663b6502e3031, type: 2}
