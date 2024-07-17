@@ -1,10 +1,10 @@
-using UnityEngine;
-using BriLib;
+using System;
+using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System;
+using UnityEngine;
+using BriLib;
 
 public class ImageGenerationManager : Singleton<ImageGenerationManager>
 {
@@ -146,6 +146,22 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         Debug.LogError($"Image upscale failed: {e.Message}");
         return null;
       }
+    }
+  }
+
+  public static Texture2D Base64ToTexture(string base64String)
+  {
+    try
+    {
+      byte[] imageBytes = Convert.FromBase64String(base64String);
+      Texture2D texture = new Texture2D(2, 2); // Create a small placeholder texture
+      texture.LoadImage(imageBytes); // Load the image bytes into the texture
+      return texture;
+    }
+    catch (Exception e)
+    {
+      Debug.LogError("Failed to convert base64 string to texture: " + e.Message);
+      return null;
     }
   }
 }

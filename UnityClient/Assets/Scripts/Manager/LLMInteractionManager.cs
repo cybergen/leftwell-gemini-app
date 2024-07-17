@@ -1,11 +1,12 @@
-using UnityEngine;
+using System;
+using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Text;
-using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
 using BriLib;
 using LLM.Network;
-using UnityEngine.Networking;
 
 public class LLMInteractionManager : Singleton<LLMInteractionManager>
 {
@@ -78,5 +79,22 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
         Debug.LogError($"Request failed: {webRequest.error}");
       }
     }
+  }
+
+  public async Task<Tuple<LLMRequestPayload, string>> SendRequestAndUpdateSequence(LLMRequestPayload request)
+  {
+    var response = await RequestLLMCompletion(request);
+    var newCompletion = response.candidates[0].content.parts[0].text;
+    request.contents.Add(new Content
+    {
+      role = response.candidates[0].content.role,
+      parts = new List<BasePart> { new TextPart { text = newCompletion } }
+    });
+    request.contents.Add(new Content
+    {
+      parts = new List<BasePart>(),
+      role = "user"
+    });
+    return new Tuple<LLMRequestPayload, string>(request, newCompletion);
   }
 }

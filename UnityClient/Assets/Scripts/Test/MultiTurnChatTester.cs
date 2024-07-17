@@ -7,11 +7,13 @@ using TMPro;
 using LLM.Network;
 using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 using TTSConstants = FrostweepGames.Plugins.GoogleCloud.TextToSpeech.Constants;
+using UnityEngine.UI;
 
 public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
   [SerializeField] private TMP_Text _outputText;
   [SerializeField] private AudioSource _audio;
+  [SerializeField] private List<RawImage> _images;
   private LLMRequestPayload _chatInProgress;
   private Action _onSpeakingSuccessful;
   private Action _onSpeakingFailed;
@@ -29,14 +31,8 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     _audioReady = true;
   }
 
-  private void Awake()
-  {
-    Debug.Log($"LEFTWELL Awake was called");
-  }
-
   private void Start()
   {
-    Debug.Log($"LEFTWELL Start was called");
     GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
     GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
     GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
@@ -46,11 +42,9 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
   private async void PlayAdventureSequence()
   {
     //1. Construct payload with system prompt, settings info, and initial prompt
-    Debug.Log($"LEFTWELL Creating payload");
     _chatInProgress = CreateInitialPayload();
 
     //2. Send out initial request to start a random adventure (pre-select)
-    Debug.Log($"LEFTWELL Sending initial story request");
     _chatInProgress.contents[_chatInProgress.contents.Count - 1].parts.Add(new TextPart
     {
       text = Constants.STORY_START_PRECEDENT + "Defeat the dark lord"
@@ -58,49 +52,63 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
 
     while (true)
     {
-      var reply = await SendRequestAndUpdateSequence(_chatInProgress);
+      var reply = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_chatInProgress);
       _chatInProgress = reply.Item1;
 
       //3. Audio synth play for initial reply and first item request
-      Debug.Log($"LEFTWELL Requesting synth voice");
       await SpeakSSML(reply.Item2);
 
       for (int i = 0; i < 3; i++)
       {
-        Debug.Log($"LEFTWELL Awaiting audio capture");
         await NextAudioReady();
 
         //4. Send a picture and audio for each item
-        Debug.Log($"LEFTWELL Capturing screenshot and uploading");
         _chatInProgress = await GetScreenshotAndAddToRequest(_chatInProgress);
-        Debug.Log($"LEFTWELL Encoding audio and uploading");
         _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
-        Debug.Log($"LEFTWELL Pushing up item info");
-        reply = await SendRequestAndUpdateSequence(_chatInProgress);
+        reply = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_chatInProgress);
         _chatInProgress = reply.Item1;
 
         //5. Wait for completion of audio clip play
-        Debug.Log($"LEFTWELL Item response voice synth");
         await SpeakSSML(reply.Item2);
         //6. Repeat 2 more times
       }
 
       //7. Send audio to start story
-      Debug.Log($"LEFTWELL Waiting for audio to start story");
       await NextAudioReady();
       _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
 
       //8. Wait for completion of story audio
-      Debug.Log($"LEFTWELL Sending start audio to LLM");
-      reply = await SendRequestAndUpdateSequence(_chatInProgress);
+      reply = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_chatInProgress);
       _chatInProgress = reply.Item1;
 
-      Debug.Log($"LEFTWELL Synth voicing the story result");
-      await SpeakSSML(reply.Item2);
+      _ = SpeakSSML(reply.Item2);
 
-      //9. Go back to beginning
+      //8.1. Get an image prompt from the story
+      var prompts = await ImagePromptGenerator.Instance.GetPromptAndNegativePrompt(_chatInProgress);
+
+      //8.2. Get set of images from the image generator
+      var images = await ImageGenerationManager.Instance.GetImagesBase64Encoded(prompts.Item1, prompts.Item2);
+
+      //8.3. Decode and assign images to UI
+      for (int i = 0; i < images.Count; i++)
+      {
+        Texture2D texture = ImageGenerationManager.Base64ToTexture(images[i]);
+        if (texture != null)
+        {
+          _images[i].texture = texture;
+        }
+      }
+
+      //8.4 Now wait for audio to resolve
+      while (_audio.isPlaying) { await Task.Delay(10); }
+
+      //8.5 Say the image gen prompts
+      await SpeakSSML($"<speak>I generated these using the prompt: <break time=\"1s\"/>{prompts.Item1} <break time=\"1s\"/>and the negative prompt: <break time=\"1s\"/>{prompts.Item2}</speak>");
+
+      //9. Trigger back to beginning
       await NextAudioReady();
       _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+      //TODO: Actually delete the contents of the old adventure here in full adventure implementation
     }
   }
 
@@ -162,23 +170,6 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
 
     _onSpeakingFailed -= onFailed;
     _onSpeakingSuccessful -= onSucceeded;
-  }
-
-  private async Task<Tuple<LLMRequestPayload, string>> SendRequestAndUpdateSequence(LLMRequestPayload request)
-  {
-    var response = await LLMInteractionManager.Instance.RequestLLMCompletion(request);
-    var newCompletion = response.candidates[0].content.parts[0].text;
-    request.contents.Add(new Content
-    {
-      role = response.candidates[0].content.role,
-      parts = new List<BasePart> { new TextPart { text = newCompletion} }
-    });
-    request.contents.Add(new Content
-    {
-      parts = new List<BasePart>(),
-      role = "user"
-    });
-    return new Tuple<LLMRequestPayload, string>(request, newCompletion);
   }
 
   private LLMRequestPayload CreateInitialPayload()

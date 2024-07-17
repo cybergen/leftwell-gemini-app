@@ -1,8 +1,8 @@
-using System.IO;
 using System;
+using System.IO;
 using UnityEngine;
-using BriLib;
 using UnityEngine.Networking;
+using BriLib;
 
 public class Config : Singleton<Config>
 {
