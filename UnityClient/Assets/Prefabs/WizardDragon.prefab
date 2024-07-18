@@ -310,7 +310,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.5735764, z: 0, w: 0.8191521}
   m_LocalPosition: {x: 13.54, y: -4, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5711765019057617485}
@@ -370,15 +370,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animationController: {fileID: -4685691666236101122}
   _cameraTransform: {fileID: 0}
-  _planeManager: {fileID: 0}
   _heightFromGroundToSeek: 0.3
-  _distanceFromPlayerToSeek: 1.8
+  _distanceFromPlayerToSeek: 1
   _angleFromPlayerForwardToSeek: -10
-  _movementSpeed: 3
-  _flyInStartingHeight: 5
+  _distanceToTargetBeforeRotationStart: 0.65
+  _movementSpeed: 1
+  _rotationMultiplier: 5
+  _angleThresholdToTurnTowardPlayer: 15
+  _distanceThresholdToMoveTowardPlayer: 1.5
+  _distanceThresholdToMoveAwayFromPlayer: 0.5
+  _flyInStartingHeight: 0.85
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
-  _shownObjectDistanceForward: 3
+  _shownObjectDistanceForward: 2
+  _shownObjectLookDistance: 0.4
+  _shownObjectAngleToSeekTo: -35
+  _upDownHoverAmplitude: 0.25
+  _upDownHoverSpeed: 6
+  _pathingSpinDuration: 0.3
+  _pathingJumpDuration: 1
 --- !u!82 &-2930509906083131161
 AudioSource:
   m_ObjectHideFlags: 0

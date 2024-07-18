@@ -33,6 +33,9 @@ public class CharacterAnimationController : MonoBehaviour
       case DragonAnimation.Fire:
         delayTime = 560;
         break;
+      case DragonAnimation.Run:
+        delayTime = 500;
+        break;
       case DragonAnimation.Damage:
         delayTime = 250;
           break;

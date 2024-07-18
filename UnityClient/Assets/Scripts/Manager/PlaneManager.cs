@@ -34,8 +34,6 @@ public class PlaneManager : Singleton<PlaneManager>
       return Vector3.Dot(Vector3.up, t.up) > 0.8f && t.position.y < camPos.y;
     });
 
-    Debug.Log($"Got {upwardPlanes.Count()} planes with upward vector");
-
     if (upwardPlanes.Count() == 0) return;
 
     //Get highest known plane as ground and move shadow receiver there
@@ -45,10 +43,12 @@ public class PlaneManager : Singleton<PlaneManager>
 
   private void OnPlanesChanged(ARPlanesChangedEventArgs args)
   {
-    //Update set of known planes
-    foreach (var plane in _knownPlanes)
+    foreach (var plane in args.removed)
     {
-      if (args.removed.Contains(plane)) _knownPlanes.Remove(plane);
+      if (_knownPlanes.Contains(plane))
+      {
+        _knownPlanes.Remove(plane);
+      }
     }
     _knownPlanes.AddRange(args.added);
   }
