@@ -15,7 +15,7 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
   public override void Begin()
   {
     base.Begin();
-    PrimePrompt();
+    _ = PrimePrompt();
   }
 
   public async Task<Tuple<string, string>> GetPromptAndNegativePrompt(LLMRequestPayload chat)
