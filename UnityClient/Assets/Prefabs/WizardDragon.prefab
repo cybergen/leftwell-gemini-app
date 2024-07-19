@@ -371,9 +371,9 @@ MonoBehaviour:
   _animationController: {fileID: -4685691666236101122}
   _cameraTransform: {fileID: 0}
   _heightFromGroundToSeek: 0.3
-  _distanceFromPlayerToSeek: 1
+  _distanceFromPlayerToSeek: 0.9
   _angleFromPlayerForwardToSeek: -10
-  _distanceToTargetBeforeRotationStart: 0.65
+  _distanceToTargetBeforeRotationStart: 0.38
   _movementSpeed: 1
   _rotationMultiplier: 5
   _angleThresholdToTurnTowardPlayer: 15
@@ -382,13 +382,15 @@ MonoBehaviour:
   _flyInStartingHeight: 0.85
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
-  _shownObjectDistanceForward: 2
-  _shownObjectLookDistance: 0.4
+  _shownObjectDistanceForward: 1.2
+  _shownObjectLookDistance: 0.35
   _shownObjectAngleToSeekTo: -35
   _upDownHoverAmplitude: 0.25
   _upDownHoverSpeed: 6
   _pathingSpinDuration: 0.3
   _pathingJumpDuration: 1
+  _uncomfortableDurationThreshold: 2.5
+  _flyBackToPlayerSpeed: 0.3
 --- !u!82 &-2930509906083131161
 AudioSource:
   m_ObjectHideFlags: 0

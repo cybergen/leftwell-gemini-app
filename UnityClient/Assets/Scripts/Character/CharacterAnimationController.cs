@@ -38,7 +38,10 @@ public class CharacterAnimationController : MonoBehaviour
         break;
       case DragonAnimation.Damage:
         delayTime = 250;
-          break;
+        break;
+      case DragonAnimation.Die:
+        delayTime = 917;
+        break;
     }
     await Task.Delay(delayTime);
 

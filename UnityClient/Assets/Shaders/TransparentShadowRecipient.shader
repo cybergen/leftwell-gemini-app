@@ -14,6 +14,7 @@ Shader "Custom/TransparentShadowRecipient"
         {
             Tags {"LightMode" = "ForwardBase" }
             Cull Back
+            ZWrite Off
             Blend SrcAlpha OneMinusSrcAlpha
             CGPROGRAM
             #pragma vertex vert

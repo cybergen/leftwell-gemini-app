@@ -63,6 +63,26 @@ public class PlanePlacementTester : MonoBehaviour
     _behaviorController.SetState(CharacterStates.JumpingToPlayer);
   }
 
+  public void OnTalkingMadClicked()
+  {
+    _behaviorController.SetState(CharacterStates.TalkingMad);
+  }
+
+  public void OnPresentingPictureClicked()
+  {
+    _behaviorController.SetState(CharacterStates.PathToPlayerAndPresentPicture);
+  }
+
+  public void OnFlabbergastedClicked()
+  {
+    _behaviorController.SetState(CharacterStates.Flabbergasted);
+  }
+
+  public void OnFlyBackToPlayerClicked()
+  {
+    _behaviorController.SetState(CharacterStates.FlyingToPlayer);
+  }
+
   private void Start()
   {
     _planeManager.planesChanged += OnPlanesChanged;

@@ -1,6 +1,5 @@
 using UnityEngine;
 using BriLib;
-using System;
 
 public class CharacterBehaviorController : MonoBehaviour
 {
@@ -30,42 +29,51 @@ public class CharacterBehaviorController : MonoBehaviour
   [Header("Idle Procedural Animation")]
   [SerializeField] private float _upDownHoverAmplitude;
   [SerializeField] private float _upDownHoverSpeed;
-  [Header("Path to Player Config")]
+  [Header("Jump to Player Config")]
   [SerializeField] private float _pathingSpinDuration = 0.25f;
   [SerializeField] private float _pathingJumpDuration = 1f;
+  [Header("Fly to Player Config")]
+  [SerializeField] private float _uncomfortableDurationThreshold = 2.5f;
+  [SerializeField] private float _flyBackToPlayerSpeed = 1.5f;
+  [Header("Assorted Config")]
+  [SerializeField] private float _dieAnimDuration = 0.6f;
 
   private CharacterStates _currentState = CharacterStates.None;
+
   //Static position traversal tracking
   private Vector3 _startPosition = Vector3.zero;
   private Vector3 _targetPosition = Vector3.zero;
   private float _traverseProgress = 0f;
+  private float _stateTimeElapsed = 0f;
+  private float _uncomfortableTimeElapsed = 0f;
   private Vector3 _shownObjectLookPosition = Vector3.zero;
   private Quaternion _prePathRotation;
 
   public void SetState(CharacterStates state)
   {
-    Debug.Log($"Got set state call {state}");
+    Debug.Log($"Setting wizard state to {state}");
 
     switch (_currentState)
     {
       case CharacterStates.InitialFlyIn:
       case CharacterStates.ShownObject:
+      case CharacterStates.JumpingToPlayer:
+      case CharacterStates.FlyingToPlayer:
         BusyPathing = false;
         break;
     }
 
     _currentState = state;
-
-    var camForward = Vector3.ProjectOnPlane(_cameraTransform.forward, Vector3.up);
-    camForward.Normalize();
+    _stateTimeElapsed = 0f;
+    _uncomfortableTimeElapsed = 0f;
 
     switch (_currentState)
     {
       case CharacterStates.InitialFlyIn:
         BusyPathing = true;
 
-        camForward = Quaternion.AngleAxis(_flyInStartingAngleFromPlayerForward, Vector3.up) * camForward;
-        _startPosition = _cameraTransform.position + camForward * _flyInStartingDistance;
+        var dir = Quaternion.AngleAxis(_flyInStartingAngleFromPlayerForward, Vector3.up) * GetFlat(_cameraTransform.forward);
+        _startPosition = _cameraTransform.position + dir * _flyInStartingDistance;
         _startPosition.y = PlaneManager.Instance.GroundHeight + _flyInStartingHeight;
 
         transform.position = _startPosition;
@@ -76,18 +84,22 @@ public class CharacterBehaviorController : MonoBehaviour
         break;
       case CharacterStates.JumpingToPlayer:
         BusyPathing = true;
+
         _startPosition = transform.position;
         _targetPosition = GetStandardPositionByPlayer();
         _animationController.SetAnimation(DragonAnimation.FlyLeft);
         _prePathRotation = transform.rotation;
+
         _traverseProgress = 0f;
         break;
       case CharacterStates.FlyingToPlayer:
         BusyPathing = true;
+
         _startPosition = transform.position;
         _targetPosition = GetStandardPositionByPlayer();
         _animationController.PlayOnce(DragonAnimation.Run, DragonAnimation.Fly);
         _prePathRotation = transform.rotation;
+
         _traverseProgress = 0f;
         break;
       case CharacterStates.IdleWithPlayer:
@@ -102,31 +114,43 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.TalkingMad:
         _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
         break;
+      case CharacterStates.Flabbergasted:
+        _animationController.SetAnimation(DragonAnimation.Die);
+        _startPosition = transform.position;
+        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition.y = PlaneManager.Instance.GroundHeight;
+        break;
       case CharacterStates.ShownObject:
         BusyPathing = true;
 
-        var flattenedDir = Vector3.ProjectOnPlane(_cameraTransform.forward, Vector3.up).normalized;
-        _shownObjectLookPosition = _cameraTransform.position + flattenedDir * _shownObjectDistanceForward;
+        _shownObjectLookPosition = _cameraTransform.position + GetFlat(_cameraTransform.forward) * _shownObjectDistanceForward;
 
-        var objectToCameraDir = (_cameraTransform.position - _shownObjectLookPosition).normalized;
+        var objectToCameraDir = GetFlat(_cameraTransform.position - _shownObjectLookPosition);
         objectToCameraDir = Quaternion.AngleAxis(_shownObjectAngleToSeekTo, Vector3.up) * objectToCameraDir;
 
         _targetPosition = _shownObjectLookPosition + objectToCameraDir * _shownObjectLookDistance;
+        _targetPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
         _startPosition = transform.position;
         _traverseProgress = 0f;
 
         _animationController.SetAnimation(DragonAnimation.Fly);
         break;
-      case CharacterStates.PresentingPicture: break;
+      case CharacterStates.PathToPlayerAndPresentPicture:
+        _targetPosition = GetStandardPositionByPlayer();
+        _startPosition = transform.position;
+        _traverseProgress = 0f;
+        BusyPathing = true;
+        break;
+      case CharacterStates.PresentingPicture:
+        _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Jump);
+        break;
     }
   }
 
   private Vector3 GetStandardPositionByPlayer()
   {
-    var camForward = Vector3.ProjectOnPlane(_cameraTransform.forward, Vector3.up);
-    camForward.Normalize();
-    camForward = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * camForward;
-    var newPosition = _cameraTransform.position + camForward * _distanceFromPlayerToSeek;
+    var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * GetFlat(_cameraTransform.forward);
+    var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
     newPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
     return newPosition;
   }
@@ -135,19 +159,18 @@ public class CharacterBehaviorController : MonoBehaviour
   {
     //TODO: Apply hover amplitude in a way that doesn't impact movement calcs
     var delta = Time.deltaTime;
-    var offset = Mathf.Sin(Time.time * _upDownHoverSpeed) * _upDownHoverAmplitude;
-    var camPos = _cameraTransform.position;
-    var selfPos = transform.position;
+    _stateTimeElapsed += delta;
 
     switch (_currentState)
     {
       case CharacterStates.InitialFlyIn:
-        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, camPos);
+        _traverseProgress 
+          = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
 
         var distanceToPoint = Vector3.Distance(transform.position, _targetPosition);
         if (distanceToPoint > _distanceToTargetBeforeRotationStart) _animationController.SetAnimation(DragonAnimation.Fly);
 
-        //If reach point, mark no longer pathing and change state
+        //If reach target point, mark no longer pathing and change to idle state
         if (_traverseProgress >= 1f)
         {
           BusyPathing = false;
@@ -155,7 +178,8 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterStates.ShownObject:
-        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _shownObjectLookPosition);
+        _traverseProgress 
+          = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _shownObjectLookPosition, _movementSpeed);
 
         //If reach point, mark no longer pathing but don't change state
         if (_traverseProgress >= 1f)
@@ -166,12 +190,12 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.JumpingToPlayer:
         var preJumpRot = GetFlattenedRotation(_targetPosition - _startPosition);
 
-        if (_traverseProgress < _pathingSpinDuration)
+        if (_traverseProgress < _pathingSpinDuration) //Start off in a spin phase to aim toward target
         {
           var spinProgress = Easing.ExpoEaseOut(_traverseProgress / _pathingSpinDuration);
           transform.rotation = Quaternion.Slerp(_prePathRotation, preJumpRot, spinProgress);
         }
-        else
+        else //Then trigger jump anim and start moving toward target
         {
           _animationController.SetAnimation(DragonAnimation.Jump);
           var jumpPath = _targetPosition - _startPosition;
@@ -184,7 +208,7 @@ public class CharacterBehaviorController : MonoBehaviour
 
         _traverseProgress += delta;
 
-        //Stop if we've made it all the way to target point
+        //Stop if enough time has elapsed that we should be at the target point
         if (_traverseProgress >= _pathingSpinDuration + _pathingJumpDuration)
         {
           BusyPathing = false;
@@ -192,7 +216,8 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterStates.FlyingToPlayer:
-        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position);
+        _traverseProgress 
+          = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _flyBackToPlayerSpeed);
         if (_traverseProgress >= 1f)
         {
           SetState(CharacterStates.IdleWithPlayer);
@@ -203,37 +228,53 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.TalkingSurprised:
       case CharacterStates.TalkingDisappointed:
       case CharacterStates.TalkingMad:
-        var flattenedForward = GetFlattened(transform.forward);
-        var flattenedCamDir = GetFlattened(camPos - selfPos);
-        var distanceToCamera = Vector3.Distance(selfPos, camPos);
-
-        //Check for rotation outside of threshold and instruct to path to player if so
+        var distanceToCamera = Vector3.Distance(transform.position, _cameraTransform.position);
         var viewAngleThreshold = Mathf.Cos(_angleThresholdToTurnTowardPlayer * Mathf.Deg2Rad);
-        if (Vector3.Dot(flattenedForward, flattenedCamDir) < viewAngleThreshold)
-        {
-          SetState(CharacterStates.FlyingToPlayer);
-          break;
-        }
-        else if (distanceToCamera > _distanceThresholdToMoveTowardPlayer
+        var currentDirDot = Vector3.Dot(GetFlat(_cameraTransform.forward), GetFlat(transform.position - _cameraTransform.position));
+
+        //If player can't see dragon for too long, or if it is too close or too far, eventually path back
+        if (currentDirDot < viewAngleThreshold || distanceToCamera > _distanceThresholdToMoveTowardPlayer
           || distanceToCamera < _distanceThresholdToMoveAwayFromPlayer)
         {
-          SetState(CharacterStates.FlyingToPlayer);
-          break;
+          _uncomfortableTimeElapsed += delta;
+          if (_uncomfortableTimeElapsed >= _uncomfortableDurationThreshold)
+          {
+            SetState(CharacterStates.FlyingToPlayer);
+          }
+        }
+        else
+        {
+          _uncomfortableTimeElapsed = 0f;
         }
 
         //TODO: See if a random animation should be triggered
 
         break;
+      case CharacterStates.Flabbergasted:
+        var progress = Mathf.Clamp01(_stateTimeElapsed / _dieAnimDuration);
+        transform.position = Vector3.Lerp(_startPosition, _targetPosition, progress);
+        break;
+      case CharacterStates.PathToPlayerAndPresentPicture:
+        if (_traverseProgress < 1f)
+        {
+          _traverseProgress
+            = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
+        }
+        else
+        {
+          SetState(CharacterStates.PresentingPicture);
+        }
+        break;
     }
   }
 
-  private float DoMotionTowardPointAndRotationTowardTarget(float delta, float progress, Vector3 positionToLookAt)
+  private float DoMotionTowardPointAndRotationTowardTarget(float delta, float progress, Vector3 positionToLookAt, float speed)
   {
     //Path toward position if not there yet
     var flightDistance = Vector3.Distance(_startPosition, _targetPosition);
     if (progress < 1f)
     {
-      progress += delta / (flightDistance / _movementSpeed);
+      progress += delta / (flightDistance / speed);
       Mathf.Clamp01(progress);
       var flightPath = _targetPosition - _startPosition;
       transform.position = (Easing.ExpoEaseOut(progress) * flightPath) + _startPosition;
@@ -264,10 +305,10 @@ public class CharacterBehaviorController : MonoBehaviour
 
   private Quaternion GetFlattenedRotation(Vector3 direction)
   {
-    return Quaternion.LookRotation(GetFlattened(direction));
+    return Quaternion.LookRotation(GetFlat(direction));
   }
 
-  private Vector3 GetFlattened(Vector3 direction)
+  private Vector3 GetFlat(Vector3 direction)
   {
     return Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
   }
@@ -275,6 +316,10 @@ public class CharacterBehaviorController : MonoBehaviour
   private void Awake()
   {
     _cameraTransform = FindObjectOfType<Camera>().transform;
+    if (_cameraTransform == null)
+    {
+      Debug.LogError($"Failed to find camera during character initialization");
+    }
   }
 }
 
@@ -290,5 +335,7 @@ public enum CharacterStates
   TalkingDisappointed,
   TalkingMad,
   ShownObject,
-  PresentingPicture
+  PathToPlayerAndPresentPicture,
+  PresentingPicture,
+  Flabbergasted
 }
