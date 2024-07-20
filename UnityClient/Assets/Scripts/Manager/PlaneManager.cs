@@ -6,7 +6,8 @@ using BriLib;
 
 public class PlaneManager : Singleton<PlaneManager>
 {
-  public float GroundHeight;
+  public float GroundHeight { get; private set; } = float.MinValue;
+  public bool Ready { get; private set; } = false;
   [SerializeField] private ARPlaneManager _planeManager;
   [SerializeField] private Transform _cameraTransform;
   [SerializeField] private Transform _shadowReceiverPlane;
@@ -51,5 +52,7 @@ public class PlaneManager : Singleton<PlaneManager>
       }
     }
     _knownPlanes.AddRange(args.added);
+
+    Ready = _knownPlanes.Count > 0;
   }
 }

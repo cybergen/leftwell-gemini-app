@@ -10,6 +10,11 @@ public class AudioQueryTester : MonoBehaviour, IPointerDownHandler, IPointerUpHa
   [SerializeField] private TMP_Text _outputText;
   private const int MAX_FILE_BYTES = 20000000;
 
+  private void Start()
+  {
+    PermissionsManager.Instance.RequestPermission(AppPermission.Microphone, null);
+  }
+
   public void OnPointerDown(PointerEventData eventData)
   {
     _outputText.text = "Starting audio capture";

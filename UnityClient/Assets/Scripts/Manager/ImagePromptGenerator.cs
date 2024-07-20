@@ -12,9 +12,8 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
   public bool ReadyToGenerate { get; private set; } = false;
   private List<Content> _promptPriming;
 
-  public override void Begin()
+  public void Initialize()
   {
-    base.Begin();
     _ = PrimePrompt();
   }
 
