@@ -37,8 +37,7 @@ public class CameraManager : Singleton<CameraManager>
 
     var info = $"Image info:\nwidth: {image.width}\nheight: {image.height}\nplaneCount: {image.planeCount}\ntimestamp: {image.timestamp}\nformat: {image.format}";
 
-    if (_captureTexture == null || _captureTexture.width != image.width || _captureTexture.height != image.height)
-      _captureTexture = new Texture2D(image.width, image.height, _format, false);
+    _captureTexture = new Texture2D(image.width, image.height, _format, false);
 
     var conversionParams = new XRCpuImage.ConversionParams(image, _format, _transformation);
     var rawTextureData = _captureTexture.GetRawTextureData<byte>();

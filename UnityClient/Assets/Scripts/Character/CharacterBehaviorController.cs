@@ -261,7 +261,7 @@ public class CharacterBehaviorController : MonoBehaviour
 
         break;
       case CharacterStates.FlyingToPortal:
-        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _targetPosition, _movementSpeed);
+        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
         if (_traverseProgress >= 1f)
         {
           BusyPathing = false;

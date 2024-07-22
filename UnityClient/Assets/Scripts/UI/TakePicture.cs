@@ -2,11 +2,13 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
+using TMPro;
 
 public class TakePicture : MonoBehaviour
 {
   [SerializeField] private int _animationMillis;
   [SerializeField] private CanvasGroup _canvas;
+  [SerializeField] private TMP_Text _text;
   private int _milliStep = 10;
   private bool _animating;
   private bool _shown;
@@ -17,10 +19,14 @@ public class TakePicture : MonoBehaviour
     _onPress?.Invoke();
   }
 
-  public async void Show(Action onPress)
+  public async void Show(string text, Action onPress)
   {
+    gameObject.SetActive(true);
     _onPress = onPress;
+    _text.text = text;
+
     if (_shown || _animating) return;
+
     await Animate(true);
     _canvas.interactable = true;
     _shown = true;
@@ -29,9 +35,11 @@ public class TakePicture : MonoBehaviour
   public async void Hide()
   {
     if (!_shown || _animating) return;
+
     await Animate(false);
     _canvas.interactable = false;
     _shown = false;
+    gameObject.SetActive(false);
   }
 
   private async Task Animate(bool show)
@@ -60,5 +68,6 @@ public class TakePicture : MonoBehaviour
     _shown = false;
     _animating = false;
     _canvas.alpha = 0f;
+    gameObject.SetActive(false);
   }
 }

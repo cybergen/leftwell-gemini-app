@@ -206,7 +206,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 97367894}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 97367896}
+        m_TargetAssemblyTypeName: TakePicture, Assembly-CSharp
+        m_MethodName: OnPress
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &97367894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,6 +271,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animationMillis: 450
   _canvas: {fileID: 97367897}
+  _text: {fileID: 1193952030}
 --- !u!225 &97367897
 CanvasGroup:
   m_ObjectHideFlags: 0

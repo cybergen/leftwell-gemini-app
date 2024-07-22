@@ -21,15 +21,19 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     var payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(payload);
     payload = payloadReplyPair.Item1;
     var stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
-    Debug.Log($"Got state {stateReplyPair.Item1} and response {stateReplyPair.Item2}");
+
+    //Fly in and start talking while arriving
     character.SetState(CharacterStates.InitialFlyIn);
+    _ = SpeechManager.Instance.Speak(stateReplyPair.Item2);
     while (character.BusyPathing) await Task.Delay(10);
-    await SpeechManager.Instance.Speak(stateReplyPair.Item2);
-    payload = await RunConvoUntilStateChanges(payload, StoryState.Intro, UIManager.Instance.PushToTalkButton);
+
+    //Run convo until state changes
+    payload = (await RunConvoUntilStateChanges(payload, StoryState.Intro, UIManager.Instance.PushToTalkButton)).Item1;
 
     //2. Give you an option of stories to choose from
     //Also comes from prompt - prime with 3 story prompts
-    payload = await RunConvoUntilStateChanges(payload, StoryState.StorySelect, UIManager.Instance.PushToTalkButton);
+    var convoResult = await RunConvoUntilStateChanges(payload, StoryState.StorySelect, UIManager.Instance.PushToTalkButton);
+    payload = convoResult.Item1;
 
     //3. Makes you select three items to bring with you on your quest - instructs you to find them
 
@@ -40,6 +44,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     //4.4 Adds incipient portal vfx to area you took picture from (right in front of your camera)
     //4.5 Tells you if the item looked powerful, gonna help to magic it up, etc (not LLM)
     //4.6 Repeat x 3
+    List<string> itemStrings = GetItemStrings(convoResult.Item2);
     for (int i = 0; i < 3; i++)
     {
       bool imageReady = false;
@@ -47,11 +52,15 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       {
         imageReady = true;
       };
-      UIManager.Instance.TakePictureButton.Show(onPictureCaptured);
+      UIManager.Instance.TakePictureButton.Show(itemStrings[i], onPictureCaptured);
       while (!imageReady) await Task.Delay(10);
       UIManager.Instance.TakePictureButton.Hide();
       character.SetState(CharacterStates.ShownObject);
+
+      //RUN THIS TWICE BECAUSE IT'S BROKEN AND RETURNS AN OLD IMAGE
       var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
+      camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
+
       PortalManager.Instance.SpawnCaptureMarker(camImage.Texture);
       //TODO: Kick off image editing
       _ = SpeechManager.Instance.Speak(GetRandomItemCaptureDialog());
@@ -80,17 +89,19 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     //5.4 Says that the spell is in progress, but you need to verify each of the anchors
     //5.5 Anchor portal states change from very spinny/loady to more stable once ready
     //TODO: Actually get this starting pose by asking you to find an open area for the portal
-    _ = SpeechManager.Instance.Speak("I'll get these items ready. In the meantime, give me an open area where I can form the portal");
+    await SpeechManager.Instance.Speak("I'll get these items ready. In the meantime, give me an open area where I can form the portal");
     var portalSpawnReady = false;
-    UIManager.Instance.TakePictureButton.Show(() =>
+    UIManager.Instance.TakePictureButton.Show("Tap to spawn big portal", () =>
     {
       portalSpawnReady = true;
     });
     while (!portalSpawnReady) await Task.Delay(10);
+    UIManager.Instance.TakePictureButton.Hide();
     PortalManager.Instance.SpawnBigPortal();
     PortalManager.Instance.SetBigPortalLoading();
     character.SetState(CharacterStates.FlyingToPortal);
     _ = SpeechManager.Instance.Speak("Perfect! Now you're going to help me get this spun up.");
+
     payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(payload);
     payload = payloadReplyPair.Item1;
     //TODO: Actually get the edited images before triggering activatable
@@ -98,7 +109,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     SetMarkersActivatable(payloadReplyPair.Item2);
 
     //TODO: Actual way to activate these portals
-    UIManager.Instance.TakePictureButton.Show(() => PortalManager.Instance.ActivateMarker(_activatedPortals));
+    UIManager.Instance.TakePictureButton.Show("Tap activate small portal", () => PortalManager.Instance.ActivateMarker(_activatedPortals));
 
     //6. Explore the magical items
     //6.1 Each one flashes and changes to the edited image
@@ -124,7 +135,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     {
       readyToNarrateFinish = true;
     });
-    UIManager.Instance.TakePictureButton.Show(() => PortalManager.Instance.ActivatePortal());
+    UIManager.Instance.TakePictureButton.Show("Tap to activate big portal", () => PortalManager.Instance.ActivatePortal());
     while (!readyToNarrateFinish) await Task.Delay(10);
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
@@ -134,6 +145,25 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     //8. Tells you you're a pretty good apprentice, asks if you want to give it another go
     return adventureResult;
+  }
+
+  public static List<string> GetItemStrings(string input)
+  {
+    List<string> resultList = new List<string>();
+
+    string[] lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+    Regex pattern = new Regex(@"^Item [1-3]:\s(.+)$");
+
+    foreach (var line in lines)
+    {
+      Match match = pattern.Match(line);
+      if (match.Success)
+      {
+        resultList.Add(match.Groups[1].Value);
+      }
+    }
+
+    return resultList;
   }
 
   private void AdvancePortalState()
@@ -174,10 +204,10 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     return MathHelpers.SelectFromRange(possibilities, new System.Random());
   }
 
-  private async Task<Request> RunConvoUntilStateChanges(Request payload, StoryState state, PushToTalkButton button)
+  private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state, PushToTalkButton button)
   {
     var stateReplyPair = new Tuple<StoryState, string>(state, string.Empty);
-    while (stateReplyPair.Item1 == StoryState.Intro)
+    while (stateReplyPair.Item1 == state)
     {
       //Show reply button and wait for user to respond with it
       var audioReady = false;
@@ -203,7 +233,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       //Say latest message
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     }
-    return payload;
+    return new Tuple<Request, string>(payload, stateReplyPair.Item2);
   }
 
   private Tuple<StoryState, string> ParseInfoFromReply(string reply)

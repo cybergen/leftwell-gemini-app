@@ -28,7 +28,7 @@ public class PortalManager : Singleton<PortalManager>
     var spawnPose = CameraManager.Instance.GetCameraPose();
     var spawnPos = new Vector3(spawnPose.Item1.x, PlaneManager.Instance.GroundHeight + _bigPortalSpawnHeight, spawnPose.Item1.z);
     var forwardDir = (CameraManager.Instance.GetCameraPose().Item1 - spawnPos).normalized;
-    var marker = Instantiate(_bigPortal, spawnPos, Quaternion.LookRotation(forwardDir));
+    var marker = Instantiate(_bigMarkerPrefab, spawnPos, Quaternion.LookRotation(forwardDir));
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
     _bigPortal = captureMarker;
   }
