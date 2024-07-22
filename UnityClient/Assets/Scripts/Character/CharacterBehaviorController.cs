@@ -59,6 +59,7 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.ShownObject:
       case CharacterStates.JumpingToPlayer:
       case CharacterStates.FlyingToPlayer:
+      case CharacterStates.FlyingToPortal:
         BusyPathing = false;
         break;
     }
@@ -143,6 +144,15 @@ public class CharacterBehaviorController : MonoBehaviour
         break;
       case CharacterStates.PresentingPicture:
         _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Jump);
+        break;
+      case CharacterStates.FlyingToPortal:
+        _startPosition = transform.position;
+        _targetPosition = PortalManager.Instance.GetBigPortalPosition() + Vector3.left * _distanceFromPlayerToSeek;
+        _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
+        BusyPathing = true;
+        break;
+      case CharacterStates.IdleByPortal:
+        transform.rotation = Quaternion.LookRotation(GetFlat(_cameraTransform.position - transform.position));
         break;
     }
   }
@@ -250,6 +260,13 @@ public class CharacterBehaviorController : MonoBehaviour
         //TODO: See if a random animation should be triggered
 
         break;
+      case CharacterStates.FlyingToPortal:
+        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _targetPosition, _movementSpeed);
+        if (_traverseProgress >= 1f)
+        {
+          BusyPathing = false;
+        }
+        break;
       case CharacterStates.Flabbergasted:
         var progress = Mathf.Clamp01(_stateTimeElapsed / _dieAnimDuration);
         transform.position = Vector3.Lerp(_startPosition, _targetPosition, progress);
@@ -337,5 +354,7 @@ public enum CharacterStates
   ShownObject,
   PathToPlayerAndPresentPicture,
   PresentingPicture,
-  Flabbergasted
+  Flabbergasted,
+  FlyingToPortal,
+  IdleByPortal
 }

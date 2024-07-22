@@ -44,12 +44,12 @@ public class FileUploadManager : Singleton<FileUploadManager>
 
       HttpResponseMessage response = await _client.SendAsync(request);
 
-      Debug.Log($"Got response {response} with status {response.StatusCode}");
+      //Debug.Log($"Got response {response} with status {response.StatusCode}");
 
       response.EnsureSuccessStatusCode();
       string responseBody = await response.Content.ReadAsStringAsync();
-      Debug.Log("Upload Response:");
-      Debug.Log(responseBody);
+      //Debug.Log("Upload Response:");
+      //Debug.Log(responseBody);
       return FilePayload.FromJSON(responseBody);
     }
   }
@@ -63,7 +63,7 @@ public class FileUploadManager : Singleton<FileUploadManager>
     _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     HttpResponseMessage response = await _client.GetAsync(discoveryUrl);
 
-    Debug.Log($"Response from discover document {response}");
+    //Debug.Log($"Response from discover document {response}");
 
     response.EnsureSuccessStatusCode();
     return await response.Content.ReadAsStringAsync();

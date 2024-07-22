@@ -23,7 +23,7 @@ public class SpeechManager : Singleton<SpeechManager>
     _speechSource = source;
   }
 
-  public async Task SpeakSSML(string something)
+  public async Task Speak(string something, bool ssml=true)
   {
     GCTextToSpeech.Instance.Synthesize(something, new VoiceConfig()
     {
@@ -31,7 +31,7 @@ public class SpeechManager : Singleton<SpeechManager>
       languageCode = GCTextToSpeech.Instance.PrepareLanguage(Constants.SYNTH_LOCALE),
       name = Constants.SYNTH_VOICE
     },
-      true,
+      ssml,
       Constants.SYNTH_PITCH,
       Constants.SYNTH_SPEAKING_RATE,
       Constants.SYNTH_SAMPLE_RATE_HERTZ,
@@ -52,11 +52,13 @@ public class SpeechManager : Singleton<SpeechManager>
 
   private void OnVoiceSynthesizeFail(string arg1, long arg2)
   {
+    Debug.LogError($"Voice synthesis failed with message {arg1}");
     _onSpeakingFailed?.Invoke();
   }
 
   private async void OnVoiceSynthesizeSuccess(PostSynthesizeResponse response, long arg2)
   {
+    _speechSource.Stop();
     _speechSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, TTSConstants.DEFAULT_AUDIO_ENCODING);
     _speechSource.Play();
     await Task.Delay((int)(_speechSource.clip.length * 1000));

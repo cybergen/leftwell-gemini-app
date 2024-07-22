@@ -57,32 +57,32 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
       _chatInProgress = reply.Item1;
 
       //3. Audio synth play for initial reply and first item request
-      await SpeakSSML(reply.Item2);
+      await SpeechManager.Instance.Speak(reply.Item2);
 
       for (int i = 0; i < 3; i++)
       {
         await NextAudioReady();
 
         //4. Send a picture and audio for each item
-        _chatInProgress = await GetScreenshotAndAddToRequest(_chatInProgress);
-        _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+        _chatInProgress = await CameraManager.Instance.GetScreenshotAndAddToRequest(_chatInProgress);
+        _chatInProgress = await AudioCaptureManager.Instance.GetAudioAndAddToRequest(_chatInProgress);
         reply = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_chatInProgress);
         _chatInProgress = reply.Item1;
 
         //5. Wait for completion of audio clip play
-        await SpeakSSML(reply.Item2);
+        await SpeechManager.Instance.Speak(reply.Item2);
         //6. Repeat 2 more times
       }
 
       //7. Send audio to start story
       await NextAudioReady();
-      _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+      _chatInProgress = await AudioCaptureManager.Instance.GetAudioAndAddToRequest(_chatInProgress);
 
       //8. Wait for completion of story audio
       reply = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_chatInProgress);
       _chatInProgress = reply.Item1;
 
-      _ = SpeakSSML(reply.Item2);
+      _ = SpeechManager.Instance.Speak(reply.Item2);
 
       //8.1. Get an image prompt from the story
       var prompts = await ImagePromptGenerator.Instance.GetPromptAndNegativePrompt(_chatInProgress);
@@ -104,73 +104,13 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
       while (_audio.isPlaying) { await Task.Delay(10); }
 
       //8.5 Say the image gen prompts
-      await SpeakSSML($"<speak>I generated these using the prompt: <break time=\"1s\"/>{prompts.Item1} <break time=\"1s\"/>and the negative prompt: <break time=\"1s\"/>{prompts.Item2}</speak>");
+      await SpeechManager.Instance.Speak($"<speak>I generated these using the prompt: <break time=\"1s\"/>{prompts.Item1} <break time=\"1s\"/>and the negative prompt: <break time=\"1s\"/>{prompts.Item2}</speak>");
 
       //9. Trigger back to beginning
       await NextAudioReady();
-      _chatInProgress = await GetAudioAndAddToRequest(_chatInProgress);
+      _chatInProgress = await AudioCaptureManager.Instance.GetAudioAndAddToRequest(_chatInProgress);
       //TODO: Actually delete the contents of the old adventure here in full adventure implementation
     }
-  }
-
-  private async Task<LLMRequestPayload> GetAudioAndAddToRequest(LLMRequestPayload currentPayload)
-  {
-    var audioBytes = await AudioCaptureManager.Instance.GetNextAudioData();
-    var fileInfo = await FileUploadManager.Instance.UploadFile("audio/wav", "Device audio during AR session", audioBytes);
-    var part = new FilePart
-    {
-      fileData = new FilePartData
-      {
-        mimeType = fileInfo.file.mimeType,
-        fileUri = fileInfo.file.uri
-      }
-    };
-    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
-    return currentPayload;
-  }
-
-  private async Task<LLMRequestPayload> GetScreenshotAndAddToRequest(LLMRequestPayload currentPayload)
-  {
-    var camImage = await CameraImageManager.Instance.GetNextAvailableCameraImage();
-    var bytes = camImage.Texture.EncodeToPNG();
-    var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
-    var part = new FilePart
-    {
-      fileData = new FilePartData
-      {
-        mimeType = fileInfo.file.mimeType,
-        fileUri = fileInfo.file.uri
-      }
-    };
-    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
-    return currentPayload;
-  }
-
-  private async Task SpeakSSML(string something)
-  {
-    GCTextToSpeech.Instance.Synthesize(something, new VoiceConfig()
-        {
-          gender = Constants.SYNTH_GENDER,
-          languageCode = GCTextToSpeech.Instance.PrepareLanguage(Constants.SYNTH_LOCALE),
-          name = Constants.SYNTH_VOICE
-        },
-      true,
-      Constants.SYNTH_PITCH,
-      Constants.SYNTH_SPEAKING_RATE,
-      Constants.SYNTH_SAMPLE_RATE_HERTZ,
-      new Enumerators.EffectsProfileId[] { });
-
-    var outcomeTriggered = false;
-
-    void onFailed() { outcomeTriggered = true; }
-    void onSucceeded() { outcomeTriggered = true; }
-    _onSpeakingFailed += onFailed;
-    _onSpeakingSuccessful += onSucceeded;
-
-    while (!outcomeTriggered) { await Task.Delay(10); }
-
-    _onSpeakingFailed -= onFailed;
-    _onSpeakingSuccessful -= onSucceeded;
   }
 
   private LLMRequestPayload CreateInitialPayload()

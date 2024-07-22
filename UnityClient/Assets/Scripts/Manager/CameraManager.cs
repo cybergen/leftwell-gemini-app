@@ -5,11 +5,12 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
 using BriLib;
+using LLM.Network;
 
-public class CameraImageManager : Singleton<CameraImageManager>
+public class CameraManager : Singleton<CameraManager>
 {
-  [SerializeField]
-  private ARCameraManager _cameraManager;
+  [SerializeField] private ARCameraManager _cameraManager;
+  [SerializeField] private Transform _cameraTransform;
   private XRCpuImage.Transformation _transformation = XRCpuImage.Transformation.MirrorY;
   private const TextureFormat _format = TextureFormat.RGBA32;
   private Texture2D _captureTexture;
@@ -19,7 +20,7 @@ public class CameraImageManager : Singleton<CameraImageManager>
     CameraImage cameraImage;
     do
     {
-      await Task.Delay(17); // Wait one frame between retrieval attempts
+      await Task.Delay(16); // Wait one frame between retrieval attempts
       cameraImage = GetCameraImage();
     } while (cameraImage == null);
     return cameraImage;
@@ -57,6 +58,28 @@ public class CameraImageManager : Singleton<CameraImageManager>
       Texture = RotateTexture(_captureTexture, false),
       ImageInfo = info
     };
+  }
+
+  public Tuple<Vector3, Quaternion> GetCameraPose()
+  {
+    return new Tuple<Vector3, Quaternion>(_cameraTransform.position, _cameraTransform.rotation);
+  }
+
+  public async Task<LLMRequestPayload> GetScreenshotAndAddToRequest(LLMRequestPayload currentPayload)
+  {
+    var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
+    var bytes = camImage.Texture.EncodeToPNG();
+    var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
+    var part = new FilePart
+    {
+      fileData = new FilePartData
+      {
+        mimeType = fileInfo.file.mimeType,
+        fileUri = fileInfo.file.uri
+      }
+    };
+    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
+    return currentPayload;
   }
 
   private Texture2D RotateTexture(Texture2D originalTexture, bool clockwise)

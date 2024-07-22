@@ -1,18 +1,41 @@
-using System;
 using System.Threading.Tasks;
+using UnityEngine;
 
-public class RequestPermissionsSequence : ISequence<bool>
+public class RequestPermissionsSequence : ISequence<CameraRigBundle, bool>
 {
-  public async Task<bool> RunAsync()
+  public async Task<bool> RunAsync(CameraRigBundle rigBundle)
   {
-    //TODO: Make this implementation more in-worldy and lore-driven, with gcloud voice synth
     var gotMicrophonePermissions = new TaskCompletionSource<bool>();
-    var gotCameraPermissions = new TaskCompletionSource<bool>();
-    PermissionsManager.Instance.RequestPermission(
-      AppPermission.Microphone, (result) => gotMicrophonePermissions.SetResult(result));
-    PermissionsManager.Instance.RequestPermission(
-      AppPermission.Camera, (result) => gotCameraPermissions.SetResult(result));
-    await Task.WhenAll(gotMicrophonePermissions.Task, gotCameraPermissions.Task);
-    return gotMicrophonePermissions.Task.Result && gotCameraPermissions.Task.Result;
+    if (!PermissionsManager.Instance.CheckPermission(AppPermission.Microphone))
+    {
+      await SpeechManager.Instance.Speak($"<speak>Hey, I can't hear what you're saying. Please give me permission to hear your voice</speak>");
+      PermissionsManager.Instance.RequestPermission(
+        AppPermission.Microphone, (result) => gotMicrophonePermissions.SetResult(result));
+      await gotMicrophonePermissions.Task;
+      //TODO: Respond if rejected
+    }
+
+    if (!PermissionsManager.Instance.CheckPermission(AppPermission.Camera))
+    {
+      await SpeechManager.Instance.Speak($"<speak>That's better! <break time=\"1s\"/> I still can't see you though. Can you give me permission to see as well, please?</speak>");
+      rigBundle.SetCameraActive(true);
+      //TODO: Respond if rejected
+    }
+    await SpeechManager.Instance.Speak($"<speak>There we go! Incoming!</speak>");
+    return gotMicrophonePermissions.Task.Result && PermissionsManager.Instance.CheckPermission(AppPermission.Camera);
+  }
+}
+
+public class CameraRigBundle
+{
+  public GameObject CameraRig;
+  public AudioListener PreCameraAudioListener;
+  public GameObject PreCameraBackdrop;
+
+  public void SetCameraActive(bool active)
+  {
+    CameraRig.SetActive(active);
+    PreCameraAudioListener.enabled = !active;
+    PreCameraBackdrop.SetActive(!active);
   }
 }

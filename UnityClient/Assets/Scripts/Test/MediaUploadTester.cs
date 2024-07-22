@@ -17,7 +17,7 @@ public class MediaUploadTester : MonoBehaviour
     }
 
     InfoText.text = "Capturing image";
-    var camImage = await CameraImageManager.Instance.GetNextAvailableCameraImage();
+    var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
     
     InfoText.text = camImage.ImageInfo;
     CameraDisplay.texture = camImage.Texture;

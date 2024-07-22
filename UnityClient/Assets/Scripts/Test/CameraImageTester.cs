@@ -11,7 +11,7 @@ public class CameraImageTest : MonoBehaviour
 
   public async void OnTriggerScreenshot()
   {
-    var camImage = await CameraImageManager.Instance.GetNextAvailableCameraImage();
+    var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
 
     if (InfoText != null)
     {

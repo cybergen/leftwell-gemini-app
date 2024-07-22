@@ -22,7 +22,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
   {
     _outputText.text = "Capturing image";
     AudioCaptureManager.Instance.EndAudioCapture();
-    var camImage = await CameraImageManager.Instance.GetNextAvailableCameraImage();
+    var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
     _outputText.text = "Encoding audio";
     var audioBytes = await AudioCaptureManager.Instance.GetNextAudioData();
     var imageBlob = Convert.ToBase64String(camImage.Texture.EncodeToPNG());

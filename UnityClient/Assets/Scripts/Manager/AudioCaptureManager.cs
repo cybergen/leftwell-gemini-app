@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
+using LLM.Network;
 
 public class AudioCaptureManager : Singleton<AudioCaptureManager>
 {
@@ -36,6 +37,38 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
     isRecording = false;
   }
 
+  public async Task<byte[]> GetNextAudioData()
+  {
+    if (isRecording)
+    {
+      Debug.LogError("Audio capture is still in progress. Please stop the capture before getting audio data.");
+      return null;
+    }
+
+    float[] samples = audioData.ToArray();
+    int channels = audioClip.channels;
+    int frequency = sampleRate;
+    byte[] wavData = await Task.Run(() => EncodeToWAV(samples, channels, frequency));
+    audioData.Clear();
+    return wavData;
+  }
+
+  public async Task<LLMRequestPayload> GetAudioAndAddToRequest(LLMRequestPayload currentPayload)
+  {
+    var audioBytes = await GetNextAudioData();
+    var fileInfo = await FileUploadManager.Instance.UploadFile("audio/wav", "Device audio during AR session", audioBytes);
+    var part = new FilePart
+    {
+      fileData = new FilePartData
+      {
+        mimeType = fileInfo.file.mimeType,
+        fileUri = fileInfo.file.uri
+      }
+    };
+    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
+    return currentPayload;
+  }
+
   private IEnumerator CaptureAudioData()
   {
     while (isRecording)
@@ -55,22 +88,6 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
       }
       yield return null;
     }
-  }
-
-  public async Task<byte[]> GetNextAudioData()
-  {
-    if (isRecording)
-    {
-      Debug.LogError("Audio capture is still in progress. Please stop the capture before getting audio data.");
-      return null;
-    }
-
-    float[] samples = audioData.ToArray();
-    int channels = audioClip.channels;
-    int frequency = sampleRate;
-    byte[] wavData = await Task.Run(() => EncodeToWAV(samples, channels, frequency));
-    audioData.Clear();
-    return wavData;
   }
 
   private byte[] EncodeToWAV(float[] samples, int channels, int sampleRate)
