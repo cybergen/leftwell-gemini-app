@@ -44,7 +44,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     //4.4 Adds incipient portal vfx to area you took picture from (right in front of your camera)
     //4.5 Tells you if the item looked powerful, gonna help to magic it up, etc (not LLM)
     //4.6 Repeat x 3
-    List<string> itemStrings = GetItemStrings(convoResult.Item2);
+    var itemStrings = GetItemStrings(convoResult.Item2);
     for (int i = 0; i < 3; i++)
     {
       bool imageReady = false;
