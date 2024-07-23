@@ -31,7 +31,7 @@ public class CameraManager : Singleton<CameraManager>
   {
     if (!_cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
     {
-      Debug.LogError("Failed to acquire CPU image from camera manager");
+      Debug.LogWarning("Failed to acquire CPU image from camera manager");
       return null;
     }
 
@@ -66,7 +66,7 @@ public class CameraManager : Singleton<CameraManager>
 
   public async Task<LLMRequestPayload> GetScreenshotAndAddToRequest(LLMRequestPayload currentPayload)
   {
-    var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
+    var camImage = await Instance.GetNextAvailableCameraImage();
     var bytes = camImage.Texture.EncodeToPNG();
     var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
     var part = new FilePart
@@ -79,6 +79,21 @@ public class CameraManager : Singleton<CameraManager>
     };
     currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
     return currentPayload;
+  }
+
+  public async Task<FilePart> UploadImageAndGetFilePart(Texture2D image)
+  {
+    var bytes = image.EncodeToPNG();
+    var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
+    var part = new FilePart
+    {
+      fileData = new FilePartData
+      {
+        mimeType = fileInfo.file.mimeType,
+        fileUri = fileInfo.file.uri
+      }
+    };
+    return part;
   }
 
   private Texture2D RotateTexture(Texture2D originalTexture, bool clockwise)

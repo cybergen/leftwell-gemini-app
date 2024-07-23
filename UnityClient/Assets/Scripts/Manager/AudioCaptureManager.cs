@@ -69,6 +69,21 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
     return currentPayload;
   }
 
+  public async Task<FilePart> GetAudioAndUpload()
+  {
+    var audioBytes = await GetNextAudioData();
+    var fileInfo = await FileUploadManager.Instance.UploadFile("audio/wav", "Device audio during AR session", audioBytes);
+    var part = new FilePart
+    {
+      fileData = new FilePartData
+      {
+        mimeType = fileInfo.file.mimeType,
+        fileUri = fileInfo.file.uri
+      }
+    };
+    return part;
+  }
+
   private IEnumerator CaptureAudioData()
   {
     while (isRecording)

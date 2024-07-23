@@ -13,22 +13,25 @@ public class PortalManager : Singleton<PortalManager>
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
   private ItemCaptureMarker _bigPortal;
 
-  public void SpawnCaptureMarker(Texture2D texture)
+  public int SpawnCaptureMarker(Texture2D texture)
   {
     var pose = CameraManager.Instance.GetCameraPose();
     var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * _forwardSpawnDistance;
     var marker = Instantiate(_smallMarkerPrefab, pos, pose.Item2);
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
     captureMarker.Spawn(texture);
+    var index = _captureMarkers.Count;
     _captureMarkers.Add(captureMarker);
+    return index;
   }
 
   public void SpawnBigPortal()
   {
-    var spawnPose = CameraManager.Instance.GetCameraPose();
-    var spawnPos = new Vector3(spawnPose.Item1.x, PlaneManager.Instance.GroundHeight + _bigPortalSpawnHeight, spawnPose.Item1.z);
-    var forwardDir = (CameraManager.Instance.GetCameraPose().Item1 - spawnPos).normalized;
-    var marker = Instantiate(_bigMarkerPrefab, spawnPos, Quaternion.LookRotation(forwardDir));
+    var camPose = CameraManager.Instance.GetCameraPose();
+    var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _forwardSpawnDistance;
+    spawnPoint.y = PlaneManager.Instance.GroundHeight + _bigPortalSpawnHeight;
+    var forwardDir = Vector3.ProjectOnPlane(spawnPoint - camPose.Item1, Vector3.up).normalized;
+    var marker = Instantiate(_bigMarkerPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
     _bigPortal = captureMarker;
   }
@@ -91,5 +94,14 @@ public class PortalManager : Singleton<PortalManager>
   public void ActivatePortal()
   {
     _bigPortal.Activate();
+  }
+
+  public bool GetAllMarkersActivatable()
+  {
+    foreach (var marker in _captureMarkers) 
+    { 
+      if (marker.CaptureMarkerState != CaptureMarkerState.Activatable) return false;
+    }
+    return true;
   }
 }

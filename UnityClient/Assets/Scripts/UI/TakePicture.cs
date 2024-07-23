@@ -21,24 +21,24 @@ public class TakePicture : MonoBehaviour
 
   public async void Show(string text, Action onPress)
   {
-    gameObject.SetActive(true);
     _onPress = onPress;
     _text.text = text;
 
-    if (_shown || _animating) return;
+    if (_shown) return;
 
+    gameObject.SetActive(true);
+    _shown = true;
     await Animate(true);
     _canvas.interactable = true;
-    _shown = true;
   }
 
   public async void Hide()
   {
-    if (!_shown || _animating) return;
+    if (!_shown) return;
 
-    await Animate(false);
-    _canvas.interactable = false;
     _shown = false;
+    _canvas.interactable = false;
+    await Animate(false);
     gameObject.SetActive(false);
   }
 

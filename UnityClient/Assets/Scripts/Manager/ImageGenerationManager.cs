@@ -149,6 +149,16 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
     }
   }
 
+  public async Task<string> GetEditedImageBase64Encoded(string base64EncodedImage)
+  {
+    return base64EncodedImage;
+  }
+
+  public async Task<Texture2D> GetRandomlyEditedImage(Texture2D initialImage)
+  {
+    return initialImage;
+  }
+
   public static Texture2D Base64ToTexture(string base64String)
   {
     try

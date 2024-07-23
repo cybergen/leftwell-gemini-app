@@ -4,7 +4,6 @@ using UnityEngine;
 public class ItemCaptureMarker : MonoBehaviour
 {
   public CaptureMarkerState CaptureMarkerState { get; private set; } = CaptureMarkerState.Spawned;
-
   [SerializeField] private MeshRenderer _renderer;
   private Texture2D _finalImage;
   private Action _onActivated;
