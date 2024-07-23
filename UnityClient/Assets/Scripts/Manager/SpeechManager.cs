@@ -61,7 +61,7 @@ public class SpeechManager : Singleton<SpeechManager>
     _speechSource.Stop();
     _speechSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, TTSConstants.DEFAULT_AUDIO_ENCODING);
     _speechSource.Play();
-    await Task.Delay(10);// (int)(_speechSource.clip.length * 1000));
+    await Task.Delay((int)(_speechSource.clip.length * 1000));
     _onSpeakingSuccessful?.Invoke();
   }
 }

@@ -1,18 +1,19 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
 using TMPro;
 
-public class TakePicture : MonoBehaviour
+public class FullScreenTapButton : MonoBehaviour
 {
   [SerializeField] private int _animationMillis;
   [SerializeField] private CanvasGroup _canvas;
   [SerializeField] private TMP_Text _text;
   private int _milliStep = 10;
-  private bool _animating;
   private bool _shown;
   private Action _onPress;
+  private CancellationTokenSource _cancellationTokenSource;
 
   public void OnPress()
   {
@@ -26,9 +27,13 @@ public class TakePicture : MonoBehaviour
 
     if (_shown) return;
 
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
     gameObject.SetActive(true);
     _shown = true;
-    await Animate(true);
+    await Animate(true, _cancellationTokenSource.Token);
+    if (_cancellationTokenSource.Token.IsCancellationRequested) return;
     _canvas.interactable = true;
   }
 
@@ -36,38 +41,50 @@ public class TakePicture : MonoBehaviour
   {
     if (!_shown) return;
 
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
     _shown = false;
     _canvas.interactable = false;
-    await Animate(false);
+    await Animate(false, _cancellationTokenSource.Token);
+    if (_cancellationTokenSource.Token.IsCancellationRequested) return;
     gameObject.SetActive(false);
   }
 
-  private async Task Animate(bool show)
+  private async Task Animate(bool show, CancellationToken token)
   {
-    _animating = true;
     _canvas.interactable = false;
-    var startAlpha = show ? 0f : 1f;
+    var startAlpha = _canvas.alpha;
     var endAlpha = show ? 1f : 0f;
     var elapsedMillis = 0;
 
     while (elapsedMillis < _animationMillis)
     {
+      if (token.IsCancellationRequested) break;
+
       var progress = Easing.ExpoEaseOut((float)elapsedMillis / _animationMillis);
       var alpha = Mathf.Lerp(startAlpha, endAlpha, progress);
       _canvas.alpha = alpha;
-      await Task.Delay(_milliStep);
+      await Task.Delay(_milliStep, token);
       elapsedMillis += _milliStep;
     }
 
-    _canvas.alpha = endAlpha;
-    _animating = false;
+    if (!token.IsCancellationRequested)
+    {
+      _canvas.alpha = endAlpha;
+    }
   }
 
   private void Awake()
   {
     _shown = false;
-    _animating = false;
     _canvas.alpha = 0f;
     gameObject.SetActive(false);
+    _cancellationTokenSource = new CancellationTokenSource();
+  }
+
+  private void OnDestroy()
+  {
+    _cancellationTokenSource.Cancel();
   }
 }

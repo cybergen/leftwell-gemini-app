@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using LLM.Network;
 
-public class BigPortalSequence : ISequence<LLMRequestPayload, BigPortalResult>
+public class StoryAndImagePromptSeqeuence : ISequence<LLMRequestPayload, BigPortalResult>
 {
   public async Task<BigPortalResult> RunAsync(LLMRequestPayload arg)
   {

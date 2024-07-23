@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
-using BriLib;
 using LLM.Network;
 using Request = LLM.Network.LLMRequestPayload;
 
 public class AdventureSequence : ISequence<CharacterBehaviorController, AdventureResult>
 {
-  private AdventureResult _adventureResult = new AdventureResult();
   private int _activatedPortals = 0;
   private List<CaptureMarkerSequence> _captureMarketSequences = new List<CaptureMarkerSequence>();
   private Texture2D _finalImage;
   private string _finalStory;
   private bool _bigPortalActivated = false;
+  private int _imagesUploaded = 0;
+  private int _audioUploaded = 0;
+  private Request _payload;
 
   public async Task<AdventureResult> RunAsync(CharacterBehaviorController character)
   {
-    var adventureResult = new AdventureResult();
-    var payload = CreateInitialPayload();
+    _payload = CreateInitialPayload();
 
     //Get intro text from LLM
-    var payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(payload);
-    payload = payloadReplyPair.Item1;
+    var payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
+    _payload = payloadReplyPair.Item1;
     var stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
 
     //Make wizard fly in and start talking while arriving
@@ -32,16 +32,14 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     while (character.BusyPathing) await Task.Delay(10);
 
     //Run intro convo until state changes
-    payload = (await RunConvoUntilStateChanges(payload, StoryState.Intro)).Item1;
+    _payload = (await RunConvoUntilStateChanges(_payload, StoryState.Intro)).Item1;
     
     //Choose which story to play
-    var convoResult = await RunConvoUntilStateChanges(payload, StoryState.StorySelect);
-    payload = convoResult.Item1;
+    var convoResult = await RunConvoUntilStateChanges(_payload, StoryState.StorySelect);
+    _payload = convoResult.Item1;
 
     //Add images of magical items (and audio descriptions) to payload one by one
     var itemStrings = GetItemStrings(convoResult.Item2);
-    int imagesUploaded = 0;
-    int audioUploaded = 0;
     for (int i = 0; i < 3; i++)
     {
       var tex = await GetCameraImage(itemStrings[i]);
@@ -49,56 +47,50 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
       //Kick off image editing sequence, incrementing activated portals after each one has been activated
       var captureMarkerSequence = new CaptureMarkerSequence();
-      _ = captureMarkerSequence.RunAsync(tex).ContinueWith((task) => {
-        Debug.LogWarning($"Got portal activated with prior activation count: {_activatedPortals}");
-        _activatedPortals++;
-      });
+      _ = captureMarkerSequence.RunAsync(tex).ContinueWith((task) => _activatedPortals++);
       _captureMarketSequences.Add(captureMarkerSequence);
 
       //Kick off addition of image to payload
       _ = CameraManager.Instance.UploadImageAndGetFilePart(tex).ContinueWith((task) =>
       {
-        imagesUploaded++;
+        _imagesUploaded++;
         //Need to add like this to avoid out of order execution stomping on each other
-        payload.contents[payload.contents.Count - 1].parts.Add(task.Result);
+        _payload.contents[_payload.contents.Count - 1].parts.Add(task.Result);
       });
 
-      await SpeechManager.Instance.Speak(GetRandomItemCaptureDialog());
-      await GetAudioCaptured();
+      await SpeechManager.Instance.Speak(DialogConstants.GetRandomItemCaptureDialog());
+      await UseAudioCaptureUI();
 
       character.SetState(CharacterStates.JumpingToPlayer);
       _ = AudioCaptureManager.Instance.GetAudioAndUpload().ContinueWith((task) =>
       {
-        audioUploaded++;
+        _audioUploaded++;
         //Need to add like this to avoid out of order execution stomping on each other
-        payload.contents[payload.contents.Count - 1].parts.Add(task.Result);
+        _payload.contents[_payload.contents.Count - 1].parts.Add(task.Result);
       });
     }
 
     //Get starting pose for big portal
-    _ = SpeechManager.Instance.Speak("I'll get these items ready. In the meantime, give me an open area where I can form the portal");
-    await AwaitableTakePicturePress("Tap to spawn big portal");
+    _ = SpeechManager.Instance.Speak(DialogConstants.POSITION_PORTAL);
+    await UseFullScreenTapUI("Tap to spawn big portal");
     PortalManager.Instance.SpawnBigPortal();
     PortalManager.Instance.SetBigPortalLoading();
     character.SetState(CharacterStates.FlyingToPortal);
-
-    //TODO: Does this make sense here to be discarded?
-    _ = SpeechManager.Instance.Speak("Perfect! I'll start working the big magic to get this spun up!");
+    _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
 
     //Ensure all images and audio are ready in the payload before advancing
-    while (imagesUploaded < 3 || audioUploaded < 3) await Task.Delay(10);
+    while (_imagesUploaded < 3 || _audioUploaded < 3) await Task.Delay(10);
 
     //Get commentary for each item and apply
-    payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(payload);
-    payload = payloadReplyPair.Item1;
+    payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
+    _payload = payloadReplyPair.Item1;
     ApplyCommentaryToMarkers(payloadReplyPair.Item2);
 
     //Immediately kick off final story sequence
-    _ = new BigPortalSequence().RunAsync(payload).ContinueWith((task) =>
+    _ = new StoryAndImagePromptSeqeuence().RunAsync(_payload).ContinueWith((task) =>
     {
-      Debug.LogWarning($"Final image, payload, and story have arrived");
       _finalImage = task.Result.FinalImage;
-      payload = task.Result.Payload;
+      _payload = task.Result.Payload;
       _finalStory = ParseInfoFromReply(task.Result.Reply).Item2;
       PortalManager.Instance.SetBigPortalActivatable(_finalImage, () =>
       {
@@ -108,55 +100,44 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     //Wait for both edited image and commentary reply to come in before allowing activation
     while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
-    Debug.LogWarning($"All markers were activatable, moving on!");
-    _ = SpeechManager.Instance.Speak("I put a little bit of magic on each of your items and transformed them! Go check out each one and activate it!");
+    _ = SpeechManager.Instance.Speak(DialogConstants.ITEMS_READY);
 
     //TODO: Actual way to activate these portals
     //Require user explores magical items before advancing
-    UIManager.Instance.TakePictureButton.Show("Tap to activate small portal", () => PortalManager.Instance.ActivateMarker(_activatedPortals));
+    UIManager.Instance.FullScreenTapButton.Show("Tap to activate small portal", () => PortalManager.Instance.ActivateMarker(_activatedPortals));
     while (_activatedPortals < 3) await Task.Delay(10);
-    UIManager.Instance.TakePictureButton.Hide();
+    UIManager.Instance.FullScreenTapButton.Hide();
     
     //Wait for results for big portal to be available before advancing at this point
-    if (!string.IsNullOrEmpty(_finalStory) && _finalImage != null)
+    if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
     {
-      _ = SpeechManager.Instance.Speak("Just a moment, I'm still trying to get this portal opened...");
-    }
-    else
-    {
+      _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
-    _ = SpeechManager.Instance.Speak("The big portal is ready!");
-    await AwaitableTakePicturePress("Tap to activate big portal");
+    _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
+    await UseFullScreenTapUI("Tap to activate big portal");
     PortalManager.Instance.ActivatePortal();
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     await SpeechManager.Instance.Speak(_finalStory);
-  
+
     //TODO: GO AGAIN
-    return adventureResult;
+    return new AdventureResult
+    {
+      ResultImage = _finalImage,
+      Chat = _payload,
+      Synopsis = _finalStory,
+    };
   }
 
   private async Task<Texture2D> GetCameraImage(string buttonText)
   {
-    await AwaitableTakePicturePress(buttonText);
+    await UseFullScreenTapUI(buttonText);
     //Run twice because TryAcquireLatestCpuImage is BROKEN AND RETURNS AN OLD FRAME
+    await CameraManager.Instance.GetNextAvailableCameraImage();
     var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
-    camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
     return camImage.Texture;
-  }
-
-  private async Task AwaitableTakePicturePress(string buttonText)
-  {
-    bool imageReady = false;
-    Action onPictureCaptured = () =>
-    {
-      imageReady = true;
-    };
-    UIManager.Instance.TakePictureButton.Show(buttonText, onPictureCaptured);
-    while (!imageReady) await Task.Delay(10);
-    UIManager.Instance.TakePictureButton.Hide();
   }
 
   private List<string> GetItemStrings(string input)
@@ -178,25 +159,12 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     return resultList;
   }
 
-  private string GetRandomItemCaptureDialog()
-  {
-    var possibilities = new List<string>
-    {
-      "Uh... Interesting. Tell me about this.",
-      "Wow. What do you have to say about this?",
-      "Anything I should know about this?",
-      "Why did you pick this?",
-      "That looks powerful. Care to explain?"
-    };
-    return MathHelpers.SelectFromRange(possibilities, new System.Random());
-  }
-
   private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state)
   {
     var stateReplyPair = new Tuple<StoryState, string>(state, string.Empty);
     while (stateReplyPair.Item1 == state)
     {
-      await GetAudioCaptured();
+      await UseAudioCaptureUI();
 
       //Capture audio, upload it, and use it in next LLM request
       payload = await AudioCaptureManager.Instance.GetAudioAndAddToRequest(payload);
@@ -212,9 +180,8 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);
   }
 
-  private async Task GetAudioCaptured()
+  private async Task UseAudioCaptureUI()
   {
-    //Show reply button and wait for user to respond with it
     var audioReady = false;
     Action audioCaptured = () =>
     {
@@ -223,8 +190,19 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     };
     UIManager.Instance.PushToTalkButton.Show(() => AudioCaptureManager.Instance.StartAudioCapture(), audioCaptured);
     while (!audioReady) await Task.Delay(10);
-    //Hide reply button again
     UIManager.Instance.PushToTalkButton.Hide();
+  }
+
+  private async Task UseFullScreenTapUI(string buttonText)
+  {
+    bool imageReady = false;
+    Action onPictureCaptured = () =>
+    {
+      imageReady = true;
+    };
+    UIManager.Instance.FullScreenTapButton.Show(buttonText, onPictureCaptured);
+    while (!imageReady) await Task.Delay(10);
+    UIManager.Instance.FullScreenTapButton.Hide();
   }
 
   private Tuple<StoryState, string> ParseInfoFromReply(string reply)
@@ -256,8 +234,8 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
       if (match.Success)
       {
-        string state = match.Groups[1].Value.Trim();
-        string modifiedResponse = regex.Replace(reply, string.Empty).Trim();
+        string matchedLine = match.Groups[1].Value.Trim();
+        string modifiedResponse = regex.Replace(matchedLine, string.Empty).Trim();
         _captureMarketSequences[i - 1].SetCommentary(modifiedResponse);
       }
       else
@@ -267,14 +245,9 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     }
   }
 
-  private void SpeakItemReply(string reply)
+  private Request CreateInitialPayload()
   {
-    _ = SpeechManager.Instance.Speak(reply);
-  }
-
-  private LLMRequestPayload CreateInitialPayload()
-  {
-    var payload = new LLMRequestPayload();
+    var payload = new Request();
 
     payload.generationConfig = new GenerationConfig
     {
@@ -331,5 +304,5 @@ public class AdventureResult
 {
   public Texture2D ResultImage;
   public string Synopsis;
-  public LLMRequestPayload Chat;
+  public Request Chat;
 }

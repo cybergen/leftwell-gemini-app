@@ -55,17 +55,8 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
 
   public async Task<LLMRequestPayload> GetAudioAndAddToRequest(LLMRequestPayload currentPayload)
   {
-    var audioBytes = await GetNextAudioData();
-    var fileInfo = await FileUploadManager.Instance.UploadFile("audio/wav", "Device audio during AR session", audioBytes);
-    var part = new FilePart
-    {
-      fileData = new FilePartData
-      {
-        mimeType = fileInfo.file.mimeType,
-        fileUri = fileInfo.file.uri
-      }
-    };
-    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
+    var filePart = await GetAudioAndUpload();
+    currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(filePart);
     return currentPayload;
   }
 

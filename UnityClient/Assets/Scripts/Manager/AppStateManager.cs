@@ -11,7 +11,7 @@ public class AppStateManager : Singleton<AppStateManager>
   [SerializeField] private GameObject _wizardPrefab;
   [SerializeField] private TMP_Text _outputText;
   [SerializeField] private PushToTalkButton _pushToTalkButton;
-  [SerializeField] private TakePicture _takePictureButton;
+  [SerializeField] private FullScreenTapButton _takePictureButton;
 
   private const string TUTORIAL_PREFS_KEY = "HasRunTutorial";
 

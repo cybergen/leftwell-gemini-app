@@ -67,16 +67,7 @@ public class CameraManager : Singleton<CameraManager>
   public async Task<LLMRequestPayload> GetScreenshotAndAddToRequest(LLMRequestPayload currentPayload)
   {
     var camImage = await Instance.GetNextAvailableCameraImage();
-    var bytes = camImage.Texture.EncodeToPNG();
-    var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Picture in AR mode", bytes);
-    var part = new FilePart
-    {
-      fileData = new FilePartData
-      {
-        mimeType = fileInfo.file.mimeType,
-        fileUri = fileInfo.file.uri
-      }
-    };
+    var part = await UploadImageAndGetFilePart(camImage.Texture);
     currentPayload.contents[currentPayload.contents.Count - 1].parts.Add(part);
     return currentPayload;
   }

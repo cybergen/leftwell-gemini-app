@@ -135,9 +135,9 @@ GameObject:
   - component: {fileID: 97367894}
   - component: {fileID: 97367893}
   - component: {fileID: 97367897}
-  - component: {fileID: 97367896}
+  - component: {fileID: 97367898}
   m_Layer: 5
-  m_Name: TakePicture
+  m_Name: FullScreenTap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -207,8 +207,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 97367896}
-        m_TargetAssemblyTypeName: TakePicture, Assembly-CSharp
+      - m_Target: {fileID: 97367898}
+        m_TargetAssemblyTypeName: FullScreenTapButton, Assembly-CSharp
         m_MethodName: OnPress
         m_Mode: 1
         m_Arguments:
@@ -257,21 +257,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 97367891}
   m_CullTransparentMesh: 1
---- !u!114 &97367896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 97367891}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b60a9551fc6a6694e9de7b9c5bddf645, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _animationMillis: 450
-  _canvas: {fileID: 97367897}
-  _text: {fileID: 1193952030}
 --- !u!225 &97367897
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -284,6 +269,21 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &97367898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 97367891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e5a45ded6d4ef144aadd31945a1a612, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _animationMillis: 450
+  _canvas: {fileID: 97367897}
+  _text: {fileID: 1193952030}
 --- !u!1 &160013784
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PushToTalkButton: {fileID: 1792525927}
-  TakePictureButton: {fileID: 97367896}
+  FullScreenTapButton: {fileID: 97367898}
 --- !u!4 &160013786
 Transform:
   m_ObjectHideFlags: 0

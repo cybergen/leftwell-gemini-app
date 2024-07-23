@@ -20,7 +20,6 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
     PortalManager.Instance.SetMarkerLoading(_markerIndex);
 
     _transformedTexture = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
-    Debug.Log($"Got reply for portal marker {_markerIndex}");
     CheckFinished();
 
     while (!_activated) await Task.Delay(10);
@@ -38,5 +37,6 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   private void OnActivated()
   {
     _activated = true;
+    _ = SpeechManager.Instance.Speak(_commentary);
   }
 }
