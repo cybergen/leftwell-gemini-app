@@ -44,12 +44,20 @@ public class ImageGenerationParameters
   public int sampleCount;
   public string mode;
   public UpscaleConfig upscaleConfig;
+  public EditConfig editConfig;
 }
 
 [Serializable]
 public class UpscaleConfig
 {
   public string upscaleFactor; //x2 or x4
+}
+
+
+[Serializable]
+public class EditConfig
+{
+  public string editMode;
 }
 
 [Serializable]
