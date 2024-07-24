@@ -2,6 +2,6 @@ using BriLib;
 
 public class UIManager : Singleton<UIManager>
 {
-  public PushToTalkButton PushToTalkButton;
+  public LongPressButton LongPressButton;
   public FullScreenTapButton FullScreenTapButton;
 }

@@ -313,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1caaa9b61ef7c554cadddb76e33b207d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PushToTalkButton: {fileID: 1792525927}
+  LongPressButton: {fileID: 1792525927}
   FullScreenTapButton: {fileID: 97367898}
 --- !u!4 &160013786
 Transform:
@@ -1388,7 +1388,7 @@ GameObject:
   - component: {fileID: 1792525928}
   - component: {fileID: 1792525927}
   m_Layer: 5
-  m_Name: PushToTalk
+  m_Name: LongPressButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

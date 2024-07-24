@@ -739,23 +739,23 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: FG_GCTTS
-    EmbeddedLinux: FG_GCTTS
+    Android: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    EmbeddedLinux: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
     GameCoreScarlett: FG_GCTTS
-    GameCoreXboxOne: FG_GCTTS
+    GameCoreXboxOne: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
     LinuxHeadlessSimulation: FG_GCTTS
-    Nintendo Switch: FG_GCTTS
-    PS4: FG_GCTTS
-    PS5: FG_GCTTS
-    QNX: FG_GCTTS
-    Stadia: FG_GCTTS
-    Standalone: FG_GCTTS
-    VisionOS: FG_GCTTS
-    WebGL: FG_GCTTS
+    Nintendo Switch: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    PS4: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    PS5: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    QNX: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    Stadia: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    Standalone: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    VisionOS: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
+    WebGL: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
     Windows Store Apps: FG_GCTTS
-    XboxOne: FG_GCTTS
+    XboxOne: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
     iPhone: FG_GCTTS
-    tvOS: FG_GCTTS
+    tvOS: FG_GCTTS;UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

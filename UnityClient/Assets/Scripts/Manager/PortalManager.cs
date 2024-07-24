@@ -13,13 +13,13 @@ public class PortalManager : Singleton<PortalManager>
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
   private ItemCaptureMarker _bigPortal;
 
-  public int SpawnCaptureMarker(Texture2D texture)
+  public int SpawnCaptureMarker()
   {
     var pose = CameraManager.Instance.GetCameraPose();
     var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * _forwardSpawnDistance;
     var marker = Instantiate(_smallMarkerPrefab, pos, pose.Item2);
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
-    captureMarker.Spawn(texture);
+    captureMarker.Spawn();
     var index = _captureMarkers.Count;
     _captureMarkers.Add(captureMarker);
     return index;
@@ -56,17 +56,7 @@ public class PortalManager : Singleton<PortalManager>
     _bigPortal.SetLoadingState();
   }
 
-  public Vector3 GetBigPortalPosition()
-  {
-    if (_bigPortal == null)
-    {
-      Debug.LogError("Did not have big portal to request position of");
-      return Vector3.zero;
-    }
-    return _bigPortal.transform.position;
-  }
-
-  public void SupplyTransformedImage(int markerIndex, Texture2D finalImage, Action onActivated)
+  public void SetMarkerActivatable(int markerIndex, Texture2D finalImage, Action onActivated)
   {
     if (!(_captureMarkers.Count > markerIndex) || markerIndex < 0)
     {
@@ -98,10 +88,20 @@ public class PortalManager : Singleton<PortalManager>
 
   public bool GetAllMarkersActivatable()
   {
-    foreach (var marker in _captureMarkers) 
-    { 
-      if (marker.CaptureMarkerState != CaptureMarkerState.Activatable) return false;
+    foreach (var marker in _captureMarkers)
+    {
+      if (!marker.Activatable) return false;
     }
     return true;
+  }
+
+  public Vector3 GetBigPortalPosition()
+  {
+    if (_bigPortal == null)
+    {
+      Debug.LogError("Did not have big portal to request position of");
+      return Vector3.zero;
+    }
+    return _bigPortal.transform.position;
   }
 }

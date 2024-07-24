@@ -16,7 +16,7 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
 
   public async Task<string> RunAsync(Texture2D arg)
   {
-    _markerIndex = PortalManager.Instance.SpawnCaptureMarker(arg);
+    _markerIndex = PortalManager.Instance.SpawnCaptureMarker();
     PortalManager.Instance.SetMarkerLoading(_markerIndex);
 
     _transformedTexture = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
@@ -30,7 +30,7 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   {
     if (_transformedTexture != null && !string.IsNullOrEmpty(_commentary))
     {
-      PortalManager.Instance.SupplyTransformedImage(_markerIndex, _transformedTexture, OnActivated);
+      PortalManager.Instance.SetMarkerActivatable(_markerIndex, _transformedTexture, OnActivated);
     }
   }
 

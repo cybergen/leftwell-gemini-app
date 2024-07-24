@@ -188,9 +188,9 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       audioReady = true;
       AudioCaptureManager.Instance.EndAudioCapture();
     };
-    UIManager.Instance.PushToTalkButton.Show(() => AudioCaptureManager.Instance.StartAudioCapture(), audioCaptured);
+    UIManager.Instance.LongPressButton.Show(() => AudioCaptureManager.Instance.StartAudioCapture(), audioCaptured);
     while (!audioReady) await Task.Delay(10);
-    UIManager.Instance.PushToTalkButton.Hide();
+    UIManager.Instance.LongPressButton.Hide();
   }
 
   private async Task UseFullScreenTapUI(string buttonText)
