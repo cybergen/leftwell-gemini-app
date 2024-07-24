@@ -9,9 +9,10 @@ public class PortalManager : Singleton<PortalManager>
   [SerializeField] private GameObject _bigMarkerPrefab;
   [SerializeField] private float _bigPortalSpawnHeight;
   [SerializeField] private float _forwardSpawnDistance;
+  [SerializeField] private float _heroPortalSpawnDistance;
 
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
-  private ItemCaptureMarker _bigPortal;
+  private HeroPortal _bigPortal;
 
   public int SpawnCaptureMarker()
   {
@@ -28,12 +29,11 @@ public class PortalManager : Singleton<PortalManager>
   public void SpawnBigPortal()
   {
     var camPose = CameraManager.Instance.GetCameraPose();
-    var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _forwardSpawnDistance;
+    var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _heroPortalSpawnDistance;
     spawnPoint.y = PlaneManager.Instance.GroundHeight + _bigPortalSpawnHeight;
-    var forwardDir = Vector3.ProjectOnPlane(spawnPoint - camPose.Item1, Vector3.up).normalized;
+    var forwardDir = Vector3.ProjectOnPlane(camPose.Item1 - spawnPoint, Vector3.up).normalized;
     var marker = Instantiate(_bigMarkerPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
-    var captureMarker = marker.GetComponent<ItemCaptureMarker>();
-    _bigPortal = captureMarker;
+    _bigPortal = marker.GetComponent<HeroPortal>();
   }
 
   public void SetMarkerLoading(int markerIndex)
@@ -46,16 +46,6 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers[markerIndex].SetLoadingState();
   }
 
-  public void SetBigPortalLoading()
-  {
-    if (_bigPortal == null)
-    {
-      Debug.LogError("Did not have big portal to set to loading");
-      return;
-    }
-    _bigPortal.SetLoadingState();
-  }
-
   public void SetMarkerActivatable(int markerIndex, Texture2D finalImage, Action onActivated)
   {
     if (!(_captureMarkers.Count > markerIndex) || markerIndex < 0)
@@ -66,14 +56,24 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers[markerIndex].MarkActivatable(finalImage, onActivated);
   }
 
-  public void SetBigPortalActivatable(Texture2D portalImage, Action onActivated)
+  public void SetBigPortalActivatable(Action onActivated)
   {
     if (_bigPortal == null)
     {
       Debug.LogError("Did not have big portal to mark activatable");
       return;
     }
-    _bigPortal.MarkActivatable(portalImage, onActivated);
+    _bigPortal.SetActivatable(onActivated);
+  }
+
+  public void SetBigPortalClosable(Action onClosed)
+  {
+    if (_bigPortal == null)
+    {
+      Debug.LogError("Did not have big portal to mark closable");
+      return;
+    }
+    _bigPortal.SetClosable(onClosed);
   }
 
   public void ActivateMarker(int index)

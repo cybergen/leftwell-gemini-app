@@ -1,24 +1,41 @@
+using System;
 using UnityEngine;
 
 public class HeroPortal : MonoBehaviour, IActivatable
 {
   public bool Activatable { get; private set; }
+  [SerializeField] private Animator _animator;
+  private const string LOADING_TRIGGER = "IsLoading";
+  private const string OPEN_TRIGGER = "IsOpen";
+  private Action _onActivate;
+  private bool _isOpen = false;
 
   public void Activate()
   {
     Activatable = false;
+    if (!_isOpen)
+    {
+      _animator.SetBool(OPEN_TRIGGER, true);
+    }
+    else
+    {
+      _animator.SetBool(OPEN_TRIGGER, false);
+      _animator.SetBool(LOADING_TRIGGER, false);
+    }
+    _isOpen = !_isOpen;
+    _onActivate?.Invoke();
   }
 
-  public void SetState(PortalState state)
+  public void SetClosable(Action onActivate)
   {
-
+    Activatable = true;
+    _onActivate = onActivate;
   }
 
-  public enum PortalState
+  public void SetActivatable(Action onActivate)
   {
-    Start,
-    Loading,
-    Activatable,
-    Activating
+    _onActivate = onActivate;
+    Activatable = true;
+    _animator.SetBool(LOADING_TRIGGER, true);
   }
 }

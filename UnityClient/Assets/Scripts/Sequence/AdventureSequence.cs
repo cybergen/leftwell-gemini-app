@@ -74,7 +74,6 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     _ = SpeechManager.Instance.Speak(DialogConstants.POSITION_PORTAL);
     await UseFullScreenTapUI("Tap to spawn big portal");
     PortalManager.Instance.SpawnBigPortal();
-    PortalManager.Instance.SetBigPortalLoading();
     character.SetState(CharacterStates.FlyingToPortal);
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
 
@@ -92,10 +91,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       _finalImage = task.Result.FinalImage;
       _payload = task.Result.Payload;
       _finalStory = ParseInfoFromReply(task.Result.Reply).Item2;
-      PortalManager.Instance.SetBigPortalActivatable(_finalImage, () =>
-      {
-        _bigPortalActivated = true;
-      });
+      PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
     });
 
     //Wait for both edited image and commentary reply to come in before allowing activation

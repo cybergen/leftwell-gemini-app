@@ -30,21 +30,18 @@ public class PortalTester : MonoBehaviour
     PortalManager.Instance.SpawnBigPortal();
   }
 
-  public void OnSetPortalLoading()
-  {
-    if (!_hasBigPortal) return;
-    PortalManager.Instance.SetBigPortalLoading();
-  }
-
   public void OnSetPortalActivatable()
   {
     if (!_hasBigPortal) return;
-    PortalManager.Instance.SetBigPortalActivatable(_portalImage, null);
+    PortalManager.Instance.SetBigPortalActivatable(() =>
+    {
+      Debug.Log("Big portal actiavted");
+      PortalManager.Instance.SetBigPortalClosable(() => Debug.Log("Big portal closed"));
+    });
   }
 
   private void Awake()
   {
     _activater.SetShowable(true);
-    
   }
 }
