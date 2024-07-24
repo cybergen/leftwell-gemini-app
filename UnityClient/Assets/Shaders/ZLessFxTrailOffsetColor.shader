@@ -1,4 +1,4 @@
-Shader "Custom/FxTrailOffset"
+Shader "Gemini/ZLessTrailOffsetColor"
 {
     Properties
     {
@@ -16,8 +16,8 @@ Shader "Custom/FxTrailOffset"
             "RenderType" = "Transparent"
         }
 
-        Blend One OneMinusSrcAlpha
-        Cull Off ZWrite Off Lighting Off
+        Blend SrcAlpha OneMinusSrcAlpha
+        Cull Off ZWrite Off Lighting Off ZTest Off
 
         CGINCLUDE
         #include "UnityCG.cginc"
@@ -60,8 +60,8 @@ Shader "Custom/FxTrailOffset"
             float4 frag(v2f i) : SV_Target
             {
                 float4 tex = tex2D(_Texture, i.uv);
-                float3 col = tex.rgb * i.color.rgb * i.color.a;
-                return float4(col, tex.r * _AddBlend * i.color.a);
+                float3 col = tex.rgb * i.color.rgb;
+                return float4(col, tex.a * i.color.a);
             }
             ENDCG
         }

@@ -17,7 +17,7 @@ Shader "Custom/FxTrailOffsetColor"
         }
 
         Blend SrcAlpha OneMinusSrcAlpha
-        Cull Off ZWrite Off Lighting Off ZTest Off
+        Cull Off ZWrite Off Lighting Off
 
         CGINCLUDE
         #include "UnityCG.cginc"

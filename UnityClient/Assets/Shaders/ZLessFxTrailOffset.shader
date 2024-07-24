@@ -1,4 +1,4 @@
-Shader "Custom/FxTrailOffset"
+Shader "Gemini/ZLessTrailOffset"
 {
     Properties
     {
@@ -17,7 +17,7 @@ Shader "Custom/FxTrailOffset"
         }
 
         Blend One OneMinusSrcAlpha
-        Cull Off ZWrite Off Lighting Off
+        Cull Off ZWrite Off Lighting Off  ZTest Off
 
         CGINCLUDE
         #include "UnityCG.cginc"

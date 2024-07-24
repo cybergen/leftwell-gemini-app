@@ -1,7 +1,4 @@
-using System;
 using UnityEngine;
-using BriLib;
-using JetBrains.Annotations;
 
 public class PortalTester : MonoBehaviour
 {
