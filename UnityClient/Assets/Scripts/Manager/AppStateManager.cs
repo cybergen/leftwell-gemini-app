@@ -9,7 +9,6 @@ public class AppStateManager : Singleton<AppStateManager>
   [SerializeField] private AudioSource _preCharacterAudioSource;
   [SerializeField] private GameObject _preCameraBackdrop;
   [SerializeField] private GameObject _wizardPrefab;
-  [SerializeField] private TMP_Text _outputText;
   [SerializeField] private LongPressButton _pushToTalkButton;
   [SerializeField] private FullScreenTapButton _takePictureButton;
 
@@ -26,7 +25,6 @@ public class AppStateManager : Singleton<AppStateManager>
 
   private async void SetState(AppState state)
   {
-    _outputText.text = $"App state: {state}";
     Debug.Log($"App state: {state}");
     switch (state)
     {

@@ -42,6 +42,6 @@ public class PortalTester : MonoBehaviour
 
   private void Awake()
   {
-    _activater.SetShowable(true);
+    _activater.SetShowable(true, Camera.main.transform);
   }
 }

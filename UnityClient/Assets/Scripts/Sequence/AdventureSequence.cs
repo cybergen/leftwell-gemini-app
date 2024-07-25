@@ -98,11 +98,9 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
     _ = SpeechManager.Instance.Speak(DialogConstants.ITEMS_READY);
 
-    //TODO: Actual way to activate these portals
     //Require user explores magical items before advancing
-    UIManager.Instance.FullScreenTapButton.Show("Tap to activate small portal", () => PortalManager.Instance.ActivateMarker(_activatedPortals));
+    UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (_activatedPortals < 3) await Task.Delay(10);
-    UIManager.Instance.FullScreenTapButton.Hide();
     
     //Wait for results for big portal to be available before advancing at this point
     if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
@@ -111,12 +109,11 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
-    await UseFullScreenTapUI("Tap to activate big portal");
-    PortalManager.Instance.ActivatePortal();
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     await SpeechManager.Instance.Speak(_finalStory);
+    UIManager.Instance.PortalActivater.SetShowable(false, null);
 
     //TODO: GO AGAIN
     return new AdventureResult

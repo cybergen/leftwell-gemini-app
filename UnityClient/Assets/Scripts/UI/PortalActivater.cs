@@ -12,9 +12,10 @@ public class PortalActivater : MonoBehaviour
   private bool _showable;
   private IActivatable _activatable;
 
-  public void SetShowable(bool showable)
+  public void SetShowable(bool showable, Transform camera)
   {
     _showable = showable;
+    _cameraTransform = camera;
     if (!_showable) _activatable = null;
   }
 
@@ -43,7 +44,7 @@ public class PortalActivater : MonoBehaviour
 
   private void FixedUpdate()
   {
-    if (!_showable) return;
+    if (!_showable || _cameraTransform == null) return;
 
     var ray = new Ray(_cameraTransform.position, _cameraTransform.forward);
     var mask = LayerMask.GetMask("Portal");
@@ -60,7 +61,6 @@ public class PortalActivater : MonoBehaviour
 
   private void Awake()
   {
-    _cameraTransform = Camera.main.transform;
     _canvasGroup.interactable = false;
     _canvasGroup.blocksRaycasts = false;
     _image.raycastTarget = false;
