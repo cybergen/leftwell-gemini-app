@@ -78,7 +78,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     //Get starting pose for big portal
     _ = SpeechManager.Instance.Speak(DialogConstants.POSITION_PORTAL);
-    await UseFullScreenTapUI("Tap to spawn big portal");
+    await UseFullScreenTapUI("Tap to spawn big portal", false);
     PortalManager.Instance.SpawnBigPortal();
     character.SetState(CharacterStates.FlyingToPortal);
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
@@ -192,16 +192,20 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     UIManager.Instance.LongPressButton.Hide();
   }
 
-  private async Task UseFullScreenTapUI(string buttonText)
+  private async Task UseFullScreenTapUI(string buttonText, bool useTakePicture = true)
   {
     bool imageReady = false;
     Action onPictureCaptured = () =>
     {
       imageReady = true;
     };
-    UIManager.Instance.FullScreenTapButton.Show(buttonText, onPictureCaptured);
+
+    if (useTakePicture) { UIManager.Instance.TakePictureButton.Show(buttonText, onPictureCaptured); }
+    else { UIManager.Instance.PortalSpawn.Show(buttonText, onPictureCaptured); }
+
     while (!imageReady) await Task.Delay(10);
-    UIManager.Instance.FullScreenTapButton.Hide();
+    UIManager.Instance.TakePictureButton.Hide();
+    UIManager.Instance.PortalSpawn.Hide();
   }
 
   private Tuple<StoryState, string> ParseInfoFromReply(string reply)

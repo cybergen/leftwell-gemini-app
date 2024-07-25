@@ -9,11 +9,9 @@ public class FullScreenTapButton : MonoBehaviour
 {
   [SerializeField] private int _animationMillis;
   [SerializeField] private CanvasGroup _canvas;
-  [SerializeField] private RectTransform _button;
   [SerializeField] private TMP_Text _text;
-  [SerializeField] private FadeOutImage _flashImage;
-  private float _buttonTargetY;
-  private int _milliStep = 10;
+  [SerializeField] private VerticalSlidingElement _slidingButton;
+  private int _milliStep = 16;
   private bool _shown;
   private Action _onPress;
   private CancellationTokenSource _cancellationTokenSource;
@@ -21,7 +19,6 @@ public class FullScreenTapButton : MonoBehaviour
   public void OnPress()
   {
     _onPress?.Invoke();
-    _flashImage.TriggerAnimate();
   }
 
   public async void Show(string text, Action onPress)
@@ -36,7 +33,10 @@ public class FullScreenTapButton : MonoBehaviour
 
     gameObject.SetActive(true);
     _shown = true;
+
+    _slidingButton.Show(_animationMillis);
     await Animate(true, _cancellationTokenSource.Token);
+
     if (_cancellationTokenSource.Token.IsCancellationRequested) return;
     _canvas.interactable = true;
   }
@@ -50,7 +50,10 @@ public class FullScreenTapButton : MonoBehaviour
 
     _shown = false;
     _canvas.interactable = false;
+
+    _slidingButton.Hide();
     await Animate(false, _cancellationTokenSource.Token);
+
     if (_cancellationTokenSource.Token.IsCancellationRequested) return;
     gameObject.SetActive(false);
   }
@@ -61,8 +64,6 @@ public class FullScreenTapButton : MonoBehaviour
 
     var startAlpha = _canvas.alpha;
     var endAlpha = show ? 1f : 0f;
-    var startY = _button.anchoredPosition.y;
-    var endY = show ? _buttonTargetY : -_buttonTargetY;
     var elapsedMillis = 0;
 
     while (elapsedMillis < _animationMillis)
@@ -73,11 +74,6 @@ public class FullScreenTapButton : MonoBehaviour
       
       var alpha = Mathf.Lerp(startAlpha, endAlpha, progress);
       _canvas.alpha = alpha;
-
-      var targetY = Mathf.Lerp(startY, endY, progress);
-      var buttonPosition = _button.anchoredPosition;
-      buttonPosition.y = targetY;
-      _button.anchoredPosition = buttonPosition;
 
       await Task.Delay(_milliStep, token);
       elapsedMillis += _milliStep;
@@ -93,10 +89,6 @@ public class FullScreenTapButton : MonoBehaviour
   {
     _shown = false;
     _canvas.alpha = 0f;
-    _buttonTargetY = _button.anchoredPosition.y;
-    var pos = _button.anchoredPosition;
-    pos.y = -_buttonTargetY;
-    _button.anchoredPosition = pos; 
     gameObject.SetActive(false);
     _cancellationTokenSource = new CancellationTokenSource();
   }
