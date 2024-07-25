@@ -43,6 +43,9 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     for (int i = 0; i < 3; i++)
     {
       var tex = await GetCameraImage(itemStrings[i]);
+
+      //Add a delay so audio UI and picture UI don't stomp on each other
+      await Task.Delay(450);
       character.SetState(CharacterStates.ShownObject);
 
       //Kick off image editing sequence, incrementing activated portals after each one has been activated
@@ -68,6 +71,9 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
         //Need to add like this to avoid out of order execution stomping on each other
         _payload.contents[_payload.contents.Count - 1].parts.Add(task.Result);
       });
+
+      //Add a delay so audio UI and picture UI don't stomp on each other
+      await Task.Delay(450);
     }
 
     //Get starting pose for big portal
