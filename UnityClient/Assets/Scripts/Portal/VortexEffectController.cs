@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
@@ -13,30 +14,45 @@ public class VortexEffectController : MonoBehaviour
   [SerializeField] private int _showAnimationMillis;
   [SerializeField] private int _milliStep = 16;
   private float _actualOpacity;
-  
+  private CancellationTokenSource _cancellationTokenSource;
+
   public async void Show()
   {
     gameObject.SetActive(true);
-    await Animate(true);
+
+    //Cancel the previous animation if any
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
+    await Animate(true, _cancellationTokenSource.Token);
   }
 
   public async void Hide()
   {
-    await Animate(false);
+    //Cancel the previous animation if any
+    _cancellationTokenSource?.Cancel();
+    _cancellationTokenSource = new CancellationTokenSource();
+
+    await Animate(false, _cancellationTokenSource.Token);
     gameObject.SetActive(false);
   }
 
-  private async Task Animate(bool shown)
+  private async Task Animate(bool shown, CancellationToken cancellationToken)
   {
     var startOpacity = _actualOpacity;
     var endOpacity = shown ? _shownOpacity : 0f;
     var elapsedMillis = 0;
     while (elapsedMillis < _showAnimationMillis)
     {
+      if (cancellationToken.IsCancellationRequested)
+      {
+        return; //Exit if animation is cancelled
+      }
+
       var progress = Easing.ExpoEaseOut((float)elapsedMillis / _showAnimationMillis);
       _actualOpacity = (endOpacity - startOpacity) * progress + startOpacity;
       elapsedMillis += _milliStep;
-      await Task.Delay(_milliStep);
+      await Task.Delay(_milliStep, cancellationToken);
     }
     _actualOpacity = endOpacity;
   }
@@ -52,5 +68,10 @@ public class VortexEffectController : MonoBehaviour
   {
     _vortexMaterial.SetFloat("_Opacity", 0f);
     _actualOpacity = 0f;
+  }
+
+  private void OnDestroy()
+  {
+    _cancellationTokenSource?.Cancel();
   }
 }

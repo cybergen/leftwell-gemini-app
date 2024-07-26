@@ -6,26 +6,18 @@ using UnityEngine;
 public class ItemCaptureMarker : MonoBehaviour, IActivatable
 {
   public bool Activatable { get; private set; }
+  public string ActivationText { get { return "Activate Item of Power"; } }
   [SerializeField] private MeshRenderer _renderer;
   [SerializeField] private GameObject _imagePlane;
   [SerializeField] private GameObject _explosionParticles;
   [SerializeField] private GameObject _initialSparks;
+  [SerializeField] private GameObject _activatableTrail;
   [SerializeField] private List<GameObject> _frameSparks;
   [SerializeField] private int _animationMillis;
   private float _targetZScale;
   private int _elapsedAnimationMillis;
   private Texture2D _finalImage;
   private Action _onActivated;
-
-  public void Spawn()
-  {
-    
-  }
-
-  public void SetLoadingState()
-  {
-
-  }
 
   public void MarkActivatable(Texture2D finalImage, Action onActivated)
   {
@@ -40,10 +32,7 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     _imagePlane.transform.localScale = scale;
 
     _imagePlane.SetActive(true);
-    foreach (var frame in _frameSparks)
-    {
-      frame.SetActive(true);
-    }
+    _activatableTrail.SetActive(true);
     Activatable = true;
   }
 
@@ -52,7 +41,12 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     _renderer.material.mainTexture = _finalImage;
     _onActivated?.Invoke();
     Activatable = false;
+    _activatableTrail.SetActive(false);
     _explosionParticles.SetActive(true);
+    foreach (var frame in _frameSparks)
+    {
+      frame.SetActive(true);
+    }
     await AnimateOpen();
   }
 

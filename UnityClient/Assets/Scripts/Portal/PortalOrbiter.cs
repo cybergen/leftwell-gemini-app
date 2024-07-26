@@ -1,4 +1,5 @@
 using UnityEngine;
+using BriLib;
 
 public class PortalOrbiter : MonoBehaviour
 {
@@ -21,13 +22,16 @@ public class PortalOrbiter : MonoBehaviour
 
   private void Update()
   {
-    // Update the corners of the plane if it has changed
+    //Update the corners of the plane if it has changed
     UpdateCorners();
+    if (!nextCorner.IsValid()) { nextCorner = corners[currentCornerIndex]; }
 
-    // Move the object towards the next corner
-    transform.position = Vector3.MoveTowards(transform.position, nextCorner, _speed * Time.deltaTime);
+    //Move the object towards the next corner
+    var vector = Vector3.MoveTowards(transform.position, nextCorner, _speed * Time.deltaTime);
+    if (!vector.IsValid()) return;
+    transform.position = vector;
 
-    // If the object has reached the next corner, move to the next corner
+    //If the object has reached the next corner, move to the next corner
     if (Vector3.Distance(transform.position, nextCorner) < _cornerProximity)
     {
       currentCornerIndex = (currentCornerIndex + 1) % corners.Length;
@@ -39,15 +43,15 @@ public class PortalOrbiter : MonoBehaviour
   {
     if (_targetPlane == null) return;
 
-    // Get the plane's transform and scale
+    //Get the plane's transform and scale
     Transform planeTransform = _targetPlane.transform;
     Vector3 planeScale = planeTransform.localScale;
 
-    // Default plane dimensions in Unity are 10x10 units
+    //Default plane dimensions in Unity are 10x10 units
     float halfWidth = 5f * planeScale.x * (1f / planeScale.x);
     float halfHeight = 5f * planeScale.z * (1f / planeScale.z);
 
-    // Calculate the corners based on the plane's local position and scale, then transform to world space
+    //Calculate the corners based on the plane's local position and scale, then transform to world space
     corners[0] = planeTransform.TransformPoint(new Vector3(-halfWidth, 0, -halfHeight));
     corners[1] = planeTransform.TransformPoint(new Vector3(halfWidth, 0, -halfHeight));
     corners[2] = planeTransform.TransformPoint(new Vector3(halfWidth, 0, halfHeight));

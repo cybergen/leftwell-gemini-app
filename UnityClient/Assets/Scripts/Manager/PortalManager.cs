@@ -20,7 +20,6 @@ public class PortalManager : Singleton<PortalManager>
     var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * _forwardSpawnDistance;
     var marker = Instantiate(_smallMarkerPrefab, pos, pose.Item2);
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
-    captureMarker.Spawn();
     var index = _captureMarkers.Count;
     _captureMarkers.Add(captureMarker);
     return index;
@@ -34,16 +33,6 @@ public class PortalManager : Singleton<PortalManager>
     var forwardDir = Vector3.ProjectOnPlane(camPose.Item1 - spawnPoint, Vector3.up).normalized;
     var marker = Instantiate(_bigMarkerPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
     _bigPortal = marker.GetComponent<HeroPortal>();
-  }
-
-  public void SetMarkerLoading(int markerIndex)
-  {
-    if (!(_captureMarkers.Count > markerIndex) || markerIndex < 0)
-    {
-      Debug.LogError($"Attempted to activate invalid capture marker index {markerIndex}");
-      return;
-    }
-    _captureMarkers[markerIndex].SetLoadingState();
   }
 
   public void SetMarkerActivatable(int markerIndex, Texture2D finalImage, Action onActivated)

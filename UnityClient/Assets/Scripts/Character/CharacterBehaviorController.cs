@@ -37,6 +37,8 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _flyBackToPlayerSpeed = 1.5f;
   [Header("Assorted Config")]
   [SerializeField] private float _dieAnimDuration = 0.6f;
+  [SerializeField] private float _distanceFromPortal;
+  [SerializeField] private float _portalAngleToSeekTo = -15f;
 
   private CharacterStates _currentState = CharacterStates.None;
 
@@ -147,7 +149,9 @@ public class CharacterBehaviorController : MonoBehaviour
         break;
       case CharacterStates.FlyingToPortal:
         _startPosition = transform.position;
-        _targetPosition = PortalManager.Instance.GetBigPortalPosition() + Vector3.left * _distanceFromPlayerToSeek;
+        var dirFromPortal = GetFlat(_cameraTransform.position - PortalManager.Instance.GetBigPortalPosition());
+        dirFromPortal = Quaternion.AngleAxis(_portalAngleToSeekTo, Vector3.up) * dirFromPortal;
+        _targetPosition = PortalManager.Instance.GetBigPortalPosition() + dirFromPortal * _distanceFromPortal;
         _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
         BusyPathing = true;
         break;

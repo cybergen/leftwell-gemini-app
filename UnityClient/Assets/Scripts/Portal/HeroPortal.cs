@@ -4,6 +4,11 @@ using UnityEngine;
 public class HeroPortal : MonoBehaviour, IActivatable
 {
   public bool Activatable { get; private set; }
+  public string ActivationText { get
+    {
+      return _isOpen ? "Close Portal" : "Open Portal";
+    }
+  }
   [SerializeField] private Animator _animator;
   private const string LOADING_TRIGGER = "IsLoading";
   private const string OPEN_TRIGGER = "IsOpen";

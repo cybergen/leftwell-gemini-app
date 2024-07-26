@@ -97,7 +97,6 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
       _finalImage = task.Result.FinalImage;
       _payload = task.Result.Payload;
       _finalStory = ParseInfoFromReply(task.Result.Reply).Item2;
-      PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
     });
 
     //Wait for both edited image and commentary reply to come in before allowing activation
@@ -107,25 +106,37 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     //Require user explores magical items before advancing
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (_activatedPortals < 3) await Task.Delay(10);
-    
+    UIManager.Instance.PortalActivater.SetShowable(false, Camera.main.transform);
+
     //Wait for results for big portal to be available before advancing at this point
     if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
     {
       _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
+
+    PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
+    await Task.Delay(2000);
+    UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
-    _ = SpeechManager.Instance.Speak(_finalStory);
+    _ = SpeechManager.Instance.Speak("It's actually opening! I can't believe we-I mean, completely as expected!");
+    await Task.Delay(4000);
 
+    //Speak final story while showing the UI
+    _ = SpeechManager.Instance.Speak(_finalStory);
     bool hidden = false;
     Action onHide = () => { hidden = true; };
     Action<bool> onShare = (successful) => { Debug.Log($"Share was {successful}"); };
     UIManager.Instance.StoryResult.Show(_finalImage, _finalStory, onHide, onShare);
     while (!hidden) { await Task.Delay(10); }
+    _ = SpeechManager.Instance.Speak("I'll just close this little rip in reality back up then.");
+    await Task.Delay(1000);
+    PortalManager.Instance.SetBigPortalClosable(null);
+    PortalManager.Instance.ActivatePortal();
 
     //TODO: GO AGAIN
     return new AdventureResult

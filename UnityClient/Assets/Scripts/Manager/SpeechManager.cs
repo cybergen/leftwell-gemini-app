@@ -7,6 +7,7 @@ using BriLib;
 
 public class SpeechManager : Singleton<SpeechManager>
 {
+  public bool Speaking { get; private set; } = false;
   private AudioSource _speechSource;
   private Action _onSpeakingFailed;
   private Action _onSpeakingSuccessful;
@@ -58,10 +59,12 @@ public class SpeechManager : Singleton<SpeechManager>
 
   private async void OnVoiceSynthesizeSuccess(PostSynthesizeResponse response, long arg2)
   {
+    Speaking = true;
     _speechSource.Stop();
     _speechSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, TTSConstants.DEFAULT_AUDIO_ENCODING);
     _speechSource.Play();
     await Task.Delay((int)(_speechSource.clip.length * 1000));
     _onSpeakingSuccessful?.Invoke();
+    Speaking = false;
   }
 }

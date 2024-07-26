@@ -78,7 +78,7 @@ Material:
     - _Metallic: 0
     - _Mode: 2
     - _OcclusionStrength: 1
-    - _Opacity: 0.00029579535
+    - _Opacity: 0.0001336699
     - _Parallax: 0.02
     - _Progress: 0
     - _SmoothnessTextureChannel: 0

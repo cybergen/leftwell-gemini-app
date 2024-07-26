@@ -248,7 +248,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &792957383368945214
 Transform:
   m_ObjectHideFlags: 0
@@ -420,8 +420,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _vortexMaterial: {fileID: 2100000, guid: e7685533b1e05ac4aacd5694c793cd5c, type: 2}
-  _shownOpacity: 0.25
-  _opacityAmplitude: 1
+  _shownOpacity: 0.15
+  _opacityAmplitude: 0.4
   _phaseTime: 2
   _showAnimationMillis: 600
   _milliStep: 16

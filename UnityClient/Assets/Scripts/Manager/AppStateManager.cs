@@ -32,10 +32,6 @@ public class AppStateManager : Singleton<AppStateManager>
         ImagePromptGenerator.Instance.Initialize();
         SpeechManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
-        SetState(AppState.TitleScreen);
-        break;
-      case AppState.TitleScreen:
-        await new TitleSequence().RunAsync();
         SetState(AppState.CheckPermissions);
         break;
       case AppState.CheckPermissions:
@@ -46,7 +42,10 @@ public class AppStateManager : Singleton<AppStateManager>
         }
         else
         {
-          SetState(AppState.FindGround);
+          _preCameraAudioListener.enabled = false;
+          _preCameraBackdrop.SetActive(false);
+          _arRig.SetActive(true);
+          SetState(AppState.TitleScreen);
         }
         break;
       case AppState.RequestPermissions:
@@ -63,13 +62,14 @@ public class AppStateManager : Singleton<AppStateManager>
         }
         else
         {
-          SetState(AppState.FindGround);
+          SetState(AppState.TitleScreen);
         }
         break;
+      case AppState.TitleScreen:
+        await new TitleSequence().RunAsync();
+        SetState(AppState.FindGround);
+        break;
       case AppState.FindGround:
-        _preCameraAudioListener.enabled = false;
-        _preCameraBackdrop.SetActive(false);
-        _arRig.SetActive(true);
         await new FindGroundSequence().RunAsync();
         var go = Instantiate(_wizardPrefab, new Vector3(0f, 500f), Quaternion.identity);
         _character = go?.GetComponent<CharacterBehaviorController>();

@@ -29,7 +29,7 @@ public class PortalActivater : MonoBehaviour
     var active = _showable && _currentActivatable != null && _currentActivatable.Activatable;
     if (active && !_wasActive)
     {
-      _text.text = "Open portal!";
+      _text.text = _currentActivatable.ActivationText;
       _screenUI.Show(450);
       _vortex.Show();
     }
