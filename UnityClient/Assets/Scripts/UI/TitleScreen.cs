@@ -7,10 +7,12 @@ public class TitleScreen : MonoBehaviour
 {
   [SerializeField] private Fadable _leftwell;
   [SerializeField] private Fadable _title;
+  [SerializeField] private Fadable _star;
   [SerializeField] private Image _leftFill;
   [SerializeField] private Image _rightFill;
   [SerializeField] private VerticalSlidingElement _start;
   [SerializeField] private int _fadeMillis;
+  [SerializeField] private int _starFadeMillis;
   [SerializeField] private int _fillMillis;
   [SerializeField] private int _slideMillis;
   [SerializeField] private int _pauseMillis;
@@ -20,6 +22,7 @@ public class TitleScreen : MonoBehaviour
   public void Show(Action onStartPressed)
   {
     _onStartPressed = onStartPressed;
+    SoundFXManager.Instance.PlaySound(Sound.IntroFlourish);
     Animate();
   }
 
@@ -41,12 +44,13 @@ public class TitleScreen : MonoBehaviour
     var elapsedMillis = 0f;
     while (elapsedMillis < _fillMillis / 2f) 
     {
-      _leftFill.fillAmount = elapsedMillis / _fillMillis;
-      _rightFill.fillAmount = elapsedMillis / _fillMillis;
+      _leftFill.fillAmount = _rightFill.fillAmount = elapsedMillis / _fillMillis;
       elapsedMillis += _milliStep;
       await Task.Delay(_milliStep);
     }
     _leftFill.fillAmount = _rightFill.fillAmount = 1f;
+    SoundFXManager.Instance.PlaySound(Sound.Chime);
+    _star.Show(_starFadeMillis);
     await Task.Delay(_pauseMillis);
 
     _start.Show(_slideMillis);
@@ -55,12 +59,13 @@ public class TitleScreen : MonoBehaviour
 
   public void OnStartPressed()
   {
-    Hide();
+    Hide(); 
+    SoundFXManager.Instance.PlaySound(Sound.Select);
     _onStartPressed?.Invoke();
   }
 
   private void Awake()
   {
-    //gameObject.SetActive(false);
+    _leftFill.fillAmount = _rightFill.fillAmount = 0f;
   }
 }
