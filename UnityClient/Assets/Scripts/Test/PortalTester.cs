@@ -42,6 +42,6 @@ public class PortalTester : MonoBehaviour
 
   private void Awake()
   {
-    _activater.SetShowable(true, Camera.main.transform);
+    UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
   }
 }

@@ -43,6 +43,7 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
   {
     _onPress = onPress;
     _onRelease = onRelease;
+    gameObject.SetActive(true);
 
     if (_shown) return;
 
@@ -79,11 +80,7 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
       _bgCircle.localScale = new Vector3(scale, scale, scale);
       _radialProgress.color = new Color(_radialBarColor.r, _radialBarColor.g, _radialBarColor.b, scale);
 
-      if (_circleAnimElapsed >= _circleExpandAnimSeconds)
-      {
-        Debug.Log("Finished circle anim");
-        _animatingCircle = false;
-      }
+      if (_circleAnimElapsed >= _circleExpandAnimSeconds) { _animatingCircle = false; }
     }
     else if (_animatingVertically)
     {
@@ -96,11 +93,10 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
       //After completion, do any animation resetting/cleanup as well as interactable setup
       if (_verticalAnimElapsed >= _slideUpAnimSeconds)
       {
-        Debug.Log("Finished vertical anim");
         _animatingVertically = false;
         _button.interactable = _shown;
         _button.enabled = _shown;
-        if (!_shown) ResetState();
+        if (!_shown) { ResetState(); }
       }
     }
 
@@ -155,5 +151,6 @@ public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     _radialProgress.fillAmount = 0f;
     _button.interactable = false;
     _button.enabled = false;
+    gameObject.SetActive(false);
   }
 }

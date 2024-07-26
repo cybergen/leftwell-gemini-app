@@ -32,6 +32,10 @@ public class AppStateManager : Singleton<AppStateManager>
         ImagePromptGenerator.Instance.Initialize();
         SpeechManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
+        SetState(AppState.TitleScreen);
+        break;
+      case AppState.TitleScreen:
+        await new TitleSequence().RunAsync();
         SetState(AppState.CheckPermissions);
         break;
       case AppState.CheckPermissions:
@@ -108,6 +112,7 @@ public class AppStateManager : Singleton<AppStateManager>
 public enum AppState
 {
   Initialize,
+  TitleScreen,
   CheckPermissions,
   RequestPermissions,
   FindGround,

@@ -118,8 +118,14 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
-    await SpeechManager.Instance.Speak(_finalStory);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
+    _ = SpeechManager.Instance.Speak(_finalStory);
+
+    bool hidden = false;
+    Action onHide = () => { hidden = true; };
+    Action<bool> onShare = (successful) => { Debug.Log($"Share was {successful}"); };
+    UIManager.Instance.StoryResult.Show(_finalImage, _finalStory, onHide, onShare);
+    while (!hidden) { await Task.Delay(10); }
 
     //TODO: GO AGAIN
     return new AdventureResult

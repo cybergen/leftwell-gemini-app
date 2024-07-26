@@ -1,8 +1,11 @@
 using UnityEngine;
+using TMPro;
 
 public class PortalActivater : MonoBehaviour
 {
-  [SerializeField] FullScreenTapButton _screenUI;
+  [SerializeField] private VerticalSlidingElement _screenUI;
+  [SerializeField] private VortexEffectController _vortex;
+  [SerializeField] private TMP_Text _text;
   private Transform _cameraTransform;
   private bool _showable;
   private bool _wasActive;
@@ -26,11 +29,15 @@ public class PortalActivater : MonoBehaviour
     var active = _showable && _currentActivatable != null && _currentActivatable.Activatable;
     if (active && !_wasActive)
     {
-      _screenUI.Show("Activate portal!", OnPress);
+      _text.text = "Open portal!";
+      _screenUI.Show(450);
+      _vortex.Show();
     }
     else if (!active && _wasActive)
     {
       _screenUI.Hide();
+      _vortex.Hide();
+      _text.text = string.Empty;
     }
     _wasActive = active;
   }
@@ -50,5 +57,10 @@ public class PortalActivater : MonoBehaviour
     {
       _currentActivatable = null;
     }
+  }
+
+  private void Awake()
+  {
+    _text.text = string.Empty;
   }
 }

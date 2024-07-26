@@ -6,4 +6,6 @@ public class UIManager : Singleton<UIManager>
   public FullScreenTapButton TakePictureButton;
   public FullScreenTapButton PortalSpawn;
   public PortalActivater PortalActivater;
+  public StoryResultScreen StoryResult;
+  public TitleScreen TitleScreen;
 }
