@@ -1,6 +1,6 @@
 using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 
-public static class Constants
+public static class PromptConstants
 {
 
   public const string STORY_PROMPT_TWO_FIRST_TIME =

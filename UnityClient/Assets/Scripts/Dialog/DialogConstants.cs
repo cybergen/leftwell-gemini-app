@@ -1,6 +1,6 @@
-using BriLib;
 using System;
 using System.Collections.Generic;
+using BriLib;
 
 public class DialogConstants
 {
@@ -19,7 +19,7 @@ public class DialogConstants
   };
 
   public static string GetRandomItemCaptureDialog()
-  {    
+  {
     return MathHelpers.SelectFromRange(ITEM_CAPTURE_RESPONSES, new Random());
   }
 }

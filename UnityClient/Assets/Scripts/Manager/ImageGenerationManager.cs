@@ -29,14 +29,14 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           prompt = prompt,
           negativePrompt = negativePrompt,
-          aspectRatio = Constants.IMAGE_GEN_ASPECT,
-          personGeneration = Constants.IMAGE_GEN_PERSON_GEN,
-          safetySettings = Constants.IMAGE_GEN_SAFETY
+          aspectRatio = PromptConstants.IMAGE_GEN_ASPECT,
+          personGeneration = PromptConstants.IMAGE_GEN_PERSON_GEN,
+          safetySettings = PromptConstants.IMAGE_GEN_SAFETY
         }
       },
       parameters = new ImageGenerationParameters
       {
-        sampleCount = Constants.IMAGE_GEN_SAMPLES
+        sampleCount = PromptConstants.IMAGE_GEN_SAMPLES
       }
     };
 
@@ -180,9 +180,9 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           prompt = editOptions.Prompt,
           negativePrompt = editOptions.NegativePrompt,
-          aspectRatio = Constants.IMAGE_GEN_ASPECT,
+          aspectRatio = PromptConstants.IMAGE_GEN_ASPECT,
           personGeneration = editOptions.PersonGeneration,
-          safetySettings = Constants.IMAGE_GEN_SAFETY,
+          safetySettings = PromptConstants.IMAGE_GEN_SAFETY,
           image = new ImageGenerationImage
           {
             bytesBase64Encoded = base64Encoded

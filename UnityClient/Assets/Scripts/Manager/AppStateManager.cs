@@ -30,7 +30,6 @@ public class AppStateManager : Singleton<AppStateManager>
     {
       case AppState.Initialize:
         ImagePromptGenerator.Instance.Initialize();
-        SpeechManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
         SetState(AppState.CheckPermissions);
         break;

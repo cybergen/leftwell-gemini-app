@@ -271,7 +271,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     payload.generationConfig = new GenerationConfig
     {
-      temperature = Constants.STORY_TWO_TEMPERATURE
+      temperature = PromptConstants.STORY_TWO_TEMPERATURE
     };
 
     payload.safetySettings = new List<SafetySetting>();
@@ -293,7 +293,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
 
     payload.systemInstruction = new Content
     {
-      parts = new List<BasePart> { new TextPart { text = Constants.STORY_PROMPT_TWO_FIRST_TIME } }
+      parts = new List<BasePart> { new TextPart { text = PromptConstants.STORY_PROMPT_TWO_FIRST_TIME } }
     };
 
     payload.contents = new List<Content>

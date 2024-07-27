@@ -68,7 +68,7 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
     var request = new LLMRequestPayload();
     request.generationConfig = new GenerationConfig
     {
-      temperature = Constants.IMAGE_TEMP
+      temperature = PromptConstants.IMAGE_TEMP
     };
     request.safetySettings = new List<SafetySetting>();
     var relevantSettings = new List<HarmCategory>
@@ -88,7 +88,7 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
     }
     request.systemInstruction = new Content
     {
-      parts = new List<BasePart> { new TextPart { text = Constants.IMAGE_GEN_PROMPT } }
+      parts = new List<BasePart> { new TextPart { text = PromptConstants.IMAGE_GEN_PROMPT } }
     };
     return request;
   }
