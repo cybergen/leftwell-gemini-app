@@ -1290,6 +1290,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 141104659662561557, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 141104659662561557, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 855356392559491228, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: _vortex
       value: 
@@ -1380,7 +1388,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2701376796379319972, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -2.106705
+      value: -0.0005888854
       objectReference: {fileID: 0}
     - target: {fileID: 3643091192918038082, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1405,6 +1413,22 @@ PrefabInstance:
     - target: {fileID: 6674761672695002030, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_Name
       value: UIManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204519277650701690, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204519277650701690, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7204519277650701690, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8053566133797290854, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8312904184502478281, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_Size

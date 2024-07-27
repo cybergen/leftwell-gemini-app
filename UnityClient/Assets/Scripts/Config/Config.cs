@@ -10,6 +10,7 @@ public class Config : Singleton<Config>
   //Create a proxy server to manage client requests instead and get secrets out of client
   public string ApiKey { get; private set; }
   public string OauthToken { get; private set; }
+  public string ElevenLabsKey { get; private set; }
 
   public override void OnCreate()
   {
@@ -36,6 +37,7 @@ public class Config : Singleton<Config>
 
     ApiKey = configData.ApiKey;
     OauthToken = configData.OauthToken;
+    ElevenLabsKey = configData.ElevenLabsKey;
   }
 
   [Serializable]
@@ -43,5 +45,6 @@ public class Config : Singleton<Config>
   {
     public string ApiKey;
     public string OauthToken;
+    public string ElevenLabsKey;
   }
 }
