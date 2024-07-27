@@ -17,20 +17,29 @@ public class SpeechManager : Singleton<SpeechManager>
     _speechSource = source;
   }
 
-  public async Task Speak(string something, bool ssml=true)
+  public async Task Speak(string something, bool ssml = true)
   {
-    var clip = await GetAudioClipFromText(something);
-    Speaking = true;
-    _speechSource.Stop();
-    _speechSource.clip = clip;
-    _speechSource.Play();
-    await Task.Delay((int)(_speechSource.clip.length * 1000));
-    Speaking = false;
+    try
+    {
+      var clip = await GetAudioClipFromText(something);
+      if (clip != null)
+      {
+        Speaking = true;
+        _speechSource.Stop();
+        _speechSource.clip = clip;
+        _speechSource.Play();
+        await Task.Delay((int)(_speechSource.clip.length * 1000));
+        Speaking = false;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.LogError($"Error during speech synthesis: {ex.Message}");
+    }
   }
 
   private async Task<AudioClip> GetAudioClipFromText(string text)
   {
-    // Create the request payload
     var body = new ElevenLabsRequestBody
     {
       text = text,
@@ -48,49 +57,52 @@ public class SpeechManager : Singleton<SpeechManager>
       SpeechConstants.OPTIMIZE_STREAM_LATENCY);
     string payload = JsonUtility.ToJson(body);
 
-    // Set up the UnityWebRequest
-    using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+    try
     {
-      byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(payload);
-      request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-      request.downloadHandler = new DownloadHandlerBuffer();
-      request.SetRequestHeader("Content-Type", "application/json");
-      request.SetRequestHeader("xi-api-key", Config.Instance.ElevenLabsKey);
-
-      // Send the request and await the response
-       await SendWebRequestAsync(request);
-
-      if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+      using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
       {
-        Debug.LogError("Error: " + request.error);
-        return null;
-      }
-      else
-      {
-        // Get the response data
-        byte[] responseData = request.downloadHandler.data;
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(payload);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("xi-api-key", Config.Instance.ElevenLabsKey);
 
-        // Save the response data to a temporary file
-        string tempFilePath = Path.Combine(Application.persistentDataPath, "temp.mp3");
-        File.WriteAllBytes(tempFilePath, responseData);
+        await SendWebRequestAsync(request);
 
-        // Load the AudioClip from the temporary file
-        using (UnityWebRequest audioRequest = UnityWebRequestMultimedia.GetAudioClip(tempFilePath, AudioType.MPEG))
+        if (request.result != UnityWebRequest.Result.Success)
         {
-          await SendWebRequestAsync(audioRequest);
+          Debug.LogError("Error: " + request.error);
+          return null;
+        }
+        else
+        {
+          byte[] responseData = request.downloadHandler.data;
 
-          if (audioRequest.result == UnityWebRequest.Result.ConnectionError || audioRequest.result == UnityWebRequest.Result.ProtocolError)
+          string tempFilePath = Path.Combine(Application.persistentDataPath, "temp.mp3");
+          File.WriteAllBytes(tempFilePath, responseData);
+
+          using (UnityWebRequest audioRequest = UnityWebRequestMultimedia.GetAudioClip("file://" + tempFilePath, AudioType.MPEG))
           {
-            Debug.LogError("Error: " + audioRequest.error);
-            return null;
-          }
-          else
-          {
-            AudioClip audioClip = DownloadHandlerAudioClip.GetContent(audioRequest);
-            return audioClip;
+            await SendWebRequestAsync(audioRequest);
+
+            if (audioRequest.result == UnityWebRequest.Result.ConnectionError || audioRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+              Debug.LogError("Error: " + audioRequest.error);
+              return null;
+            }
+            else
+            {
+              AudioClip audioClip = DownloadHandlerAudioClip.GetContent(audioRequest);
+              return audioClip;
+            }
           }
         }
       }
+    }
+    catch (Exception ex)
+    {
+      Debug.LogError($"Error in GetAudioClipFromText: {ex.Message}");
+      return null;
     }
   }
 
@@ -99,7 +111,6 @@ public class SpeechManager : Singleton<SpeechManager>
     var tcs = new TaskCompletionSource<bool>();
     request.SendWebRequest().completed += operation =>
     {
-      Debug.Log($"Got response from eleven labs: {request.result}");
       if (request.result == UnityWebRequest.Result.Success)
       {
         tcs.SetResult(true);
