@@ -20,7 +20,6 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
-    Debug.Log($"Got url: {url}");
     var request = new ImageRequest
     {
       instances = new List<ImageGenerationInstance>
@@ -29,14 +28,14 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           prompt = prompt,
           negativePrompt = negativePrompt,
-          aspectRatio = PromptConstants.IMAGE_GEN_ASPECT,
-          personGeneration = PromptConstants.IMAGE_GEN_PERSON_GEN,
-          safetySettings = PromptConstants.IMAGE_GEN_SAFETY
+          aspectRatio = GenerationSettings.IMAGE_GEN_ASPECT,
+          personGeneration = GenerationSettings.IMAGE_GEN_PERSON_GEN,
+          safetySettings = GenerationSettings.IMAGE_GEN_SAFETY
         }
       },
       parameters = new ImageGenerationParameters
       {
-        sampleCount = PromptConstants.IMAGE_GEN_SAMPLES
+        sampleCount = GenerationSettings.IMAGE_GEN_SAMPLES
       }
     };
 
@@ -49,16 +48,13 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
 
         client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Instance.OauthToken);
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        Debug.Log($"Created body");
         HttpResponseMessage response = await client.PostAsync(url, content);
-        Debug.Log($"Got response");
 
         // Check if the response is successful
         if (response.IsSuccessStatusCode)
         {
           // Read the response content
           string responseBody = await response.Content.ReadAsStringAsync();
-          Debug.Log($"Image gen response body {responseBody}");
 
           // Deserialize the response JSON to a ReplyObject and return image as base64 string
           var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
@@ -71,9 +67,8 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         }
         else
         {
-          Debug.LogError($"Image gen failed with status: {response.StatusCode}");
           string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Error response: {errorResponse}");
+          Debug.LogError($"Image gen failed with status: {response.StatusCode} and response {errorResponse}");
           return null;
         }
       }
@@ -103,11 +98,11 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       },
       parameters = new ImageGenerationParameters
       {
-        sampleCount = 1,
-        mode = "upscale",
+        sampleCount = GenerationSettings.UPSCALE_SAMPLE_COUNT,
+        mode = GenerationSettings.UPSCALE_MODE,
         upscaleConfig = new UpscaleConfig
         {
-          upscaleFactor = "x2"
+          upscaleFactor = GenerationSettings.UPSCALE_FACTOR
         }
       }
     };
@@ -153,7 +148,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   {
     var bytes = initialImage.EncodeToPNG();
     var base64Encoded = Convert.ToBase64String(bytes);
-    var editOptions = GetRandomEditOptions();
+    var editOptions = GenerationSettings.GetRandomEditOptions();
 
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, editOptions.Model);
     ImageGenerationParameters parameters = new ImageGenerationParameters();
@@ -170,8 +165,6 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       parameters.sampleCount = 1;
     }
 
-
-    Debug.Log($"Got url: {url}");
     var request = new ImageRequest
     {
       instances = new List<ImageGenerationInstance>
@@ -180,9 +173,9 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           prompt = editOptions.Prompt,
           negativePrompt = editOptions.NegativePrompt,
-          aspectRatio = PromptConstants.IMAGE_GEN_ASPECT,
+          aspectRatio = GenerationSettings.IMAGE_GEN_ASPECT,
           personGeneration = editOptions.PersonGeneration,
-          safetySettings = PromptConstants.IMAGE_GEN_SAFETY,
+          safetySettings = GenerationSettings.IMAGE_GEN_SAFETY,
           image = new ImageGenerationImage
           {
             bytesBase64Encoded = base64Encoded
@@ -251,65 +244,6 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       Debug.LogError("Failed to convert base64 string to texture: " + e.Message);
       return null;
     }
-  }
-
-  private EditOptions GetRandomEditOptions()
-  {
-    var editOptions = new List<EditOptions>
-    {
-      new EditOptions
-      {
-        Model = "imagegeneration@002",
-        Prompt = "mystical, fantasy, glimmering, purple clouds, magic, glowing",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@002",
-        Prompt = "made of magical smoke, colorful, magical, fantasy, glowing",
-        NegativePrompt = "ugly, bland, grey, dull",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@002",
-        Prompt = "watercolor, beautiful, artistic, colorful, stylish",
-        NegativePrompt = "scary, people, ugly",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@002",
-        Prompt = "pencil sketch, drawn, black and white, cross-hatching, sketchy, charcoal",
-        NegativePrompt = "scary, people, ugly",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@002",
-        Prompt = "cartoon, cartoony, line art, vibrant colors",
-        NegativePrompt = "ugly",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@006",
-        Prompt = "fantasy, magical, colorful, exalted, powerful, emanating force, waves, color",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
-        PersonGeneration = "dont_allow",
-        EditMode = "product-image"
-      },
-      new EditOptions
-      {
-        Model = "imagegeneration@006",
-        Prompt = "explosion, flames, smoke, blast, bright, colorful, orange, flare, lava, glowing, eruption, tense, centered",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
-        PersonGeneration = "dont_allow",
-        EditMode = "product-image"
-      },
-    };
-    return MathHelpers.SelectFromRange(editOptions, new System.Random());
   }
 }
 

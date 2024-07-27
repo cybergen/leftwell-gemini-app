@@ -98,10 +98,4 @@ General guidelines about how you reply: You do not use emojis in your replies. Y
   public const Enumerators.SsmlVoiceGender SYNTH_GENDER = Enumerators.SsmlVoiceGender.MALE;
   public const Enumerators.LanguageCode SYNTH_LOCALE = Enumerators.LanguageCode.en_GB;
   public const string SYNTH_VOICE = "en-GB-Wavenet-B";//"en-GB-Studio-B";
-
-  //Image generation constants
-  public const int IMAGE_GEN_SAMPLES = 4;
-  public const string IMAGE_GEN_ASPECT = "16:9";
-  public const string IMAGE_GEN_PERSON_GEN = "allow_all";
-  public const string IMAGE_GEN_SAFETY = "block_few";
 }

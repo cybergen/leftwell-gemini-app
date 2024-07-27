@@ -1,4 +1,4 @@
-public class SpeechConstants
+public class SpeechSettings
 {
   public const float STABILITY_BOOST = 0.7f;
   public const float SIMILARITY_BOOST = 0.55f;

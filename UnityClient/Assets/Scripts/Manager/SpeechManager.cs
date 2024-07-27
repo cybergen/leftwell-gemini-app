@@ -43,19 +43,19 @@ public class SpeechManager : Singleton<SpeechManager>
     var body = new ElevenLabsRequestBody
     {
       text = text,
-      model_id = SpeechConstants.MODEL,
+      model_id = SpeechSettings.MODEL,
       voice_settings = new VoiceSettings
       {
-        stability = SpeechConstants.STABILITY_BOOST,
-        similarity_boost = SpeechConstants.SIMILARITY_BOOST,
-        style = SpeechConstants.STYLE
+        stability = SpeechSettings.STABILITY_BOOST,
+        similarity_boost = SpeechSettings.SIMILARITY_BOOST,
+        style = SpeechSettings.STYLE
       }
     };
     var url = string.Format(
-      apiUrl, 
-      SpeechConstants.KING_OF_NY_VOICE_ID, 
-      SpeechConstants.OUTPUT_FORMAT, 
-      SpeechConstants.OPTIMIZE_STREAM_LATENCY);
+      apiUrl,
+      SpeechSettings.KING_OF_NY_VOICE_ID, 
+      SpeechSettings.OUTPUT_FORMAT, 
+      SpeechSettings.OPTIMIZE_STREAM_LATENCY);
     string payload = JsonUtility.ToJson(body);
 
     try
@@ -123,20 +123,4 @@ public class SpeechManager : Singleton<SpeechManager>
     };
     return tcs.Task;
   }
-}
-
-[Serializable]
-public class ElevenLabsRequestBody
-{
-  public string text;
-  public string model_id;
-  public VoiceSettings voice_settings;
-}
-
-[Serializable]
-public class VoiceSettings
-{
-  public float stability;
-  public float similarity_boost;
-  public float style;
 }
