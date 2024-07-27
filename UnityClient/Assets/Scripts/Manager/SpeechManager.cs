@@ -43,6 +43,7 @@ public class SpeechManager : Singleton<SpeechManager>
     var body = new ElevenLabsRequestBody
     {
       text = text,
+      model_id = SpeechConstants.MODEL,
       voice_settings = new VoiceSettings
       {
         stability = SpeechConstants.STABILITY_BOOST,
@@ -128,6 +129,7 @@ public class SpeechManager : Singleton<SpeechManager>
 public class ElevenLabsRequestBody
 {
   public string text;
+  public string model_id;
   public VoiceSettings voice_settings;
 }
 
