@@ -71,3 +71,12 @@ public class GenerationSettings
     return MathHelpers.SelectFromRange(editOptions, new System.Random());
   }
 }
+
+public class EditOptions
+{
+  public string Model;
+  public string Prompt;
+  public string NegativePrompt;
+  public string PersonGeneration;
+  public string EditMode;
+}

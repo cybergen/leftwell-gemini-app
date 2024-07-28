@@ -80,3 +80,7 @@ crashlytics-build.properties
 # Env
 env.json
 env.json.meta
+.env
+
+# Node stuff
+node_modules/

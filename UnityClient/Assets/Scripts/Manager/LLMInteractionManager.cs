@@ -11,8 +11,8 @@ using LLM.Network;
 public class LLMInteractionManager : Singleton<LLMInteractionManager>
 {
   private const string MODEL = "gemini-1.5-pro";
-  private const string INFERENCE_URL = "https://generativelanguage.googleapis.com/v1beta/models/{0}:generateContent?key={1}";
-  private const string STREAM_URL = "https://generativelanguage.googleapis.com/v1beta/models/{0}:generateContent?key={1}";
+  private const string INFERENCE_URL = NetworkSettings.PROXY_URL_BASE + "api/llm/models/{0}:generateContent";
+  private const string STREAM_URL = NetworkSettings.PROXY_URL_BASE + "api/llm/models/{0}:generateContent";
 
   public async Task<LLMTextResponse> RequestLLMCompletion(LLMRequestPayload request)
   {
@@ -23,19 +23,14 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
         string jsonPayload = request.ToJSON();
         Debug.Log($"Sending LLM generate content request with payload:\n{jsonPayload}");
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        string urlWithKey = string.Format(INFERENCE_URL, MODEL, Config.Instance.ApiKey);
+        string urlWithKey = string.Format(INFERENCE_URL, MODEL);
         HttpResponseMessage response = await client.PostAsync(urlWithKey, content);
 
-        // Check if the response is successful
         if (response.IsSuccessStatusCode)
         {
-          // Read the response content
           string responseBody = await response.Content.ReadAsStringAsync();
           Debug.Log($"Response body {responseBody}");
-
-          // Deserialize the response JSON to a ReplyObject
           var reply = LLMTextResponse.FromJson(responseBody);
-
           return reply;
         }
         else
@@ -57,9 +52,9 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
   public async void RequestLLMCompletionStream(LLMRequestPayload request, Action<string> onTextResponseUpdated)
   {
     Debug.Log($"Sending LLM stream request");
-    string jsonPayload = request.ToJSON();    
+    string jsonPayload = request.ToJSON();
     byte[] jsonToSend = new UTF8Encoding().GetBytes(jsonPayload);
-    string urlWithKey = string.Format(STREAM_URL, MODEL, Config.Instance.ApiKey);
+    string urlWithKey = string.Format(STREAM_URL, MODEL);
 
     using (UnityWebRequest webRequest = new UnityWebRequest(urlWithKey, UnityWebRequest.kHttpVerbPOST))
     {

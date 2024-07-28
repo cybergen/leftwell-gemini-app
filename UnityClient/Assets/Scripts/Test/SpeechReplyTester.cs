@@ -76,7 +76,7 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
     var payload = LLMRequestPayload.GetRequestWithMultipleParts(partList.ToArray());
     var response = await LLMInteractionManager.Instance.RequestLLMCompletion(payload);
     // TODO: Better way to interact with this code
-    GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
+    GCTextToSpeech.Instance.apiKey = "";// Config.Instance.ApiKey;
     GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
     GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
     GCTextToSpeech.Instance.Synthesize(response.candidates[0].content.parts[0].text, new VoiceConfig()

@@ -1,0 +1,21 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "description": "Proxy server for Teleportation Turmoil LLM, image gen, and speech synth requests",
+  "main": "tiny_proxy.js",
+  "scripts": {
+    "start": "node tiny_proxy.js"
+  },
+  "author": "Leftwell",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "busboy": "^1.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-http-proxy": "^2.0.0",
+    "formidable": "^3.5.1",
+    "http-proxy": "^1.18.1"
+  }
+}

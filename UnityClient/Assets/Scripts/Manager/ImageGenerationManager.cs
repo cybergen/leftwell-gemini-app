@@ -12,14 +12,15 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   private const string UPSCALE_MODEL = "imagegeneration@002";
   private const string LOCATION = "us-central1";
   private const string PROJECT_ID = "gen-lang-client-0643048200";
-  private const string GENERATION_URL 
-    = "https://{0}-aiplatform.googleapis.com/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
+  private const string GENERATION_URL
+      = NetworkSettings.PROXY_URL_BASE + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
   private const string UPSCALE_URL
-    = "https://{0}-aiplatform.googleapis.com/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
+      = NetworkSettings.PROXY_URL_BASE + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
 
   public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
+    Debug.Log($"Got url: {url}");
     var request = new ImageRequest
     {
       instances = new List<ImageGenerationInstance>
@@ -46,17 +47,13 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         string jsonPayload = request.ToJson();
         Debug.Log($"Making image gen request:\n{jsonPayload}");
 
-        client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Instance.OauthToken);
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         HttpResponseMessage response = await client.PostAsync(url, content);
 
-        // Check if the response is successful
         if (response.IsSuccessStatusCode)
         {
-          // Read the response content
           string responseBody = await response.Content.ReadAsStringAsync();
 
-          // Deserialize the response JSON to a ReplyObject and return image as base64 string
           var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
           var imageList = new List<string>();
           foreach (var prediction in reply.predictions)
@@ -111,20 +108,16 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
     {
       try
       {
-        client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Instance.OauthToken);
         string jsonPayload = request.ToJson();
         Debug.Log($"Making image upscale request:\n{jsonPayload}");
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         HttpResponseMessage response = await client.PostAsync(url, content);
 
-        // Check if the response is successful
         if (response.IsSuccessStatusCode)
         {
-          // Read the response content
           string responseBody = await response.Content.ReadAsStringAsync();
           Debug.Log($"Image response body {responseBody}");
 
-          // Deserialize the response JSON to a ReplyObject and return image as base64 string
           var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
           return reply.predictions[0].bytesBase64Encoded;
         }
@@ -192,20 +185,16 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         string jsonPayload = request.ToJson();
         Debug.Log($"Making image edit request:\n{jsonPayload}");
 
-        client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Config.Instance.OauthToken);
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         Debug.Log($"Created body");
         HttpResponseMessage response = await client.PostAsync(url, content);
         Debug.Log($"Got response");
 
-        // Check if the response is successful
         if (response.IsSuccessStatusCode)
         {
-          // Read the response content
           string responseBody = await response.Content.ReadAsStringAsync();
           Debug.Log($"Image gen response body {responseBody}");
 
-          // Deserialize the response JSON to a ReplyObject and return image as base64 string
           var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
           var imageList = new List<string>();
           foreach (var prediction in reply.predictions)
@@ -235,8 +224,8 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
     try
     {
       byte[] imageBytes = Convert.FromBase64String(base64String);
-      Texture2D texture = new Texture2D(2, 2); // Create a small placeholder texture
-      texture.LoadImage(imageBytes); // Load the image bytes into the texture
+      Texture2D texture = new Texture2D(2, 2);
+      texture.LoadImage(imageBytes);
       return texture;
     }
     catch (Exception e)
@@ -245,13 +234,4 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       return null;
     }
   }
-}
-
-public class EditOptions
-{
-  public string Model;
-  public string Prompt;
-  public string NegativePrompt;
-  public string PersonGeneration;
-  public string EditMode;
 }

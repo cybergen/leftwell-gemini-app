@@ -34,7 +34,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
   private void Start()
   {
     PermissionsManager.Instance.RequestPermission(AppPermission.Microphone, null);
-    GCTextToSpeech.Instance.apiKey = Config.Instance.ApiKey;
+    GCTextToSpeech.Instance.apiKey = "";// Config.Instance.ApiKey;
     GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
     GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
     PlayAdventureSequence();

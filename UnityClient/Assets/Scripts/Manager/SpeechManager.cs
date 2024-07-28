@@ -8,8 +8,9 @@ using BriLib;
 public class SpeechManager : Singleton<SpeechManager>
 {
   public bool Speaking { get; private set; } = false;
-  private const string _urlBase = "https://api.elevenlabs.io/v1/text-to-speech/";
-  private const string apiUrl = _urlBase + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
+  private const string _urlBase = NetworkSettings.PROXY_URL_BASE + "api/speech/";
+  private const string apiUrl = _urlBase 
+    + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
   private AudioSource _speechSource;
 
   public void SetSpeechSource(AudioSource source)
@@ -52,10 +53,10 @@ public class SpeechManager : Singleton<SpeechManager>
       }
     };
     var url = string.Format(
-      apiUrl,
-      SpeechSettings.KING_OF_NY_VOICE_ID, 
-      SpeechSettings.OUTPUT_FORMAT, 
-      SpeechSettings.OPTIMIZE_STREAM_LATENCY);
+        apiUrl,
+        SpeechSettings.KING_OF_NY_VOICE_ID,
+        SpeechSettings.OUTPUT_FORMAT,
+        SpeechSettings.OPTIMIZE_STREAM_LATENCY);
     string payload = JsonUtility.ToJson(body);
 
     try
@@ -66,7 +67,6 @@ public class SpeechManager : Singleton<SpeechManager>
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("xi-api-key", Config.Instance.ElevenLabsKey);
 
         await SendWebRequestAsync(request);
 

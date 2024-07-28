@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using UnityEngine;
 using BriLib;
 using LLM.Network;
 
@@ -10,15 +11,7 @@ public class FileUploadManager : Singleton<FileUploadManager>
 
   public async Task<FilePayload> UploadFile(string mimeType, string displayName, byte[] bytes)
   {
-    var key = Config.Instance.ApiKey;
-    var uploadUrl = $"https://generativelanguage.googleapis.com/upload/v1beta/files?key={key}&alt=json&uploadType=multipart";
-
-    _client.DefaultRequestHeaders.Clear();
-    _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    _client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate");
-    _client.DefaultRequestHeaders.Add("User-Agent", "Python-httplib2/0.22.0 (gzip)");
-    _client.DefaultRequestHeaders.Add("x-goog-api-client", "gdcl/2.137.0 gl-python/3.11.2");
-
+    var uploadUrl = NetworkSettings.PROXY_URL_BASE + "api/file-upload/upload/v1beta/files?alt=json&uploadType=multipart";
     var boundary = "===============3790691624723926432==";
 
     using (var content = new MultipartContent("related", boundary))
@@ -43,26 +36,21 @@ public class FileUploadManager : Singleton<FileUploadManager>
 
       HttpResponseMessage response = await _client.SendAsync(request);
 
-      //Debug.Log($"Got response {response} with status {response.StatusCode}");
+      Debug.Log($"Got file upload response: {response.StatusCode}");
 
       response.EnsureSuccessStatusCode();
       string responseBody = await response.Content.ReadAsStringAsync();
-      //Debug.Log("Upload Response:");
-      //Debug.Log(responseBody);
       return FilePayload.FromJSON(responseBody);
     }
   }
 
   public async Task<string> GetDiscoveryDocument()
   {
-    var key = Config.Instance.ApiKey;
-    var discoveryUrl = $"https://generativelanguage.googleapis.com/$discovery/rest?version=v1beta&key={key}";
+    var discoveryUrl = $"http://localhost:3000/api/file-upload/$discovery/rest?version=v1beta";
 
     _client.DefaultRequestHeaders.Clear();
     _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     HttpResponseMessage response = await _client.GetAsync(discoveryUrl);
-
-    //Debug.Log($"Response from discover document {response}");
 
     response.EnsureSuccessStatusCode();
     return await response.Content.ReadAsStringAsync();
