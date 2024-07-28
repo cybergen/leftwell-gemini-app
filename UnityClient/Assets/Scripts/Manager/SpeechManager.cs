@@ -25,12 +25,7 @@ public class SpeechManager : Singleton<SpeechManager>
       var clip = await GetAudioClipFromText(something);
       if (clip != null)
       {
-        Speaking = true;
-        _speechSource.Stop();
-        _speechSource.clip = clip;
-        _speechSource.Play();
-        await Task.Delay((int)(_speechSource.clip.length * 1000));
-        Speaking = false;
+        await PlayClip(clip);
       }
     }
     catch (Exception ex)
@@ -39,7 +34,17 @@ public class SpeechManager : Singleton<SpeechManager>
     }
   }
 
-  private async Task<AudioClip> GetAudioClipFromText(string text)
+  public async Task PlayClip(AudioClip clip)
+  {
+    Speaking = true;
+    _speechSource.Stop();
+    _speechSource.clip = clip;
+    _speechSource.Play();
+    await Task.Delay((int)(_speechSource.clip.length * 1000));
+    Speaking = false;
+  }
+
+  public async Task<AudioClip> GetAudioClipFromText(string text)
   {
     var body = new ElevenLabsRequestBody
     {

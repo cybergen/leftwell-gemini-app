@@ -39,6 +39,8 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _dieAnimDuration = 0.6f;
   [SerializeField] private float _distanceFromPortal;
   [SerializeField] private float _portalAngleToSeekTo = -15f;
+  [Header("Audio Stuff")]
+  [SerializeField] private GameObject _whooshSource;
 
   private CharacterStates _currentState = CharacterStates.None;
 
@@ -73,6 +75,7 @@ public class CharacterBehaviorController : MonoBehaviour
     switch (_currentState)
     {
       case CharacterStates.InitialFlyIn:
+        _whooshSource.SetActive(true);
         BusyPathing = true;
 
         var dir = Quaternion.AngleAxis(_flyInStartingAngleFromPlayerForward, Vector3.up) * GetFlat(_cameraTransform.forward);
@@ -182,7 +185,10 @@ public class CharacterBehaviorController : MonoBehaviour
           = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
 
         var distanceToPoint = Vector3.Distance(transform.position, _targetPosition);
-        if (distanceToPoint > _distanceToTargetBeforeRotationStart) _animationController.SetAnimation(DragonAnimation.Fly);
+        if (distanceToPoint > _distanceToTargetBeforeRotationStart)
+        {
+          _animationController.SetAnimation(DragonAnimation.Fly);
+        }
 
         //If reach target point, mark no longer pathing and change to idle state
         if (_traverseProgress >= 1f)
@@ -289,7 +295,7 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
-  private float DoMotionTowardPointAndRotationTowardTarget(float delta, float progress, Vector3 positionToLookAt, float speed)
+  private float DoMotionTowardPointAndRotationTowardTarget(float delta, float progress, Vector3 positionToLookAt, float speed, System.Action doAtTurn = null)
   {
     //Path toward position if not there yet
     var flightDistance = Vector3.Distance(_startPosition, _targetPosition);

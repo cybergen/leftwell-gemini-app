@@ -12,10 +12,10 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   private const string UPSCALE_MODEL = "imagegeneration@002";
   private const string LOCATION = "us-central1";
   private const string PROJECT_ID = "gen-lang-client-0643048200";
-  private const string GENERATION_URL
-      = NetworkSettings.PROXY_URL_BASE + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
-  private const string UPSCALE_URL
-      = NetworkSettings.PROXY_URL_BASE + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
+  private const string GENERATION_URL = NetworkSettings.PROXY_URL_BASE 
+    + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
+  private const string UPSCALE_URL = NetworkSettings.PROXY_URL_BASE 
+    + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
 
   public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt)
   {
