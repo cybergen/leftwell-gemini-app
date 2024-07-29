@@ -5,6 +5,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const proxy = require('express-http-proxy');
 const { exec } = require('child_process');
+const logger = require('./logger');
 
 dotenv.config();
 
@@ -12,20 +13,18 @@ const createServer = () => {
   const app = express();
 
   app.use((req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
-    console.log('Headers:', req.headers);
+    logger.info(`Incoming request: ${req.method} ${req.originalUrl}`);
+    logger.debug(`Headers: ${JSON.stringify(req.headers)}`);
+    const origin = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    logger.debug(`Origin: ${origin}`);
     next();
-  });
-
-  app.get('/test', (req, res) => {
-    res.send('Hello, this is a test endpoint!');
   });
 
   const getOAuthToken = () => {
     return new Promise((resolve, reject) => {
       exec('gcloud auth print-access-token', (error, stdout, stderr) => {
         if (error) {
-          console.error('Error fetching OAuth token:', stderr);
+          logger.error('Error fetching OAuth token', { stderr });
           reject(`Error fetching OAuth token: ${stderr}`);
         } else {
           resolve(stdout.trim());
@@ -81,7 +80,7 @@ const createServer = () => {
         }
       })(req, res, next);
     } catch (error) {
-      console.error('Error in middleware while fetching OAuth token:', error);
+      logger.error('Error in middleware while fetching OAuth token', { error });
       res.status(500).send(error);
     }
   });
@@ -106,12 +105,12 @@ const startServer = (useHttps = false) => {
 
     const httpsServer = https.createServer(credentials, app);
     httpsServer.listen(port, () => {
-      console.log(`HTTPS Server running on port ${port}`);
+      logger.info(`HTTPS Server running on port ${port}`);
     });
   } else {
     const httpServer = http.createServer(app);
     httpServer.listen(port, () => {
-      console.log(`HTTP Server running on port ${port}`);
+      logger.info(`HTTP Server running on port ${port}`);
     });
   }
 };
