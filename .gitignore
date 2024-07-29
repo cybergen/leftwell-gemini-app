@@ -84,3 +84,6 @@ env.json.meta
 
 # Node stuff
 node_modules/
+
+# Mac OS stuff
+.DS_Store

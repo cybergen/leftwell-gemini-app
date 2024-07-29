@@ -4,7 +4,8 @@
   "description": "Proxy server for Teleportation Turmoil LLM, image gen, and speech synth requests",
   "main": "tiny_proxy.js",
   "scripts": {
-    "start": "node tiny_proxy.js"
+    "dev": "node start-dev.js",
+    "prod": "node start-prod.js"
   },
   "author": "Leftwell",
   "license": "ISC",
