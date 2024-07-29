@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using BriLib;
 
 public class HeroPortal : MonoBehaviour, IActivatable
 {
@@ -10,6 +11,10 @@ public class HeroPortal : MonoBehaviour, IActivatable
     }
   }
   [SerializeField] private Animator _animator;
+  [SerializeField] private AudioFader _loopingAudio;
+  [SerializeField] private GameObject _openSoundOne;
+  [SerializeField] private GameObject _openSoundTwo;
+  [SerializeField] private float _pauseBeforeSecondOpenSound;
   private const string LOADING_TRIGGER = "IsLoading";
   private const string OPEN_TRIGGER = "IsOpen";
   private Action _onActivate;
@@ -20,10 +25,18 @@ public class HeroPortal : MonoBehaviour, IActivatable
     Activatable = false;
     if (!_isOpen)
     {
+      _openSoundOne.SetActive(false);
+      _openSoundOne.SetActive(true);
+      _ = AsyncMethods.DoAfterTime(_pauseBeforeSecondOpenSound, () => 
+      {
+        _openSoundTwo.SetActive(false);
+        _openSoundTwo.SetActive(true);
+      });
       _animator.SetBool(OPEN_TRIGGER, true);
     }
     else
     {
+      _loopingAudio.FadeOut();
       _animator.SetBool(OPEN_TRIGGER, false);
       _animator.SetBool(LOADING_TRIGGER, false);
     }
@@ -39,6 +52,7 @@ public class HeroPortal : MonoBehaviour, IActivatable
 
   public void SetActivatable(Action onActivate)
   {
+    _loopingAudio.FadeIn();
     _onActivate = onActivate;
     Activatable = true;
     _animator.SetBool(LOADING_TRIGGER, true);

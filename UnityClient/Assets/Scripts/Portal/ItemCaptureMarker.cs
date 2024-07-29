@@ -8,6 +8,10 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
   public bool Activatable { get; private set; }
   public string ActivationText { get { return "Activate Item of Power"; } }
   [SerializeField] private MeshRenderer _renderer;
+  [SerializeField] private BoxCollider _collider;
+  [SerializeField] private AudioFader _loopingSound;
+  [SerializeField] private AudioSource _poofSound;
+  [SerializeField] private AudioSource _chimeSound;
   [SerializeField] private GameObject _imagePlane;
   [SerializeField] private GameObject _explosionParticles;
   [SerializeField] private GameObject _initialSparks;
@@ -21,6 +25,7 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
 
   public void MarkActivatable(Texture2D finalImage, Action onActivated)
   {
+    _collider.enabled = true;
     _initialSparks.SetActive(false);
     _finalImage = finalImage;
     _onActivated = onActivated;
@@ -34,15 +39,19 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     _imagePlane.SetActive(true);
     _activatableTrail.SetActive(true);
     Activatable = true;
+
+    _chimeSound.enabled = true;
   }
 
   public async void Activate()
   {
+    _poofSound.enabled = true;
     _renderer.material.mainTexture = _finalImage;
     _onActivated?.Invoke();
     Activatable = false;
     _activatableTrail.SetActive(false);
     _explosionParticles.SetActive(true);
+    _collider.enabled = false;
     foreach (var frame in _frameSparks)
     {
       frame.SetActive(true);
@@ -64,5 +73,10 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     }
     scale.z = _targetZScale;
     _imagePlane.transform.localScale = scale;
+  }
+
+  private void Start()
+  {
+    _loopingSound.FadeIn();
   }
 }
