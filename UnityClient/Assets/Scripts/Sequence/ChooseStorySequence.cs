@@ -13,7 +13,8 @@ public class ChooseStorySequence : ISequence<string>
     string chosenOption = string.Empty;
     for (int i = 0; i < OPTION_COUNT; i++)
     {
-      _ = SpeechManager.Instance.Speak(DialogConstants.GetRandomOptionPrecedent() + options[i]);
+      await SpeechManager.Instance.Speak(DialogConstants.GetRandomOptionPrecedent());
+      _ = SpeechManager.Instance.Speak(options[i]);
       var madeSelection = false;
       Action onYes = () => { madeSelection = true; chosenOption = options[i]; };
       Action onNo = () => { madeSelection = true; };

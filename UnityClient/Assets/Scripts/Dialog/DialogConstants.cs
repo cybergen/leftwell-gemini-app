@@ -124,11 +124,11 @@ public class DialogConstants
     "What do you think of... ",
     "Okay, so hear me out... ",
     "What about... ",
-    "Want to try ",
-    "Do you like ",
+    "Want to try... ",
+    "Do you like... ",
     "Thoughts on... ",
-    "What if we ran ",
-    "Hey! You want ",
+    "What if we ran... ",
+    "Hey! You want... ",
   };
 
   public static string GetRandomOptionPrecedent()

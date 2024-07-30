@@ -46,6 +46,9 @@ public class SpeechManager : Singleton<SpeechManager>
 
   public async Task<AudioClip> GetAudioClipFromText(string text)
   {
+    var cachedClip = CachedAudioManager.Instance.GetAudioClip(text);
+    if (cachedClip != null) { Debug.LogWarning("Got audio from cache!");  return cachedClip; }
+
     var body = new ElevenLabsRequestBody
     {
       text = text,
