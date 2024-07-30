@@ -11,6 +11,7 @@ public class PlaneManager : Singleton<PlaneManager>
   [SerializeField] private ARPlaneManager _planeManager;
   [SerializeField] private Transform _cameraTransform;
   [SerializeField] private Transform _shadowReceiverPlane;
+  [SerializeField] private float boundarySize = 3f;
   private List<ARPlane> _knownPlanes = new List<ARPlane>();
 
   public override void Begin()
@@ -27,17 +28,20 @@ public class PlaneManager : Singleton<PlaneManager>
 
   private void Update()
   {
-    //Go through set of planes and find planes with mostly vertical orientation
     var camPos = _cameraTransform.position;
-    var upwardPlanes = _knownPlanes.Where((plane) =>
-    {
-      var t = plane.transform;
-      return Vector3.Dot(Vector3.up, t.up) > 0.8f && t.position.y < camPos.y;
-    });
+    var halfExtents = new Vector3(boundarySize, boundarySize, boundarySize) / 2f;
 
-    if (upwardPlanes.Count() == 0) return;
+    //Find all colliders within the boundary box around the camera
+    var collidersInBoundary = Physics.OverlapBox(camPos, halfExtents, Quaternion.identity, LayerMask.GetMask("ARPlane"));
 
-    //Get highest known plane as ground and move shadow receiver there
+    //Filter colliders to find those belonging to upward-facing planes and below height of camera
+    var upwardPlanes = collidersInBoundary
+      .Select(collider => collider.GetComponent<ARPlane>())
+      .Where(plane => plane != null && Vector3.Dot(Vector3.up, plane.transform.up) > 0.8f && plane.transform.position.y < camPos.y);
+
+    if (!upwardPlanes.Any()) return;
+
+    //Get the highest known plane as ground and move shadow receiver there
     GroundHeight = upwardPlanes.Max(p => p.transform.position.y);
     _shadowReceiverPlane.position = new Vector3(camPos.x, GroundHeight, camPos.z);
   }
