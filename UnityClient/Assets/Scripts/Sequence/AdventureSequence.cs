@@ -8,6 +8,7 @@ using Request = LLM.Network.LLMRequestPayload;
 
 public class AdventureSequence : ISequence<CharacterBehaviorController, AdventureResult>
 {
+  private const int ITEM_COUNT = 3;
   private int _activatedPortals = 0;
   private List<CaptureMarkerSequence> _captureMarketSequences = new List<CaptureMarkerSequence>();
   private Texture2D _finalImage;
@@ -39,16 +40,18 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     _payload = convoResult.Item1;
 
     //Add images of magical items (and audio descriptions) to payload one by one
-    var itemStrings = GetItemStrings(convoResult.Item2);
-    for (int i = 0; i < 3; i++)
+    var itemStrings = DialogConstants.GetItemStrings(ITEM_COUNT);// GetItemStrings(convoResult.Item2);
+    for (int i = 0; i < ITEM_COUNT; i++)
     {
+      _ = SpeechManager.Instance.Speak(itemStrings[i]);
       var tex = await GetCameraImage(itemStrings[i]);
 
       //Add a delay so audio UI and picture UI don't stomp on each other
       await Task.Delay(450);
       character.SetState(CharacterStates.ShownObject);
 
-      //Kick off image editing sequence, incrementing activated portals after each one has been activated
+      //Kick off image editing sequence in the background
+      //Increment activated items after each one has been triggered to move on to the big portal
       var captureMarkerSequence = new CaptureMarkerSequence();
       _ = captureMarkerSequence.RunAsync(tex).ContinueWith((task) => _activatedPortals++);
       _captureMarketSequences.Add(captureMarkerSequence);
@@ -70,6 +73,11 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
         _audioUploaded++;
         //Need to add like this to avoid out of order execution stomping on each other
         _payload.contents[_payload.contents.Count - 1].parts.Add(task.Result);
+        //After our audio has been added, add text as well
+        _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart
+        {
+          text = $"Item {i}: {itemStrings[i]}"
+        });
       });
 
       //Add a delay so audio UI and picture UI don't stomp on each other
@@ -84,7 +92,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
 
     //Ensure all images and audio are ready in the payload before advancing
-    while (_imagesUploaded < 3 || _audioUploaded < 3) await Task.Delay(10);
+    while (_imagesUploaded < ITEM_COUNT || _audioUploaded < ITEM_COUNT) await Task.Delay(10);
 
     //Get commentary for each item and apply
     payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
