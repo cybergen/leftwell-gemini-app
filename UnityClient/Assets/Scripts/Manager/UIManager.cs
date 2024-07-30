@@ -8,4 +8,5 @@ public class UIManager : Singleton<UIManager>
   public PortalActivater PortalActivater;
   public StoryResultScreen StoryResult;
   public TitleScreen TitleScreen;
+  public YesNoScreen YesNoScreen;
 }

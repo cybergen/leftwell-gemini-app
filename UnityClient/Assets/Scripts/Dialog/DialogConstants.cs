@@ -11,6 +11,8 @@ public class DialogConstants
     = "I used some magic on each of your items to reveal their true power! Go check out each one and activate it!";
   public const string PORTAL_NOT_READY = "Just a moment, I'm still trying to get this portal opened...";
   public const string PORTAL_READY = "The portal is ready!";
+  public const string NO_STORY_CHOICE = "Picky picky! I'll choose for you then...";
+  public const string STORY_OPTIONS_INTRO = "Here are your story options.";
 
   public static List<string> ITEM_CAPTURE_RESPONSES = new List<string>
   {
@@ -70,6 +72,70 @@ public class DialogConstants
     "Something to fend off the chill of night"
   };
 
+  public static List<string> STORY_OPTIONS = new List<string>
+  {
+    "Defeat the Dark Lord",
+    "Reincarnated as a Villainess",
+    "The Haunted Castle",
+    "The Underwater Kingdom",
+    "The Cursed Forest",
+    "The Wizard's Tower",
+    "The Secret Society",
+    "The Sacred Artifact",
+    "The Time Traveler's Dilemma",
+    "The Lost City of Gold",
+    "The Dragon's Lair",
+    "The Space Pirate's Treasure",
+    "The Desert Nomad's Quest",
+    "The Enchanted Garden",
+    "The Ghost Ship",
+    "The Rebel's Rebellion",
+    "The Alien Invasion",
+    "The Phantom Thief",
+    "The Elven Alliance",
+    "The Shadow Realm",
+    "The Hero's Journey",
+    "The Vampire's Masquerade",
+    "The Cybernetic Uprising",
+    "The Monster Hunter",
+    "The Celestial Prophecy",
+    "The Demon King's Revenge",
+    "The Forgotten Kingdom",
+    "The Immortal Sorcerer",
+    "The Parallel Universe",
+    "The Legendary Samurai",
+    "The Golden Dirigible",
+    "The Fairy Barrow",
+    "The Robot Philosopher",
+    "The Twelth Monkey",
+    "The Lost Heir",
+    "The Pirate's Curse",
+    "The Secret of the Labyrinth",
+    "The Titan's Awakening",
+    "The Witch's Brew",
+    "The Quest for Immortality",
+    "The Hollow Earth",
+    "The Diamond Planet"
+  };
+
+  public static List<string> OPTION_PRECEDENTS = new List<string>
+  {
+    "How about... ",
+    "What do you think of... ",
+    "Okay, so hear me out... ",
+    "What about... ",
+    "Want to try ",
+    "Do you like ",
+    "Thoughts on... ",
+    "What if we ran ",
+    "Hey! You want ",
+  };
+
+  public static string GetRandomOptionPrecedent()
+  {
+    return MathHelpers.SelectFromRange(OPTION_PRECEDENTS, new Random());
+  }
+
   public static string GetRandomItemCaptureDialog()
   {
     return MathHelpers.SelectFromRange(ITEM_CAPTURE_RESPONSES, new Random());
@@ -79,6 +145,20 @@ public class DialogConstants
   {
     var list = new List<string>();
     var itemCopy = new List<string>(ITEMS_OF_POWER);
+    var rand = new Random();
+    for (int i = 0; i < count; i++)
+    {
+      var item = MathHelpers.SelectFromRange(itemCopy, rand);
+      itemCopy.Remove(item);
+      list.Add(item);
+    }
+    return list;
+  }
+
+  public static List<string> GetStoryStrings(int count)
+  {
+    var list = new List<string>();
+    var itemCopy = new List<string>(STORY_OPTIONS);
     var rand = new Random();
     for (int i = 0; i < count; i++)
     {

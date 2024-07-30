@@ -36,8 +36,17 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     _payload = (await RunConvoUntilStateChanges(_payload, StoryState.Intro)).Item1;
     
     //Choose which story to play
-    var convoResult = await RunConvoUntilStateChanges(_payload, StoryState.StorySelect);
-    _payload = convoResult.Item1;
+    //var convoResult = await RunConvoUntilStateChanges(_payload, StoryState.StorySelect);
+    //_payload = convoResult.Item1;
+    var storyOption = await new ChooseStorySequence().RunAsync();
+    _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart
+    {
+      text = storyOption
+    });
+    payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
+    _payload = payloadReplyPair.Item1;
+    stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
+    await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
     var itemStrings = DialogConstants.GetItemStrings(ITEM_COUNT);// GetItemStrings(convoResult.Item2);
