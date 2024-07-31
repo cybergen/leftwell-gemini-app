@@ -1,6 +1,6 @@
 using UnityEngine;
-using TMPro;
 using BriLib;
+using LLM.Network;
 
 public class AppStateManager : Singleton<AppStateManager>
 {
@@ -16,6 +16,7 @@ public class AppStateManager : Singleton<AppStateManager>
 
   private CharacterBehaviorController _character;
   private AudioSource _characterAudioSource;
+  private LLMRequestPayload _previousLog;
 
   public override void Begin()
   {
@@ -101,9 +102,32 @@ public class AppStateManager : Singleton<AppStateManager>
         else { SetState(AppState.Adventure); }
         break;
       case AppState.Adventure:
-        var result = await new AdventureSequence().RunAsync(_character);
-        //TODO: Save images and history stuff
-        //TODO: Allow running a second sequence
+        var dependencies = new AdventureDependencies
+        {
+          Character = _character,
+          IsRepeat = false,
+          ExistingPayload = null,
+        };
+        var result = await new AdventureSequence().RunAsync(dependencies);
+        if (result.Repeat)
+        {
+          _previousLog = result.Chat;
+          SetState(AppState.AdventureAgain);
+        }
+        break;
+      case AppState.AdventureAgain:
+        var repeatDependencies = new AdventureDependencies
+        {
+          Character = _character,
+          IsRepeat = true,
+          ExistingPayload = _previousLog,
+        };
+        var secondOutcome = await new AdventureSequence().RunAsync(repeatDependencies);
+        if (secondOutcome.Repeat)
+        {
+          _previousLog = secondOutcome.Chat;
+          SetState(AppState.AdventureAgain);
+        }
         break;
     }
   }
@@ -118,5 +142,6 @@ public enum AppState
   FindGround,
   CheckTutorial,
   Tutorial,
-  Adventure
+  Adventure,
+  AdventureAgain,
 }

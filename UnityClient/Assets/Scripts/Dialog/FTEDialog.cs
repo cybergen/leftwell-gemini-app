@@ -2,9 +2,9 @@ public class FTEDialog
 {
   //Permissions requests
   public const string REQUEST_CAMERA = "Hey kid, are you there? I can't see anything!";
-  public const string GOT_CAMERA = "That's better! Well... Not a LOT better.";
-  public const string REQUEST_MIC = "Oh wait, are you trying to say something? I can't hear ya!";
-  public const string GOT_MIC = "That's better! Well... Not a LOT better.";
+  public const string GOT_CAMERA = "That's better!";
+  public const string REQUEST_MIC = "Are you trying to say something? I can't hear ya!";
+  public const string GOT_MIC = "Okay, we're good to go!";
   public const string REJECTED_PERMISSION = "C'mon kid, I need you to work with me here!";
 
   //Tutorial
@@ -21,4 +21,7 @@ public class FTEDialog
   public const string TUT_ITEM_READY = "Alright! It's ready for activation. I want you to look at the capture spark and press the button to activate it!";
   public const string TUT_ITEM_GOOD = "There you go! You're practically ready to teach a thaumaturgy class at this point!";
   public const string TUT_DONE = "That's everything you need to know. We can run through this again if you'd like! Otherwise, good luck out there!";
+
+  //General use
+  public const string BE_RIGHT_BACK = "I need to grab some supplies! I'll be right back, kid.";
 }

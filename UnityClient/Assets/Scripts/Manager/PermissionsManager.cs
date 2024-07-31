@@ -35,12 +35,18 @@ public class PermissionsManager : Singleton<PermissionsManager>
 #if UNITY_ANDROID
   private IEnumerator RequestAndroidPermission(string permission, Action<bool> callback)
   {
+    var permissionAccepted = false;
+    var permissionsDismissed = false;
+    var permissionsCallback = new PermissionCallbacks();
+    permissionsCallback.PermissionGranted += (s) => { permissionAccepted = true; permissionsDismissed = true; };
+    permissionsCallback.PermissionDenied += (s) => { permissionAccepted = false; permissionsDismissed = true; };
+    permissionsCallback.PermissionDeniedAndDontAskAgain += (s) => { permissionAccepted = false; permissionsDismissed = true; };
     if (!Permission.HasUserAuthorizedPermission(permission))
     {
-      Permission.RequestUserPermission(permission);
-      yield return new WaitUntil(() => Permission.HasUserAuthorizedPermission(permission));
+      Permission.RequestUserPermission(permission, permissionsCallback);
+      while (!permissionsDismissed) { yield return null; }
     }
-    callback?.Invoke(Permission.HasUserAuthorizedPermission(permission));
+    callback?.Invoke(permissionAccepted);
   }
 #endif
 
