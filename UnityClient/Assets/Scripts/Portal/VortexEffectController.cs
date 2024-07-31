@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
 
@@ -11,54 +9,53 @@ public class VortexEffectController : MonoBehaviour
   [SerializeField] private float _opacityAmplitude;
   [SerializeField] private float _phaseTime;
   [Header("Show/Hide Config")]
-  [SerializeField] private int _showAnimationMillis;
-  [SerializeField] private int _milliStep = 16;
+  [SerializeField] private float _showAnimationDuration;
   private float _actualOpacity;
-  private CancellationTokenSource _cancellationTokenSource;
+  private float _elapsedSeconds;
+  private float _startOpacity;
+  private float _endOpacity;
+  private bool _animating;
 
-  public async void Show()
+  public void Show()
   {
     gameObject.SetActive(true);
-
-    //Cancel the previous animation if any
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
-    await Animate(true, _cancellationTokenSource.Token);
+    StartAnimation(true);
   }
 
-  public async void Hide()
+  public void Hide()
   {
-    //Cancel the previous animation if any
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
-    await Animate(false, _cancellationTokenSource.Token);
-    gameObject.SetActive(false);
+    StartAnimation(false);
   }
 
-  private async Task Animate(bool shown, CancellationToken cancellationToken)
+  private void StartAnimation(bool shown)
   {
-    var startOpacity = _actualOpacity;
-    var endOpacity = shown ? _shownOpacity : 0f;
-    var elapsedMillis = 0;
-    while (elapsedMillis < _showAnimationMillis)
-    {
-      if (cancellationToken.IsCancellationRequested)
-      {
-        return; //Exit if animation is cancelled
-      }
-
-      var progress = Easing.ExpoEaseOut((float)elapsedMillis / _showAnimationMillis);
-      _actualOpacity = (endOpacity - startOpacity) * progress + startOpacity;
-      elapsedMillis += _milliStep;
-      await Task.Delay(_milliStep, cancellationToken);
-    }
-    _actualOpacity = endOpacity;
+    _animating = true;
+    _elapsedSeconds = 0f;
+    _startOpacity = _actualOpacity;
+    _endOpacity = shown ? _shownOpacity : 0f;
   }
 
   private void Update()
   {
+    if (_animating)
+    {
+      _elapsedSeconds += Time.deltaTime;
+      float progress = Mathf.Clamp01(_elapsedSeconds / _showAnimationDuration);
+      float easedProgress = Easing.ExpoEaseOut(progress);
+      _actualOpacity = Mathf.Lerp(_startOpacity, _endOpacity, easedProgress);
+
+      if (_elapsedSeconds >= _showAnimationDuration)
+      {
+        _animating = false;
+        _actualOpacity = _endOpacity;
+
+        if (_endOpacity == 0f)
+        {
+          gameObject.SetActive(false);
+        }
+      }
+    }
+
     var sineTime = Mathf.Sin(((Time.time % _phaseTime) / _phaseTime * 360f) * Mathf.Deg2Rad);
     var alpha = sineTime * _opacityAmplitude * _actualOpacity; //Multiply by opacity to allow to fully fade
     _vortexMaterial.SetFloat("_Opacity", _actualOpacity + alpha);
@@ -68,10 +65,5 @@ public class VortexEffectController : MonoBehaviour
   {
     _vortexMaterial.SetFloat("_Opacity", 0f);
     _actualOpacity = 0f;
-  }
-
-  private void OnDestroy()
-  {
-    _cancellationTokenSource?.Cancel();
   }
 }

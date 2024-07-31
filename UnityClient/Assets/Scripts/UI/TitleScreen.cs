@@ -53,7 +53,7 @@ public class TitleScreen : MonoBehaviour
     _star.Show(_starFadeMillis);
     await Task.Delay(_pauseMillis);
 
-    _start.Show(_slideMillis);
+    _start.Show(_slideMillis / 1000f);
     while (_start.Animating) { await Task.Delay(10); }
   }
 

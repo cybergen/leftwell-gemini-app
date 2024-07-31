@@ -6,6 +6,7 @@ public class PortalActivater : MonoBehaviour
   [SerializeField] private VerticalSlidingElement _screenUI;
   [SerializeField] private VortexEffectController _vortex;
   [SerializeField] private TMP_Text _text;
+  [SerializeField] private float _animSeconds = 0.45f;
   private Transform _cameraTransform;
   private bool _showable;
   private bool _wasActive;
@@ -30,12 +31,12 @@ public class PortalActivater : MonoBehaviour
     if (active && !_wasActive)
     {
       _text.text = _currentActivatable.ActivationText;
-      _screenUI.Show(450);
+      _screenUI.Show(_animSeconds);
       _vortex.Show();
     }
     else if (!active && _wasActive)
     {
-      _screenUI.Hide();
+      _screenUI.Hide(_animSeconds);
       _vortex.Hide();
       _text.text = string.Empty;
     }

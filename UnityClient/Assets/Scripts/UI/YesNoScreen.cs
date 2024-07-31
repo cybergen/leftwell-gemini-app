@@ -17,7 +17,7 @@ public class YesNoScreen : MonoBehaviour
     _onYes = onYes;
     _onNo = onNo;
     _fadable.Show(_animationMillis);
-    _buttons.Show(_animationMillis);
+    _buttons.Show(_animationMillis / 1000f);
   }
   
   public void Hide()
@@ -25,7 +25,7 @@ public class YesNoScreen : MonoBehaviour
     _onYes = null;
     _onNo = null;
     _fadable.Hide();
-    _buttons.Hide();
+    _buttons.Hide(_animationMillis / 1000f);
   }
 
   public void OnYes()

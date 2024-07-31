@@ -182,19 +182,16 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       try
       {
         string jsonPayload = request.ToJson();
-        Debug.Log($"Making image edit request:\n{jsonPayload}");
+        Debug.Log($"Making image edit request:\n{JsonUtility.ToJson(editOptions)}");
 
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        Debug.Log($"Created body");
         HttpResponseMessage response = await client.PostAsync(url, content);
-        Debug.Log($"Got response");
 
         if (response.IsSuccessStatusCode)
         {
           string responseBody = await response.Content.ReadAsStringAsync();
-          Debug.Log($"Image gen response body {responseBody}");
-
           var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
+          Debug.Log($"Got response for image edit with {reply.predictions.Count} samples");
           var imageList = new List<string>();
           foreach (var prediction in reply.predictions)
           {
@@ -206,7 +203,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           Debug.LogError($"Image gen failed with status: {response.StatusCode}");
           string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Error response: {errorResponse}");
+          Debug.LogError($"Image gen error response: {errorResponse}");
           return null;
         }
       }

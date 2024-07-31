@@ -1,79 +1,73 @@
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
 
 public class VerticalSlidingElement : MonoBehaviour
 {
   public bool Animating { get; private set; } = false;
-  private RectTransform _button;
-  private int _animationMillis;
+  private RectTransform _self;
   private float _finalY;
-  private int _milliStep = 16;
-  private CancellationTokenSource _cancellationTokenSource;
+  private float _animationDuration;
+  private float _elapsedSeconds;
+  private float _startPositionY;
+  private float _targetPositionY;
 
-  public async void Show(int animationDuration)
+  public void Show(float animationDuration)
   {
-    Animating = true;
-    _animationMillis = animationDuration;
+    _animationDuration = animationDuration;
     gameObject.SetActive(true);
-
-    // Cancel the previous animation if any
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
-    await Animate(true, _cancellationTokenSource.Token);
+    StartAnimation(true);
   }
 
-  public async void Hide()
+  public void Hide(float animationDuration)
+  {
+    _animationDuration = animationDuration;
+    StartAnimation(false);
+  }
+
+  private void StartAnimation(bool show)
   {
     Animating = true;
-    // Cancel the previous animation if any
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
-    await Animate(false, _cancellationTokenSource.Token);
-    gameObject.SetActive(false);
+    _elapsedSeconds = 0f;
+    _startPositionY = _self.anchoredPosition.y;
+    _targetPositionY = show ? _finalY : -_finalY;
   }
 
-  private async Task Animate(bool show, CancellationToken cancellationToken)
+  private void Update()
   {
-    var startY = _button.anchoredPosition.y;
-    var endY = show ? _finalY : -_finalY;
-    var elapsedMillis = 0;
-
-    while (elapsedMillis < _animationMillis)
+    if (Animating)
     {
-      if (cancellationToken.IsCancellationRequested)
+      _elapsedSeconds += Time.deltaTime;
+
+      float progress = Mathf.Clamp01(_elapsedSeconds / _animationDuration);
+      float easedProgress = Easing.ExpoEaseOut(progress);
+      float targetY = Mathf.Lerp(_startPositionY, _targetPositionY, easedProgress);
+
+      var selfPos = _self.anchoredPosition;
+      selfPos.y = targetY;
+      _self.anchoredPosition = selfPos;
+
+      if (_elapsedSeconds >= _animationDuration)
       {
-        return; // Exit if animation is cancelled
+        Animating = false;
+        var finalPosition = _self.anchoredPosition;
+        finalPosition.y = _targetPositionY;
+        _self.anchoredPosition = finalPosition;
+
+        if (_targetPositionY == -_finalY)
+        {
+          gameObject.SetActive(false);
+        }
       }
-
-      var progress = Easing.ExpoEaseOut((float)elapsedMillis / _animationMillis);
-      var targetY = Mathf.Lerp(startY, endY, progress);
-      var buttonPosition = _button.anchoredPosition;
-      buttonPosition.y = targetY;
-      _button.anchoredPosition = buttonPosition;
-
-      await Task.Delay(_milliStep, cancellationToken);
-      elapsedMillis += _milliStep;
     }
-
-    // Ensure final position is set
-    var finalPosition = _button.anchoredPosition;
-    finalPosition.y = endY;
-    _button.anchoredPosition = finalPosition;
-
-    Animating = false;
   }
 
   private void Awake()
   {
-    _button = GetComponent<RectTransform>();
-    _finalY = _button.anchoredPosition.y;
-    var pos = _button.anchoredPosition;
+    _self = GetComponent<RectTransform>();
+    _finalY = _self.anchoredPosition.y;
+    var pos = _self.anchoredPosition;
     pos.y = -_finalY;
-    _button.anchoredPosition = pos;
+    _self.anchoredPosition = pos;
     gameObject.SetActive(false);
   }
 }

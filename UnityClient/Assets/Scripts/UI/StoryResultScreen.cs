@@ -31,7 +31,7 @@ public class StoryResultScreen : MonoBehaviour
     _onShare = onShare;
     _fadable.Show(_animationMillis);
     while (_fadable.Animating) { await Task.Delay(10); }
-    _shareButton.Show(_animationMillis);
+    _shareButton.Show(_animationMillis / 1000f);
   }
 
   public async void Hide()
