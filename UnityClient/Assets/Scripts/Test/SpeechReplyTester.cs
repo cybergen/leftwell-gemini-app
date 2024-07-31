@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 using LLM.Network;
-using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 
 public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
@@ -75,34 +74,10 @@ public class SpeechReplyTester : MonoBehaviour, IPointerDownHandler, IPointerUpH
     _outputText.text = "Making request to Gemini";
     var payload = LLMRequestPayload.GetRequestWithMultipleParts(partList.ToArray());
     var response = await LLMInteractionManager.Instance.RequestLLMCompletion(payload);
-    // TODO: Better way to interact with this code
-    GCTextToSpeech.Instance.apiKey = "";// Config.Instance.ApiKey;
-    GCTextToSpeech.Instance.SynthesizeSuccessEvent += OnVoiceSynthesizeSuccess;
-    GCTextToSpeech.Instance.SynthesizeFailedEvent += OnVoiceSynthesizeFail;
-    GCTextToSpeech.Instance.Synthesize(response.candidates[0].content.parts[0].text, new VoiceConfig()
-      {
-        gender = Enumerators.SsmlVoiceGender.MALE,
-        languageCode = GCTextToSpeech.Instance.PrepareLanguage(Enumerators.LanguageCode.en_GB),
-        name = "en-GB-Neural2-B"
-    },
-      true,
-      0.15d,
-      0.95d,
-      16000, 
-      new Enumerators.EffectsProfileId[] { });
+
+    SpeechManager.Instance.SetSpeechSource(_audioSource);
+    _ = SpeechManager.Instance.Speak(response.candidates[0].content.parts[0].text);
     Debug.Log($"Got LLM response:\n{response}");
-    _outputText.text = (response.candidates[0].content.parts[0] as TextPart).text;
-  }
-
-  private void OnVoiceSynthesizeFail(string arg1, long arg2)
-  {
-    Debug.LogError($"Failed to synthesize voice with arg {arg1}");
-  }
-
-  private void OnVoiceSynthesizeSuccess(PostSynthesizeResponse response, long arg2)
-  {
-    Debug.Log("Succeeded in voice synthesis");
-    _audioSource.clip = GCTextToSpeech.Instance.GetAudioClipFromBase64(response.audioContent, FrostweepGames.Plugins.GoogleCloud.TextToSpeech.Constants.DEFAULT_AUDIO_ENCODING);
-    _audioSource.Play();
+    _outputText.text = response.candidates[0].content.parts[0].text;
   }
 }
