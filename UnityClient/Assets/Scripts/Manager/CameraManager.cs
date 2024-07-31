@@ -31,7 +31,8 @@ public class CameraManager : Singleton<CameraManager>
   {
     if (!_cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
     {
-      Debug.LogWarning("Failed to acquire CPU image from camera manager");
+      //Debug.LogWarning("Failed to acquire CPU image from camera manager");
+      //This seems to just fail a bunch of times before finally retrieving on ARFoundation w/ remoting
       return null;
     }
 

@@ -60,7 +60,7 @@ public class CharacterBehaviorController : MonoBehaviour
 
   public void SetState(CharacterStates state)
   {
-    Debug.Log($"Setting wizard state to {state}");
+    //Debug.Log($"Setting wizard state to {state}");
 
     switch (_currentState)
     {
