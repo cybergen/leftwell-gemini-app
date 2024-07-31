@@ -8,6 +8,7 @@ using BriLib;
 
 public class ImageGenerationManager : Singleton<ImageGenerationManager>
 {
+  //private const string GENERATION_MODEL = "imagegeneration@006";
   private const string GENERATION_MODEL = "imagen-3.0-generate-001";
   private const string UPSCALE_MODEL = "imagegeneration@002";
   private const string LOCATION = "us-central1";
