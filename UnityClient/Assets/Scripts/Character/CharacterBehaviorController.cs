@@ -1,5 +1,6 @@
 using UnityEngine;
 using BriLib;
+using UnityEngine.XR.ARFoundation.VisualScripting;
 
 public class CharacterBehaviorController : MonoBehaviour
 {
@@ -35,6 +36,10 @@ public class CharacterBehaviorController : MonoBehaviour
   [Header("Fly to Player Config")]
   [SerializeField] private float _uncomfortableDurationThreshold = 2.5f;
   [SerializeField] private float _flyBackToPlayerSpeed = 1.5f;
+  [Header("Fly Away Config")]
+  [SerializeField] private float _flyAwayAngle = -90f;
+  [SerializeField] private float _flyAwayDistance = 30f;
+  [Tooltip("Meters per second")][SerializeField] private float _flyAwaySpeed;
   [Header("Assorted Config")]
   [SerializeField] private float _dieAnimDuration = 0.6f;
   [SerializeField] private float _distanceFromPortal;
@@ -161,6 +166,14 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.IdleByPortal:
         transform.rotation = Quaternion.LookRotation(GetFlat(_cameraTransform.position - transform.position));
         break;
+      case CharacterStates.FlyAway:
+        _startPosition = transform.position;
+        var cameraLeft = Quaternion.AngleAxis(_flyAwayAngle, Vector3.up) * _cameraTransform.forward;
+        cameraLeft = GetFlat(cameraLeft);
+        _targetPosition = _startPosition + cameraLeft * _flyAwayDistance;
+        _traverseProgress = 0f;
+        BusyPathing = true;
+        break;
     }
   }
 
@@ -236,12 +249,9 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterStates.FlyingToPlayer:
-        _traverseProgress 
-          = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _flyBackToPlayerSpeed);
-        if (_traverseProgress >= 1f)
-        {
-          SetState(CharacterStates.IdleWithPlayer);
-        }
+        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(
+          delta, _traverseProgress, _cameraTransform.position, _flyBackToPlayerSpeed);
+        if (_traverseProgress >= 1f) { SetState(CharacterStates.IdleWithPlayer); }
         break;
       case CharacterStates.IdleWithPlayer:
       case CharacterStates.Talking:
@@ -271,10 +281,22 @@ public class CharacterBehaviorController : MonoBehaviour
 
         break;
       case CharacterStates.FlyingToPortal:
-        _traverseProgress = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
-        if (_traverseProgress >= 1f)
+        _traverseProgress 
+          = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
+        if (_traverseProgress >= 1f) { BusyPathing = false; }
+        break;
+      case CharacterStates.FlyAway:
+        var exitVector = (_targetPosition - transform.forward).normalized;
+        if (Vector3.Dot(transform.forward, exitVector) < 0.8f)
+        {
+          var exitRotation = Quaternion.LookRotation(exitVector);
+          transform.rotation = Quaternion.Slerp(transform.rotation, exitRotation, delta * _rotationMultiplier);
+        }
+        else if (_traverseProgress < 1f)
         {
           BusyPathing = false;
+          _traverseProgress
+            = DoMotionTowardPointAndRotationTowardTarget(delta, _traverseProgress, _cameraTransform.position, _movementSpeed);
         }
         break;
       case CharacterStates.Flabbergasted:
@@ -366,5 +388,6 @@ public enum CharacterStates
   PresentingPicture,
   Flabbergasted,
   FlyingToPortal,
-  IdleByPortal
+  IdleByPortal,
+  FlyAway
 }

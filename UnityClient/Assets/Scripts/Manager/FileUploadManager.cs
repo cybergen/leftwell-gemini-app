@@ -1,7 +1,6 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using UnityEngine;
 using BriLib;
 using LLM.Network;
 
@@ -35,8 +34,6 @@ public class FileUploadManager : Singleton<FileUploadManager>
       };
 
       HttpResponseMessage response = await _client.SendAsync(request);
-
-      Debug.Log($"Got file upload response: {response.StatusCode}");
 
       response.EnsureSuccessStatusCode();
       string responseBody = await response.Content.ReadAsStringAsync();

@@ -33,9 +33,11 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
     }
   }
 
-  private void OnActivated()
+  private async void OnActivated()
   {
     _activated = true;
+    while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
+    await Task.Delay(DialogConstants.DIALOG_PAUSE);
     _ = SpeechManager.Instance.Speak(_commentary);
   }
 }

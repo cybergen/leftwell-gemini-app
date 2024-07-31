@@ -48,7 +48,7 @@ public class CachedAudioManager : Singleton<CachedAudioManager>
 
   public static string SanitizeFileName(string input)
   {
-    string invalidChars = @".,'""!_";
+    string invalidChars = @".,'""!_?";
     string invalidRegStr = $"[{Regex.Escape(invalidChars)}]";
     string sanitized = Regex.Replace(input, invalidRegStr, "");
     sanitized = sanitized.Replace(" ", "");

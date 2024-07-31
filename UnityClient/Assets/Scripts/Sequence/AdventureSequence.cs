@@ -117,30 +117,31 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     });
 
     //Wait for both edited image and commentary reply to come in before allowing activation
-    while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
+    while (!PortalManager.Instance.GetAllMarkersActivatable() || SpeechManager.Instance.Speaking) await Task.Delay(10);
     _ = SpeechManager.Instance.Speak(DialogConstants.ITEMS_READY);
 
     //Require user explores magical items before advancing
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
-    while (_activatedPortals < 3) await Task.Delay(10);
-    UIManager.Instance.PortalActivater.SetShowable(false, Camera.main.transform);
+    while (_activatedPortals < ITEM_COUNT) await Task.Delay(10);
+    UIManager.Instance.PortalActivater.SetShowable(false, null);
 
     //Wait for results for big portal to be available before advancing at this point
     if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
     {
+      while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
       _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
 
     PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
+    while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
-    await Task.Delay(2000);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
-    _ = SpeechManager.Instance.Speak("It's actually opening! I can't believe we-I mean, completely as expected!");
+    _ = SpeechManager.Instance.Speak(DialogConstants.OPENING_PORTAL);
     await Task.Delay(4000);
 
     //Speak final story while showing the UI
@@ -150,7 +151,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     Action<bool> onShare = (successful) => { Debug.Log($"Share was {successful}"); };
     UIManager.Instance.StoryResult.Show(_finalImage, _finalStory, onHide, onShare);
     while (!hidden) { await Task.Delay(10); }
-    _ = SpeechManager.Instance.Speak("I'll just close this little rip in reality back up then.");
+    _ = SpeechManager.Instance.Speak(DialogConstants.CLOSE_PORTAL);
     await Task.Delay(1000);
     PortalManager.Instance.SetBigPortalClosable(null);
     PortalManager.Instance.ActivatePortal();
@@ -164,7 +165,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     };
   }
 
-  private async Task<Texture2D> GetCameraImage(string buttonText)
+  public static async Task<Texture2D> GetCameraImage(string buttonText)
   {
     await UseFullScreenTapUI(buttonText);
     //Run twice because TryAcquireLatestCpuImage is BROKEN AND RETURNS AN OLD FRAME
@@ -173,23 +174,17 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     return camImage.Texture;
   }
 
-  private List<string> GetItemStrings(string input)
+  public async Task UseAudioCaptureUI()
   {
-    List<string> resultList = new List<string>();
-
-    string[] lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-    Regex pattern = new Regex(@"^Item [1-3]:\s(.+)$");
-
-    foreach (var line in lines)
+    var audioReady = false;
+    Action audioCaptured = () =>
     {
-      Match match = pattern.Match(line);
-      if (match.Success)
-      {
-        resultList.Add(match.Groups[1].Value);
-      }
-    }
-
-    return resultList;
+      audioReady = true;
+      AudioCaptureManager.Instance.EndAudioCapture();
+    };
+    UIManager.Instance.LongPressButton.Show(() => AudioCaptureManager.Instance.StartAudioCapture(), audioCaptured);
+    while (!audioReady) await Task.Delay(10);
+    UIManager.Instance.LongPressButton.Hide();
   }
 
   private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state)
@@ -213,20 +208,7 @@ public class AdventureSequence : ISequence<CharacterBehaviorController, Adventur
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);
   }
 
-  private async Task UseAudioCaptureUI()
-  {
-    var audioReady = false;
-    Action audioCaptured = () =>
-    {
-      audioReady = true;
-      AudioCaptureManager.Instance.EndAudioCapture();
-    };
-    UIManager.Instance.LongPressButton.Show(() => AudioCaptureManager.Instance.StartAudioCapture(), audioCaptured);
-    while (!audioReady) await Task.Delay(10);
-    UIManager.Instance.LongPressButton.Hide();
-  }
-
-  private async Task UseFullScreenTapUI(string buttonText, bool useTakePicture = true)
+  public static async Task UseFullScreenTapUI(string buttonText, bool useTakePicture = true)
   {
     bool imageReady = false;
     Action onPictureCaptured = () =>

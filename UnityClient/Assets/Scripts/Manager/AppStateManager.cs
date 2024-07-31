@@ -12,7 +12,7 @@ public class AppStateManager : Singleton<AppStateManager>
   [SerializeField] private LongPressButton _pushToTalkButton;
   [SerializeField] private FullScreenTapButton _takePictureButton;
 
-  private const string TUTORIAL_PREFS_KEY = "HasRunTutorial";
+  private const string HAS_RUN_TUTORIAL_KEY = "HasRunTutorial";
 
   private CharacterBehaviorController _character;
   private AudioSource _characterAudioSource;
@@ -85,19 +85,20 @@ public class AppStateManager : Singleton<AppStateManager>
         }
         break;
       case AppState.CheckTutorial:
-        if (PreferencesManager.Instance.GetBool(TUTORIAL_PREFS_KEY))
+        if (PreferencesManager.Instance.GetBool(HAS_RUN_TUTORIAL_KEY))
         {
           SetState(AppState.Adventure);
         }
         else
         {
-          //TODO: Implement actual tutorial! For now, just skip to adventure
-          //SetState(AppState.Tutorial);
-          SetState(AppState.Adventure);
+          SetState(AppState.Tutorial);
         }
         break;
       case AppState.Tutorial:
-        Debug.LogError("Tutorial not yet implemented");
+        PreferencesManager.Instance.SetBool(HAS_RUN_TUTORIAL_KEY, true);
+        var redoTutorial = await new TutorialSequence().RunAsync(_character);
+        if (redoTutorial) { SetState(AppState.Tutorial); }
+        else { SetState(AppState.Adventure); }
         break;
       case AppState.Adventure:
         var result = await new AdventureSequence().RunAsync(_character);

@@ -84,6 +84,14 @@ public class PortalManager : Singleton<PortalManager>
     return true;
   }
 
+  public void DestroyEverything()
+  {
+    foreach (var marker in _captureMarkers) { Destroy(marker.gameObject); }
+    _captureMarkers.Clear();
+    if (_bigPortal != null) { Destroy(_bigPortal.gameObject); }
+    _bigPortal = null;
+  }
+
   public Vector3 GetBigPortalPosition()
   {
     if (_bigPortal == null)

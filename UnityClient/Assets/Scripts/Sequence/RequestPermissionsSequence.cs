@@ -5,23 +5,36 @@ public class RequestPermissionsSequence : ISequence<CameraRigBundle, bool>
 {
   public async Task<bool> RunAsync(CameraRigBundle rigBundle)
   {
-    var gotMicrophonePermissions = new TaskCompletionSource<bool>();
-    if (!PermissionsManager.Instance.CheckPermission(AppPermission.Microphone))
-    {
-      await SpeechManager.Instance.Speak($"<speak>Hey, I can't hear what you're saying. Please give me permission to hear your voice</speak>");
-      PermissionsManager.Instance.RequestPermission(
-        AppPermission.Microphone, (result) => gotMicrophonePermissions.SetResult(result));
-      await gotMicrophonePermissions.Task;
-      //TODO: Respond if rejected
-    }
 
     if (!PermissionsManager.Instance.CheckPermission(AppPermission.Camera))
     {
-      await SpeechManager.Instance.Speak($"<speak>That's better! <break time=\"1s\"/> I still can't see you though. Can you give me permission to see as well, please?</speak>");
+      await SpeechManager.Instance.Speak(FTEDialog.REQUEST_CAMERA);
       rigBundle.SetCameraActive(true);
-      //TODO: Respond if rejected
+
+      if (!PermissionsManager.Instance.CheckPermission(AppPermission.Camera))
+      {
+        await SpeechManager.Instance.Speak(FTEDialog.REJECTED_PERMISSION);
+        return false;
+      }
+
+      await SpeechManager.Instance.Speak(FTEDialog.GOT_CAMERA);
     }
-    await SpeechManager.Instance.Speak($"<speak>There we go! Incoming!</speak>");
+
+    var gotMicrophonePermissions = new TaskCompletionSource<bool>();
+    if (!PermissionsManager.Instance.CheckPermission(AppPermission.Microphone))
+    {
+      await SpeechManager.Instance.Speak(FTEDialog.REQUEST_MIC);
+      PermissionsManager.Instance.RequestPermission(
+        AppPermission.Microphone, (result) => gotMicrophonePermissions.SetResult(result));
+      await gotMicrophonePermissions.Task;
+      if (!gotMicrophonePermissions.Task.Result)
+      {
+        await SpeechManager.Instance.Speak(FTEDialog.REJECTED_PERMISSION);
+        return false;
+      }
+    }
+
+    await SpeechManager.Instance.Speak(FTEDialog.GOT_MIC);
     return gotMicrophonePermissions.Task.Result && PermissionsManager.Instance.CheckPermission(AppPermission.Camera);
   }
 }
