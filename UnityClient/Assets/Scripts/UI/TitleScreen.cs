@@ -33,11 +33,11 @@ public class TitleScreen : MonoBehaviour
 
   private async void Animate()
   {
-    _leftwell.Show(_fadeMillis);
+    _leftwell.Show(_fadeMillis / 1000f);
     while (_leftwell.Animating) { await Task.Delay(10); }
     await Task.Delay(_pauseMillis);
 
-    _title.Show(_fadeMillis);
+    _title.Show(_fadeMillis / 1000f);
     while (_title.Animating) { await Task.Delay(10); }
     await Task.Delay(_pauseMillis);
 
@@ -50,7 +50,7 @@ public class TitleScreen : MonoBehaviour
     }
     _leftFill.fillAmount = _rightFill.fillAmount = 1f;
     SoundFXManager.Instance.PlaySound(Sound.Chime);
-    _star.Show(_starFadeMillis);
+    _star.Show(_starFadeMillis / 1000f);
     await Task.Delay(_pauseMillis);
 
     _start.Show(_slideMillis / 1000f);

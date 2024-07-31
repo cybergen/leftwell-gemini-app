@@ -21,7 +21,9 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
       try
       {
         string jsonPayload = request.ToJSON();
-        Debug.Log($"Sending LLM generate content request with payload:\n{jsonPayload}");
+        var lastContent = request.contents[request.contents.Count - 1];
+        var lastPart = lastContent.parts[lastContent.parts.Count - 1];
+        Debug.Log($"Requesting generation:\n{JsonUtility.ToJson(lastPart)}");
         StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
         string urlWithKey = string.Format(INFERENCE_URL, MODEL);
         HttpResponseMessage response = await client.PostAsync(urlWithKey, content);
@@ -29,8 +31,8 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
         if (response.IsSuccessStatusCode)
         {
           string responseBody = await response.Content.ReadAsStringAsync();
-          Debug.Log($"Response body {responseBody}");
           var reply = LLMTextResponse.FromJson(responseBody);
+          Debug.Log($"Got generation response {JsonUtility.ToJson(reply.candidates[0])}");
           return reply;
         }
         else

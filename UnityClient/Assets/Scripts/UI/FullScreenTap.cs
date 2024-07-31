@@ -28,7 +28,7 @@ public class FullScreenTapButton : MonoBehaviour
     _shown = true;
 
     _slidingButton.Show(_animationMillis / 1000f);
-    _fadable.Show(_animationMillis);
+    _fadable.Show(_animationMillis / 1000f);
   }
 
   public async void Hide()
@@ -38,7 +38,7 @@ public class FullScreenTapButton : MonoBehaviour
     _shown = false;
 
     _slidingButton.Hide(_animationMillis / 1000f);
-    _fadable.Hide();
+    _fadable.Hide(_animationMillis / 1000f);
     while (_fadable.Animating) { await Task.Delay(10); }
     gameObject.SetActive(false);
   }

@@ -1,81 +1,71 @@
 using UnityEngine;
-using System.Threading;
-using System.Threading.Tasks;
 using BriLib;
 
 public class Fadable : MonoBehaviour
 {
   public bool Animating { get; private set; } = false;
+
   [SerializeField] private CanvasGroup _canvas;
-  private int _animationMillis;
-  private int _milliStep = 16;
-  private CancellationTokenSource _cancellationTokenSource;
+  private float _animationDuration;
+  private float _elapsedSeconds;
+  private float _startAlpha;
+  private float _endAlpha;
   private bool _shown;
 
-  public async void Show(int animationMillis)
+  public void Show(float animationDuration)
   {
     if (_shown) return;
 
-    _animationMillis = animationMillis;
+    _animationDuration = animationDuration;
     Animating = true;
-
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
     gameObject.SetActive(true);
     _shown = true;
-
-    await Animate(true, _cancellationTokenSource.Token);
-
-    if (_cancellationTokenSource.Token.IsCancellationRequested) return;
-    _canvas.interactable = true;
+    _canvas.interactable = false;
+    StartAnimation(true);
   }
 
-  public async void Hide()
+  public void Hide(float animationDuration)
   {
     if (!_shown) return;
 
+    _animationDuration = animationDuration;
     Animating = true;
-
-    _cancellationTokenSource?.Cancel();
-    _cancellationTokenSource = new CancellationTokenSource();
-
     _shown = false;
     _canvas.interactable = false;
-
-    await Animate(false, _cancellationTokenSource.Token);
-
-    if (_cancellationTokenSource.Token.IsCancellationRequested) return;
-    gameObject.SetActive(false);
+    StartAnimation(false);
   }
 
-  private async Task Animate(bool show, CancellationToken token)
+  private void StartAnimation(bool show)
   {
-    _canvas.interactable = false;
+    _elapsedSeconds = 0f;
+    _startAlpha = _canvas.alpha;
+    _endAlpha = show ? 1f : 0f;
+  }
 
-    var startAlpha = _canvas.alpha;
-    var endAlpha = show ? 1f : 0f;
-    var elapsedMillis = 0;
-
-    while (elapsedMillis < _animationMillis)
+  private void Update()
+  {
+    if (Animating)
     {
-      if (token.IsCancellationRequested) break;
+      _elapsedSeconds += Time.deltaTime;
+      float progress = Mathf.Clamp01(_elapsedSeconds / _animationDuration);
+      float easedProgress = Easing.ExpoEaseOut(progress);
+      _canvas.alpha = Mathf.Lerp(_startAlpha, _endAlpha, easedProgress);
 
-      var progress = Easing.ExpoEaseOut((float)elapsedMillis / _animationMillis);
+      if (_elapsedSeconds >= _animationDuration)
+      {
+        Animating = false;
+        _canvas.alpha = _endAlpha;
 
-      var alpha = Mathf.Lerp(startAlpha, endAlpha, progress);
-      _canvas.alpha = alpha;
-
-      await Task.Delay(_milliStep, token);
-      elapsedMillis += _milliStep;
+        if (_endAlpha == 0f)
+        {
+          gameObject.SetActive(false);
+        }
+        else
+        {
+          _canvas.interactable = true;
+        }
+      }
     }
-
-    if (!token.IsCancellationRequested)
-    {
-      _canvas.alpha = endAlpha;
-    }
-
-    Animating = false;
   }
 
   private void Awake()
@@ -83,11 +73,5 @@ public class Fadable : MonoBehaviour
     _shown = false;
     _canvas.alpha = 0f;
     gameObject.SetActive(false);
-    _cancellationTokenSource = new CancellationTokenSource();
-  }
-
-  private void OnDestroy()
-  {
-    _cancellationTokenSource.Cancel();
   }
 }

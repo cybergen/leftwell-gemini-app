@@ -29,14 +29,14 @@ public class StoryResultScreen : MonoBehaviour
     _text.text = storyText;
     _onHide = onHide;
     _onShare = onShare;
-    _fadable.Show(_animationMillis);
+    _fadable.Show(_animationMillis / 1000f);
     while (_fadable.Animating) { await Task.Delay(10); }
     _shareButton.Show(_animationMillis / 1000f);
   }
 
   public async void Hide()
   {
-    _fadable.Hide();
+    _fadable.Hide(_animationMillis / 1000f);
     while (_fadable.Animating) { await Task.Delay(10); }
     _onHide?.Invoke();
   }

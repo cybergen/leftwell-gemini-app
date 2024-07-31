@@ -18,7 +18,7 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
 
   public void StartAudioCapture()
   {
-    Debug.Log("Starting audio capture");
+    //Debug.Log("Starting audio capture");
     if (isRecording) return;
 
     microphoneDevice = Microphone.devices[0];
@@ -30,7 +30,7 @@ public class AudioCaptureManager : Singleton<AudioCaptureManager>
 
   public void EndAudioCapture()
   {
-    Debug.Log("Ending audio capture");
+    //Debug.Log("Ending audio capture");
     if (!isRecording) return;
 
     Microphone.End(microphoneDevice);
