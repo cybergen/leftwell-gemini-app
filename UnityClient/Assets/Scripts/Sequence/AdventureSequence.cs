@@ -10,7 +10,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 {
   private const int ITEM_COUNT = 3;
   private int _activatedPortals = 0;
-  private List<CaptureMarkerSequence> _captureMarketSequences = new List<CaptureMarkerSequence>();
+  private List<CaptureMarkerSequence> _captureMarkerSequences = new List<CaptureMarkerSequence>();
   private Texture2D _finalImage;
   private string _finalStory;
   private bool _bigPortalActivated = false;
@@ -39,7 +39,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
     //Make wizard fly in and start talking while arriving
     character.SetState(CharacterStates.InitialFlyIn);
-    _ = SpeechManager.Instance.Speak(stateReplyPair.Item2);
+    await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     while (character.BusyPathing) await Task.Delay(10);
 
     //Run intro convo until state changes
@@ -56,6 +56,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
     _payload = payloadReplyPair.Item1;
     stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
@@ -73,7 +74,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       //Increment activated items after each one has been triggered to move on to the big portal
       var captureMarkerSequence = new CaptureMarkerSequence();
       _ = captureMarkerSequence.RunAsync(tex).ContinueWith((task) => _activatedPortals++);
-      _captureMarketSequences.Add(captureMarkerSequence);
+      _captureMarkerSequences.Add(captureMarkerSequence);
 
       //Kick off addition of image to payload
       _ = CameraManager.Instance.UploadImageAndGetFilePart(tex).ContinueWith((task) =>
@@ -127,30 +128,35 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     });
 
     //Wait for both edited image and commentary reply to come in before allowing activation
-    while (!PortalManager.Instance.GetAllMarkersActivatable() || SpeechManager.Instance.Speaking) await Task.Delay(10);
+    while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _ = SpeechManager.Instance.Speak(DialogConstants.ITEMS_READY);
 
     //Require user explores magical items before advancing
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (_activatedPortals < ITEM_COUNT) await Task.Delay(10);
+    await Task.Delay(DialogConstants.DIALOG_PAUSE);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
 
     //Wait for results for big portal to be available before advancing at this point
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
     {
-      while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
       _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
 
     PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
-    while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
+    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
+    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _ = SpeechManager.Instance.Speak(DialogConstants.OPENING_PORTAL);
     await Task.Delay(4000);
 
@@ -178,7 +184,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     var repeatAdventure = false;
     Action onYes = () => { repliedToYesNo = true; repeatAdventure = true; };
     Action onNo = () => { repliedToYesNo = true; repeatAdventure = false; };
-    UIManager.Instance.YesNoScreen.Show("Do another adventure?", onYes, onNo);
+    UIManager.Instance.YesNoScreen.Show("Go on another adventure?", onYes, onNo);
     while (!repliedToYesNo) { await Task.Delay(10); }
     UIManager.Instance.YesNoScreen.Hide();
 
@@ -192,6 +198,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     }
     else
     {
+      character.SetState(CharacterStates.FlyingToPlayer);
       _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart { text = "Free converse" });
       payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
       _payload = payloadReplyPair.Item1;
@@ -247,6 +254,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
 
       //Say latest message
+      while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     }
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);
@@ -299,7 +307,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       {
         string matchedLine = match.Groups[1].Value.Trim();
         string modifiedResponse = regex.Replace(matchedLine, string.Empty).Trim();
-        _captureMarketSequences[i - 1].SetCommentary(modifiedResponse);
+        _captureMarkerSequences[i - 1].SetCommentary(modifiedResponse);
       }
       else
       {

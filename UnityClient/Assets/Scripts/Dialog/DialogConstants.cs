@@ -13,7 +13,7 @@ public class DialogConstants
   public const string PORTAL_READY = "The portal is ready!";
   public const string NO_STORY_CHOICE = "Picky picky! I'll choose for you then...";
   public const string STORY_OPTIONS_INTRO = "Here are your story options.";
-  public const string OPENING_PORTAL = "It's actually opening! I completely, 100% expected this!";
+  public const string OPENING_PORTAL = "This thing is actually working!";
   public const string CLOSE_PORTAL = "I'll just close this little rip in reality back up then.";
   public const int DIALOG_PAUSE = 500;
   public const string CLOSE_PORTAL_QUESTION = "We make a great team! Close the portal down whenever you're ready.";

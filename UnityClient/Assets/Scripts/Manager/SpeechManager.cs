@@ -8,6 +8,7 @@ using BriLib;
 public class SpeechManager : Singleton<SpeechManager>
 {
   public bool Speaking { get; private set; } = false;
+  public bool Loading { get; private set; } = false;
   private const string _urlBase = NetworkSettings.PROXY_URL_BASE + "api/speech/";
   private const string apiUrl = _urlBase 
     + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
@@ -22,7 +23,9 @@ public class SpeechManager : Singleton<SpeechManager>
   {
     try
     {
+      Loading = true;
       var clip = await GetAudioClipFromText(something);
+      Loading = false;
       if (clip != null)
       {
         await PlayClip(clip);

@@ -8,9 +8,12 @@ public class ChooseStorySequence : ISequence<string>
 
   public async Task<string> RunAsync()
   {
+    while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     await SpeechManager.Instance.Speak(DialogConstants.STORY_OPTIONS_INTRO);
+
     var options = DialogConstants.GetStoryStrings(OPTION_COUNT);
     string chosenOption = string.Empty;
+
     for (int i = 0; i < OPTION_COUNT; i++)
     {
       await SpeechManager.Instance.Speak(DialogConstants.GetRandomOptionPrecedent());
