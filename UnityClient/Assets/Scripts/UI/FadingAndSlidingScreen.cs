@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using TMPro;
 
-public class FullScreenTapButton : MonoBehaviour
+public class FadingAndSlidingScreen : MonoBehaviour
 {
   [SerializeField] private int _animationMillis;
   [SerializeField] private Fadable _fadable;

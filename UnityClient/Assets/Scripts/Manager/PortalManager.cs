@@ -6,13 +6,13 @@ using BriLib;
 public class PortalManager : Singleton<PortalManager>
 {
   [SerializeField] private GameObject _smallMarkerPrefab;
-  [SerializeField] private GameObject _bigMarkerPrefab;
-  [SerializeField] private float _bigPortalSpawnHeight;
+  [SerializeField] private GameObject _heroPortalPrefab;
+  [SerializeField] private float _heroPortalSpawnHeight;
   [SerializeField] private float _forwardSpawnDistance;
   [SerializeField] private float _heroPortalSpawnDistance;
 
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
-  private HeroPortal _bigPortal;
+  private HeroPortal _heroPortal;
 
   public int SpawnCaptureMarker()
   {
@@ -25,14 +25,14 @@ public class PortalManager : Singleton<PortalManager>
     return index;
   }
 
-  public void SpawnBigPortal()
+  public void SpawnHeroPortal()
   {
     var camPose = CameraManager.Instance.GetCameraPose();
     var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _heroPortalSpawnDistance;
-    spawnPoint.y = PlaneManager.Instance.GroundHeight + _bigPortalSpawnHeight;
+    spawnPoint.y = PlaneManager.Instance.GroundHeight + _heroPortalSpawnHeight;
     var forwardDir = Vector3.ProjectOnPlane(camPose.Item1 - spawnPoint, Vector3.up).normalized;
-    var marker = Instantiate(_bigMarkerPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
-    _bigPortal = marker.GetComponent<HeroPortal>();
+    var marker = Instantiate(_heroPortalPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
+    _heroPortal = marker.GetComponent<HeroPortal>();
   }
 
   public void SetMarkerActivatable(int markerIndex, Texture2D finalImage, Action onActivated)
@@ -45,24 +45,24 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers[markerIndex].MarkActivatable(finalImage, onActivated);
   }
 
-  public void SetBigPortalActivatable(Action onActivated)
+  public void SetHeroPortalActivatable(Action onActivated)
   {
-    if (_bigPortal == null)
+    if (_heroPortal == null)
     {
       Debug.LogError("Did not have big portal to mark activatable");
       return;
     }
-    _bigPortal.SetActivatable(onActivated);
+    _heroPortal.SetActivatable(onActivated);
   }
 
-  public void SetBigPortalClosable(Action onClosed)
+  public void SetHeroPortalClosable(Action onClosed)
   {
-    if (_bigPortal == null)
+    if (_heroPortal == null)
     {
       Debug.LogError("Did not have big portal to mark closable");
       return;
     }
-    _bigPortal.SetClosable(onClosed);
+    _heroPortal.SetClosable(onClosed);
   }
 
   public void ActivateMarker(int index)
@@ -72,7 +72,7 @@ public class PortalManager : Singleton<PortalManager>
 
   public void ActivatePortal()
   {
-    _bigPortal.Activate();
+    _heroPortal.Activate();
   }
 
   public bool GetAllMarkersActivatable()
@@ -88,17 +88,17 @@ public class PortalManager : Singleton<PortalManager>
   {
     foreach (var marker in _captureMarkers) { Destroy(marker.gameObject); }
     _captureMarkers.Clear();
-    if (_bigPortal != null) { Destroy(_bigPortal.gameObject); }
-    _bigPortal = null;
+    if (_heroPortal != null) { Destroy(_heroPortal.gameObject); }
+    _heroPortal = null;
   }
 
-  public Vector3 GetBigPortalPosition()
+  public Vector3 GetHeroPortalPosition()
   {
-    if (_bigPortal == null)
+    if (_heroPortal == null)
     {
       Debug.LogError("Did not have big portal to request position of");
       return Vector3.zero;
     }
-    return _bigPortal.transform.position;
+    return _heroPortal.transform.position;
   }
 }

@@ -107,7 +107,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Get starting pose for big portal
     _ = SpeechManager.Instance.Speak(DialogConstants.POSITION_PORTAL);
     await UseFullScreenTapUI("Tap to spawn big portal", false);
-    PortalManager.Instance.SpawnBigPortal();
+    PortalManager.Instance.SpawnHeroPortal();
     character.SetState(CharacterStates.FlyingToPortal);
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
 
@@ -146,7 +146,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
 
-    PortalManager.Instance.SetBigPortalActivatable(() => _bigPortalActivated = true);
+    PortalManager.Instance.SetHeroPortalActivatable(() => _bigPortalActivated = true);
     await Task.Delay(DialogConstants.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
@@ -173,7 +173,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Wait for portal closing before moving on
     bool portalClosed = false;
     Action onPortalClosed = () => { portalClosed = true; };
-    PortalManager.Instance.SetBigPortalClosable(onPortalClosed);
+    PortalManager.Instance.SetHeroPortalClosable(onPortalClosed);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (!portalClosed) { await Task.Delay(10); }
     await Task.Delay(1000);

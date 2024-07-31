@@ -27,16 +27,16 @@ public class PortalTester : MonoBehaviour
   {
     if (_hasBigPortal) return;
     _hasBigPortal = true;
-    PortalManager.Instance.SpawnBigPortal();
+    PortalManager.Instance.SpawnHeroPortal();
   }
 
   public void OnSetPortalActivatable()
   {
     if (!_hasBigPortal) return;
-    PortalManager.Instance.SetBigPortalActivatable(() =>
+    PortalManager.Instance.SetHeroPortalActivatable(() =>
     {
       Debug.Log("Big portal actiavted");
-      PortalManager.Instance.SetBigPortalClosable(() => Debug.Log("Big portal closed"));
+      PortalManager.Instance.SetHeroPortalClosable(() => Debug.Log("Big portal closed"));
     });
   }
 

@@ -36,7 +36,6 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     scale.x = width;
     _imagePlane.transform.localScale = scale;
 
-    _renderer.enabled = false;
     _imagePlane.SetActive(true);
     _activatableTrail.SetActive(true);
     Activatable = true;
@@ -80,5 +79,6 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
   private void Start()
   {
     _loopingSound.FadeIn();
+    _renderer.enabled = false;
   }
 }

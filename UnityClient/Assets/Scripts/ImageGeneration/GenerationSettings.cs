@@ -20,7 +20,7 @@ public class GenerationSettings
       {
         Model = "imagen-3.0-fast-generate-001",
         Prompt = "mystical, fantasy, glimmering, purple clouds, magic, glowing",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
+        NegativePrompt = "ugly colors, concrete, grey, boring",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
@@ -55,7 +55,7 @@ public class GenerationSettings
       {
         Model = "imagegeneration@006",
         Prompt = "fantasy, magical, colorful, exalted, powerful, emanating force, waves, color",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
+        NegativePrompt = "ugly colors, concrete, grey, boring",
         PersonGeneration = "dont_allow",
         EditMode = "product-image"
       },
@@ -63,7 +63,7 @@ public class GenerationSettings
       {
         Model = "imagegeneration@006",
         Prompt = "explosion, flames, smoke, blast, bright, colorful, orange, flare, lava, glowing, eruption, tense, centered",
-        NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
+        NegativePrompt = "ugly colors, concrete, grey, boring",
         PersonGeneration = "dont_allow",
         EditMode = "product-image"
       },

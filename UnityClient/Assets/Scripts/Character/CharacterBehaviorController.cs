@@ -157,9 +157,9 @@ public class CharacterBehaviorController : MonoBehaviour
         break;
       case CharacterStates.FlyingToPortal:
         _startPosition = transform.position;
-        var dirFromPortal = GetFlat(_cameraTransform.position - PortalManager.Instance.GetBigPortalPosition());
+        var dirFromPortal = GetFlat(_cameraTransform.position - PortalManager.Instance.GetHeroPortalPosition());
         dirFromPortal = Quaternion.AngleAxis(_portalAngleToSeekTo, Vector3.up) * dirFromPortal;
-        _targetPosition = PortalManager.Instance.GetBigPortalPosition() + dirFromPortal * _distanceFromPortal;
+        _targetPosition = PortalManager.Instance.GetHeroPortalPosition() + dirFromPortal * _distanceFromPortal;
         _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
         BusyPathing = true;
         break;

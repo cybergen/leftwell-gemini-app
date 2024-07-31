@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _smallMarkerPrefab: {fileID: 3446704381175424742, guid: 10340b27f9e3974499dbdd38abfe904e, type: 3}
-  _bigMarkerPrefab: {fileID: 4565741485230480569, guid: 0cdceb493be13c14db2c9ce17a3d77fb, type: 3}
-  _bigPortalSpawnHeight: 0
+  _heroPortalPrefab: {fileID: 4565741485230480569, guid: 0cdceb493be13c14db2c9ce17a3d77fb, type: 3}
+  _heroPortalSpawnHeight: 0
   _forwardSpawnDistance: 0.5
   _heroPortalSpawnDistance: 2.4

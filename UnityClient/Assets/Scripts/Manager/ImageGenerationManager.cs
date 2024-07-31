@@ -18,7 +18,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   private const string UPSCALE_URL = NetworkSettings.PROXY_URL_BASE 
     + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
 
-  public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt)
+  public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt, int imageCount = 1)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
     var request = new ImageRequest
@@ -36,7 +36,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
       },
       parameters = new ImageGenerationParameters
       {
-        sampleCount = GenerationSettings.IMAGE_GEN_SAMPLES
+        sampleCount = imageCount
       }
     };
 

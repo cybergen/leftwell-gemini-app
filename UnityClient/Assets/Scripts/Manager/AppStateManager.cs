@@ -10,7 +10,7 @@ public class AppStateManager : Singleton<AppStateManager>
   [SerializeField] private GameObject _preCameraBackdrop;
   [SerializeField] private GameObject _wizardPrefab;
   [SerializeField] private LongPressButton _pushToTalkButton;
-  [SerializeField] private FullScreenTapButton _takePictureButton;
+  [SerializeField] private FadingAndSlidingScreen _takePictureButton;
 
   private const string HAS_RUN_TUTORIAL_KEY = "HasRunTutorial";
 
