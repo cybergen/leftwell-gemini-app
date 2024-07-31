@@ -48,7 +48,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
     //2. Send out initial request to start a random adventure (pre-select)
     _chatInProgress.contents[_chatInProgress.contents.Count - 1].parts.Add(new TextPart
     {
-      text = PromptConstants.STORY_START_PRECEDENT + "Defeat the dark lord"
+      text = StoryPromptSettings.STORY_START_PRECEDENT + "Defeat the dark lord"
     });
 
     while (true)
@@ -119,7 +119,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
 
     payload.generationConfig = new GenerationConfig
     {
-      temperature = PromptConstants.STORY_TEMPERATURE
+      temperature = StoryPromptSettings.STORY_TEMPERATURE
     };
 
     payload.safetySettings = new List<SafetySetting>();
@@ -141,7 +141,7 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
 
     payload.systemInstruction = new Content
     {
-      parts = new List<BasePart> { new TextPart { text = PromptConstants.STORY_PROMPT } }
+      parts = new List<BasePart> { new TextPart { text = StoryPromptSettings.STORY_PROMPT } }
     };
 
     payload.contents = new List<Content>

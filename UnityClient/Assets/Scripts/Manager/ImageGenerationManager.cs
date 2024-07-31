@@ -8,7 +8,7 @@ using BriLib;
 
 public class ImageGenerationManager : Singleton<ImageGenerationManager>
 {
-  private const string GENERATION_MODEL = "imagegeneration@006";
+  private const string GENERATION_MODEL = "imagen-3.0-generate-001";
   private const string UPSCALE_MODEL = "imagegeneration@002";
   private const string LOCATION = "us-central1";
   private const string PROJECT_ID = "gen-lang-client-0643048200";
@@ -20,7 +20,6 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
   public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
-    Debug.Log($"Got url: {url}");
     var request = new ImageRequest
     {
       instances = new List<ImageGenerationInstance>

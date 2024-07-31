@@ -1,6 +1,6 @@
 using FrostweepGames.Plugins.GoogleCloud.TextToSpeech;
 
-public static class PromptConstants
+public static class StoryPromptSettings
 {
 
   public const string STORY_PROMPT_TWO_FIRST_TIME =
@@ -55,20 +55,4 @@ General guidelines about how you reply: You do not use emojis in your replies. Y
   public const string STORY_SELECTION_STATE = "Story selection";
   public const string STORY_ITEM_SELECTION_STATE = "Item selection";
   public const string STORY_TOLD_STATE = "Story told";
-
-  //Image prompt generation constants
-  public const string IMAGE_GEN_PROMPT = "You are an expert at producing effective image prompts for a generative art tool called Imagen 2. Given a multi-turn chat between an AI and a player describing an adventure, you always choose the most pivotal or hilarious moment from the adventure about which to create a text prompt for image generation AI, and you select styles, camera characteristics, and keywords to produce the most interesting images. You respond with nothing except for the text of your image prompt. Your prompt is presented like so:\r\n\r\nPrompt: Text of prompt\r\n\r\nNegative Prompt: Negative prompt text\r\n\r\nWhen generating a prompt, you will operate according to the initially supplied guide. You are great at optimizing your prompt for best results according to the supplied guide! You also avoid prompts that would involve explicit activity or language, gore, or words like disgusting that may trigger AI safety measures.\r\n\r\nFinally, when you are presented with a set of generated images and prompted \"Please choose the best one\" you always select the perfect one that best represents the adventure. You respond in the following format:\r\n\r\nBest Image: Selected image number\r\n\r\nReason: Reason why you selected that one";
-
-  public const string IMAGE_PROMPT_PRECEDENT = "Prompt: ";
-  public const string IMAGE_NEGATIVE_PROMPT_PRECEDENT = "Negative Prompt: ";
-  public const string IMAGE_SELECTION_COMMAND = "Please choose the best one";
-  public const float IMAGE_TEMP = 1f;
-
-  //Voice synth constants
-  public const double SYNTH_PITCH = 0.0d;
-  public const double SYNTH_SPEAKING_RATE = 1.1d;
-  public const double SYNTH_SAMPLE_RATE_HERTZ = 16000;
-  public const Enumerators.SsmlVoiceGender SYNTH_GENDER = Enumerators.SsmlVoiceGender.MALE;
-  public const Enumerators.LanguageCode SYNTH_LOCALE = Enumerators.LanguageCode.en_GB;
-  public const string SYNTH_VOICE = "en-GB-Wavenet-B";//"en-GB-Studio-B";
 }

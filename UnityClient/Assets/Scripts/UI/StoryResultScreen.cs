@@ -24,7 +24,6 @@ public class StoryResultScreen : MonoBehaviour
 
   public async void Show(Texture2D image, string storyText, Action onHide, Action<bool> onShare)
   {
-    Debug.LogWarning($"Showing final image with dimensions width: {image.width}, height: {image.height}");
     _texture = image;
     _image.texture = image;
     _text.text = storyText;

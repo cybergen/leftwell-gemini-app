@@ -322,7 +322,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
     payload.generationConfig = new GenerationConfig
     {
-      temperature = PromptConstants.STORY_TWO_TEMPERATURE
+      temperature = StoryPromptSettings.STORY_TWO_TEMPERATURE
     };
 
     payload.safetySettings = new List<SafetySetting>();
@@ -344,7 +344,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
     payload.systemInstruction = new Content
     {
-      parts = new List<BasePart> { new TextPart { text = PromptConstants.STORY_PROMPT_TWO_FIRST_TIME } }
+      parts = new List<BasePart> { new TextPart { text = StoryPromptSettings.STORY_PROMPT_TWO_FIRST_TIME } }
     };
 
     payload.contents = new List<Content>

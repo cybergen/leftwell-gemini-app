@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class GenerationSettings
 {
-  public const int IMAGE_GEN_SAMPLES = 4;
-  public const string IMAGE_GEN_ASPECT = "16:9";
+  public const int IMAGE_GEN_SAMPLES = 1;
+  public const string IMAGE_GEN_ASPECT = "1:1";
   public const string IMAGE_GEN_PERSON_GEN = "allow_all";
   public const string IMAGE_GEN_SAFETY = "block_few";
 
@@ -18,35 +18,35 @@ public class GenerationSettings
     {
       new EditOptions
       {
-        Model = "imagegeneration@002",
+        Model = "imagen-3.0-fast-generate-001",
         Prompt = "mystical, fantasy, glimmering, purple clouds, magic, glowing",
         NegativePrompt = "ugly colors, concrete, brutalism, grey, boring",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
-        Model = "imagegeneration@002",
+        Model = "imagen-3.0-fast-generate-001",
         Prompt = "made of magical smoke, colorful, magical, fantasy, glowing",
         NegativePrompt = "ugly, bland, grey, dull",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
-        Model = "imagegeneration@002",
+        Model = "imagen-3.0-fast-generate-001",
         Prompt = "watercolor, beautiful, artistic, colorful, stylish",
         NegativePrompt = "scary, people, ugly",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
-        Model = "imagegeneration@002",
+        Model = "imagen-3.0-fast-generate-001",
         Prompt = "pencil sketch, drawn, black and white, cross-hatching, sketchy, charcoal",
         NegativePrompt = "scary, people, ugly",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
-        Model = "imagegeneration@002",
+        Model = "imagen-3.0-fast-generate-001",
         Prompt = "cartoon, cartoony, line art, vibrant colors",
         NegativePrompt = "ugly",
         PersonGeneration = "dont_allow",
