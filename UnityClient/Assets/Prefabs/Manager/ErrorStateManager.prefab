@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FailedHeroImage: {fileID: 2800000, guid: cae742e0b56b04549b7a703c30a0cd24, type: 3}
-  FailedItemImage: {fileID: 0}
+  FailedSynthClip: {fileID: 8300000, guid: af7c17211a9d4674f93b21366b940566, type: 3}

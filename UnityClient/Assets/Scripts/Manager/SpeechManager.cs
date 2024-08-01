@@ -10,9 +10,11 @@ public class SpeechManager : Singleton<SpeechManager>
   public bool Speaking { get; private set; } = false;
   public bool Loading { get; private set; } = false;
   private const string _urlBase = NetworkSettings.PROXY_URL_BASE + "api/speech/";
-  private const string apiUrl = _urlBase 
+  private const string apiUrl = _urlBase
     + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
   private AudioSource _speechSource;
+  private const int MAX_RETRIES = 3;
+  private const int TIMEOUT_SECONDS = 45;
 
   public void SetSpeechSource(AudioSource source)
   {
@@ -21,24 +23,23 @@ public class SpeechManager : Singleton<SpeechManager>
 
   public async Task Speak(string something, bool ssml = true)
   {
-    try
+    Loading = true;
+    var clip = await GetAudioClipFromText(something);
+    Loading = false;
+    if (clip != null)
     {
-      Loading = true;
-      var clip = await GetAudioClipFromText(something);
-      Loading = false;
-      if (clip != null)
-      {
-        await PlayClip(clip);
-      }
-    }
-    catch (Exception ex)
-    {
-      Debug.LogError($"Error during speech synthesis: {ex.Message}");
+      await PlayClip(clip);
     }
   }
 
   public async Task PlayClip(AudioClip clip)
   {
+    if (clip == null)
+    {
+      Debug.LogError("Got null clip");
+      return;
+    }
+
     Speaking = true;
     _speechSource.Stop();
     _speechSource.clip = clip;
@@ -63,6 +64,7 @@ public class SpeechManager : Singleton<SpeechManager>
         style = SpeechSettings.STYLE
       }
     };
+
     var url = string.Format(
         apiUrl,
         SpeechSettings.KING_OF_NY_VOICE_ID,
@@ -70,52 +72,82 @@ public class SpeechManager : Singleton<SpeechManager>
         SpeechSettings.OPTIMIZE_STREAM_LATENCY);
     string payload = JsonUtility.ToJson(body);
 
-    try
+    for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
     {
-      using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+      try
       {
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(payload);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        await SendWebRequestAsync(request);
-
-        if (request.result != UnityWebRequest.Result.Success)
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
-          Debug.LogError("Error: " + request.error);
-          return null;
-        }
-        else
-        {
-          byte[] responseData = request.downloadHandler.data;
+          byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(payload);
+          request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+          request.downloadHandler = new DownloadHandlerBuffer();
+          request.SetRequestHeader("Content-Type", "application/json");
 
-          string tempFilePath = Path.Combine(Application.persistentDataPath, "temp.mp3");
-          File.WriteAllBytes(tempFilePath, responseData);
-
-          using (UnityWebRequest audioRequest = UnityWebRequestMultimedia.GetAudioClip("file://" + tempFilePath, AudioType.MPEG))
+          var requestTask = SendWebRequestAsync(request);
+          if (await Task.WhenAny(requestTask, Task.Delay(TIMEOUT_SECONDS * 1000)) == requestTask)
           {
-            await SendWebRequestAsync(audioRequest);
+            await requestTask; //Ensure any exception/cancellation is re-thrown
 
-            if (audioRequest.result == UnityWebRequest.Result.ConnectionError || audioRequest.result == UnityWebRequest.Result.ProtocolError)
+            //In a general failure case, just retry
+            if (request.result != UnityWebRequest.Result.Success)
             {
-              Debug.LogError("Error: " + audioRequest.error);
-              return null;
+              Debug.LogError("Error: " + request.error);
+              continue; // Retry on failure
             }
-            else
+            else //Otherwise, attempt to save mp3 file bytes and then load as AudioClip
             {
-              AudioClip audioClip = DownloadHandlerAudioClip.GetContent(audioRequest);
-              return audioClip;
+              byte[] responseData = request.downloadHandler.data;
+
+              string tempFilePath = Path.Combine(Application.persistentDataPath, "temp.mp3");
+              File.WriteAllBytes(tempFilePath, responseData);
+
+              using (UnityWebRequest audioRequest = UnityWebRequestMultimedia.GetAudioClip("file://" + tempFilePath, AudioType.MPEG))
+              {
+                var audioRequestTask = SendWebRequestAsync(audioRequest);
+                if (await Task.WhenAny(audioRequestTask, Task.Delay(TIMEOUT_SECONDS * 1000)) == audioRequestTask)
+                {
+                  await audioRequestTask; // Ensure any exception/cancellation is re-thrown
+
+                  if (audioRequest.result == UnityWebRequest.Result.ConnectionError || audioRequest.result == UnityWebRequest.Result.ProtocolError)
+                  {
+                    Debug.LogError("Error: " + audioRequest.error);
+                    continue;
+                  }
+                  else
+                  {
+                    AudioClip audioClip = DownloadHandlerAudioClip.GetContent(audioRequest);
+                    if (audioClip == null)
+                    {
+                      Debug.LogError("Failed to deserialize audio clip. Retrying...");
+                      continue;
+                    }
+                    return audioClip;
+                  }
+                }
+                else
+                {
+                  Debug.LogError("Audio load from local files timed out. Retrying...");
+                  continue;
+                }
+              }
             }
+          }
+          else
+          {
+            Debug.LogError("Initial voice synth http request timed out. Retrying...");
+            continue;
           }
         }
       }
+      catch (Exception ex)
+      {
+        Debug.LogError($"Error in GetAudioClipFromText: {ex.Message}");
+        continue;
+      }
     }
-    catch (Exception ex)
-    {
-      Debug.LogError($"Error in GetAudioClipFromText: {ex.Message}");
-      return null;
-    }
+
+    Debug.LogError("Max retries reached. GetAudioClipFromText failed.");
+    return ErrorStateManager.Instance.FailedSynthClip;
   }
 
   private static Task SendWebRequestAsync(UnityWebRequest request)
