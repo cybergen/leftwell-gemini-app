@@ -13,41 +13,67 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
   private const string MODEL = "gemini-1.5-pro";
   private const string INFERENCE_URL = NetworkSettings.PROXY_URL_BASE + "api/llm/models/{0}:generateContent";
   private const string STREAM_URL = NetworkSettings.PROXY_URL_BASE + "api/llm/models/{0}:generateContent";
+  private const int MAX_RETRIES = 3;
+  private const int TIMEOUT_SECONDS = 45;
 
   public async Task<LLMTextResponse> RequestLLMCompletion(LLMRequestPayload request)
   {
+    var lastContent = request.contents[request.contents.Count - 1];
+    var lastPart = lastContent.parts[lastContent.parts.Count - 1];
+    Debug.Log($"Requesting generation:\n{JsonUtility.ToJson(lastPart)}");
+
     using (HttpClient client = new HttpClient())
     {
-      try
+      for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
       {
-        string jsonPayload = request.ToJSON();
-        var lastContent = request.contents[request.contents.Count - 1];
-        var lastPart = lastContent.parts[lastContent.parts.Count - 1];
-        Debug.Log($"Requesting generation:\n{JsonUtility.ToJson(lastPart)}");
-        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        string urlWithKey = string.Format(INFERENCE_URL, MODEL);
-        HttpResponseMessage response = await client.PostAsync(urlWithKey, content);
+        try
+        {
+          client.Timeout = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+          string jsonPayload = request.ToJSON();
+          StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+          string url = string.Format(INFERENCE_URL, MODEL);
 
-        if (response.IsSuccessStatusCode)
-        {
-          string responseBody = await response.Content.ReadAsStringAsync();
-          var reply = LLMTextResponse.FromJson(responseBody);
-          Debug.Log($"Got generation response {JsonUtility.ToJson(reply.candidates[0])}");
-          return reply;
+          HttpResponseMessage response = await client.PostAsync(url, content);
+
+          if (response.IsSuccessStatusCode)
+          {
+            string responseBody = await response.Content.ReadAsStringAsync();
+            var reply = LLMTextResponse.FromJson(responseBody);
+
+            if (reply.candidates.Count == 0)
+            {
+              Debug.LogWarning("Empty response received, retrying...");
+              continue; //Retry if response was empty
+            }
+
+            Debug.Log($"Got generation response {JsonUtility.ToJson(reply.candidates[0])}");
+            return reply;
+          }
+          else
+          {
+            Debug.LogError($"RequestLLMCompletion failed with status code: {response.StatusCode}");
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            Debug.LogError($"Error response: {errorResponse}");
+
+            //Retry if anything goes wrong
+            continue;
+          }
         }
-        else
+        catch (TaskCanceledException)
         {
-          Debug.LogError($"RequestLLMCompletion failed with status code: {response.StatusCode}");
-          string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Error response: {errorResponse}");
-          return null;
+          Debug.LogError("RequestLLMCompletion request timed out. Retrying...");
+          continue; //Retry if we've timed out or otherwise been cancelled
+        }
+        catch (Exception e)
+        {
+          Debug.LogError($"RequestLLMCompletion failed: {e.Message}");
+          continue;
         }
       }
-      catch (Exception e)
-      {
-        Debug.LogError($"RequestLLMCompletion failed: {e.Message}");
-        return null;
-      }
+
+      Debug.LogError("Max retries reached. RequestLLMCompletion failed.");
+      AppStateManager.Instance.LLMErrorBailout();
+      return null;
     }
   }
 
@@ -81,6 +107,12 @@ public class LLMInteractionManager : Singleton<LLMInteractionManager>
   public async Task<Tuple<LLMRequestPayload, string>> SendRequestAndUpdateSequence(LLMRequestPayload request)
   {
     var response = await RequestLLMCompletion(request);
+    if (response == null || response.candidates.Count == 0)
+    {
+      AppStateManager.Instance.LLMErrorBailout();
+      return null;
+    }
+
     var newCompletion = response.candidates[0].content.parts[0].text;
     request.contents.Add(new Content
     {

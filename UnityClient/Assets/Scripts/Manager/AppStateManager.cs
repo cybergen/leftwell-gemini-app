@@ -26,6 +26,11 @@ public class AppStateManager : Singleton<AppStateManager>
     SetState(AppState.Initialize);
   }
 
+  public void LLMErrorBailout()
+  {
+    SetState(AppState.LLMError);
+  }
+
   private async void SetState(AppState state)
   {
     Debug.Log($"App state: {state}");
@@ -138,10 +143,7 @@ public class AppStateManager : Singleton<AppStateManager>
           while (_character.BusyPathing) { await Task.Delay(10); }
         }
         await SpeechManager.Instance.Speak(FTEDialog.LLM_ERROR);
-
-        Action onYes = () => { SetState(AppState.Adventure); };
-        Action onNo = () => { Application.Quit(); };
-        UIManager.Instance.YesNoScreen.Show("Restart the adventure?", onYes, onNo);
+        Application.Quit();
         break;
     }
   }

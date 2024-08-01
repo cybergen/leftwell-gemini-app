@@ -29,6 +29,8 @@ public class StoryAndImagePromptSeqeuence : ISequence<LLMRequestPayload, BigPort
     Texture2D image;
     if (imageGenResponse.status != ImageGenStatus.Succeeded && imageGenResponse.status != ImageGenStatus.SucceededAfterRetry)
     {
+      while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
+      await Task.Delay(AdventureDialog.DIALOG_PAUSE);
       await SpeechManager.Instance.Speak(AdventureDialog.FAILED_TO_GET_HERO_IMAGE);
       image = ErrorStateManager.Instance.FailedHeroImage;
     }
@@ -36,7 +38,6 @@ public class StoryAndImagePromptSeqeuence : ISequence<LLMRequestPayload, BigPort
     {
       image = Base64ToTexture(imageGenResponse.images[0]);
     }
-    
 
     return new BigPortalResult
     {
