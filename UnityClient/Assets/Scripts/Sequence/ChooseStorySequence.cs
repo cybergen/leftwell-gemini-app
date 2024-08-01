@@ -9,15 +9,15 @@ public class ChooseStorySequence : ISequence<CharacterBehaviorController, string
   public async Task<string> RunAsync(CharacterBehaviorController character)
   {
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    await SpeechManager.Instance.Speak(DialogConstants.STORY_OPTIONS_INTRO);
+    await SpeechManager.Instance.Speak(AdventureDialog.STORY_OPTIONS_INTRO);
 
-    var options = DialogConstants.GetStoryStrings(OPTION_COUNT);
+    var options = AdventureDialog.GetStoryStrings(OPTION_COUNT);
     string chosenOption = string.Empty;
 
     for (int i = 0; i < OPTION_COUNT; i++)
     {
       character.SetState(CharacterStates.TalkingMad);
-      await SpeechManager.Instance.Speak(DialogConstants.GetRandomOptionPrecedent());
+      await SpeechManager.Instance.Speak(AdventureDialog.GetRandomOptionPrecedent());
       _ = SpeechManager.Instance.Speak(options[i]);
       var madeSelection = false;
       Action onYes = () => { madeSelection = true; chosenOption = options[i]; };
@@ -30,7 +30,7 @@ public class ChooseStorySequence : ISequence<CharacterBehaviorController, string
 
     if (string.IsNullOrEmpty(chosenOption))
     {
-      await SpeechManager.Instance.Speak(DialogConstants.NO_STORY_CHOICE);
+      await SpeechManager.Instance.Speak(AdventureDialog.NO_STORY_CHOICE);
       chosenOption = MathHelpers.SelectFromRange(options, new Random());
     }
 

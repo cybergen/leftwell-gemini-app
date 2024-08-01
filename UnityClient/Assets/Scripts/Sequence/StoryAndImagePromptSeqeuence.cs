@@ -29,7 +29,7 @@ public class StoryAndImagePromptSeqeuence : ISequence<LLMRequestPayload, BigPort
     Texture2D image;
     if (imageGenResponse.status != ImageGenStatus.Succeeded && imageGenResponse.status != ImageGenStatus.SucceededAfterRetry)
     {
-      await SpeechManager.Instance.Speak(DialogConstants.FAILED_TO_GET_HERO_IMAGE);
+      await SpeechManager.Instance.Speak(AdventureDialog.FAILED_TO_GET_HERO_IMAGE);
       image = ErrorStateManager.Instance.FailedHeroImage;
     }
     else

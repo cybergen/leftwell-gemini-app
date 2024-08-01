@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using BriLib;
 
-public class DialogConstants
+public class AdventureDialog
 {
   public const string POSITION_PORTAL 
     = "I'll get these items ready. In the meantime, give me an open area where I can form the portal";

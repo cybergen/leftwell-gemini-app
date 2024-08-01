@@ -24,7 +24,10 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
     FailedForOtherReason
   }
 
-  public async Task<(List<string> images, ImageGenStatus status)> GetImagesBase64Encoded(string prompt, string negativePrompt, int imageCount = 1)
+  public async Task<(List<string> images, ImageGenStatus status)> GetImagesBase64Encoded(
+    string prompt, 
+    string negativePrompt, 
+    int imageCount = 1)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
     var request = new ImageRequest

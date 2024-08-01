@@ -91,7 +91,6 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     Action onNo = () => { repliedToYesNo = true; repeatTutorial = false; };
     UIManager.Instance.YesNoScreen.Show("Repeat the tutorial?", onYes, onNo);
     while (!repliedToYesNo) { await Task.Delay(10); }
-    UIManager.Instance.YesNoScreen.Hide();
 
     //Fly away and break everything down
     await SpeechManager.Instance.Speak(FTEDialog.BE_RIGHT_BACK);

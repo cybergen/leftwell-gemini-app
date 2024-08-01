@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
 using LLM.Network;
@@ -129,6 +131,18 @@ public class AppStateManager : Singleton<AppStateManager>
           SetState(AppState.AdventureAgain);
         }
         break;
+      case AppState.LLMError:
+        if (_character != null)
+        {
+          _character.SetState(CharacterStates.JumpingToPlayer);
+          while (_character.BusyPathing) { await Task.Delay(10); }
+        }
+        await SpeechManager.Instance.Speak(FTEDialog.LLM_ERROR);
+
+        Action onYes = () => { SetState(AppState.Adventure); };
+        Action onNo = () => { Application.Quit(); };
+        UIManager.Instance.YesNoScreen.Show("Restart the adventure?", onYes, onNo);
+        break;
     }
   }
 }
@@ -144,4 +158,5 @@ public enum AppState
   Tutorial,
   Adventure,
   AdventureAgain,
+  LLMError
 }

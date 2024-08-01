@@ -31,7 +31,7 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
 
     if (imageGenResponse.status != ImageGenStatus.Succeeded && imageGenResponse.status != ImageGenStatus.SucceededAfterRetry)
     {
-      await SpeechManager.Instance.Speak(DialogConstants.FAILED_TO_GET_ITEM_IMAGE);
+      await SpeechManager.Instance.Speak(AdventureDialog.FAILED_TO_GET_ITEM_IMAGE);
       _transformedTexture = arg;
     }
     else
@@ -57,7 +57,7 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   {
     _activated = true;
     while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
-    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     _ = SpeechManager.Instance.Speak(_commentary);
   }
 }

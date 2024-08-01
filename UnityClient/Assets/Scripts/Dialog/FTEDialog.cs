@@ -24,4 +24,5 @@ public class FTEDialog
 
   //General use
   public const string BE_RIGHT_BACK = "I need to grab some supplies! I'll be right back, kid.";
+  public const string LLM_ERROR = "Something has gone real screwy with my magic, kid. We're gonna have to abort this mission!";
 }

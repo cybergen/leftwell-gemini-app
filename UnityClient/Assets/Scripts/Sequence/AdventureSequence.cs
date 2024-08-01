@@ -69,7 +69,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
-    var itemStrings = DialogConstants.GetItemStrings(ITEM_COUNT);// GetItemStrings(convoResult.Item2);
+    var itemStrings = AdventureDialog.GetItemStrings(ITEM_COUNT);// GetItemStrings(convoResult.Item2);
     for (int i = 0; i < ITEM_COUNT; i++)
     {
       _ = SpeechManager.Instance.Speak(itemStrings[i]);
@@ -94,7 +94,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
         _payload.contents[_payload.contents.Count - 1].parts.Add(task.Result);
       });
 
-      await SpeechManager.Instance.Speak(DialogConstants.GetRandomItemCaptureDialog());
+      await SpeechManager.Instance.Speak(AdventureDialog.GetRandomItemCaptureDialog());
       await UseAudioCaptureUI();
 
       character.SetState(CharacterStates.JumpingToPlayer);
@@ -115,11 +115,11 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     }
 
     //Get starting pose for big portal
-    _ = SpeechManager.Instance.Speak(DialogConstants.POSITION_PORTAL);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.POSITION_PORTAL);
     await UseFullScreenTapUI("Tap to spawn big portal", false);
     PortalManager.Instance.SpawnHeroPortal();
     character.SetState(CharacterStates.FlyingToPortal);
-    _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_PLACED);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_PLACED);
 
     //Ensure all images and audio are ready in the payload before advancing
     while (_imagesUploaded < ITEM_COUNT || _audioUploaded < ITEM_COUNT) await Task.Delay(10);
@@ -140,36 +140,36 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Wait for both edited image and commentary reply to come in before allowing activation
     while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    _ = SpeechManager.Instance.Speak(DialogConstants.ITEMS_READY);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.ITEMS_READY);
 
     //Require user explores magical items before advancing
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (_activatedPortals < ITEM_COUNT) await Task.Delay(10);
-    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
 
     //Wait for results for big portal to be available before advancing at this point
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     if (string.IsNullOrEmpty(_finalStory) || _finalImage == null)
     {
-      _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
+      _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
 
     PortalManager.Instance.SetHeroPortalActivatable(() => _bigPortalActivated = true);
-    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _charAnimator.SetAnimation(DragonAnimation.Jump);
-    _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_READY);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
     //Wait for activation of big portal
     while (!_bigPortalActivated) await Task.Delay(10);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
-    await Task.Delay(DialogConstants.DIALOG_PAUSE);
+    await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     character.SetState(CharacterStates.Flabbergasted);
-    _ = SpeechManager.Instance.Speak(DialogConstants.OPENING_PORTAL);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.OPENING_PORTAL);
     await Task.Delay(4000);
     character.SetState(CharacterStates.FlyingToPlayer);
 
@@ -180,7 +180,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     Action<bool> onShare = (successful) => { Debug.Log($"Share was {successful}"); };
     UIManager.Instance.StoryResult.Show(_finalImage, _finalStory, onHide, onShare);
     while (!hidden) { await Task.Delay(10); }
-    _ = SpeechManager.Instance.Speak(DialogConstants.CLOSE_PORTAL_QUESTION);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.CLOSE_PORTAL_QUESTION);
     await Task.Delay(1000);
 
     //Wait for portal closing before moving on
@@ -192,14 +192,13 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     await Task.Delay(1000);
 
     //Ask whether to go again
-    _ = SpeechManager.Instance.Speak(DialogConstants.GO_AGAIN_QUESTION);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.GO_AGAIN_QUESTION);
     var repliedToYesNo = false;
     var repeatAdventure = false;
     Action onYes = () => { repliedToYesNo = true; repeatAdventure = true; };
     Action onNo = () => { repliedToYesNo = true; repeatAdventure = false; };
     UIManager.Instance.YesNoScreen.Show("Go on another adventure?", onYes, onNo);
     while (!repliedToYesNo) { await Task.Delay(10); }
-    UIManager.Instance.YesNoScreen.Hide();
 
     //Fly off
     if (repeatAdventure)
@@ -306,7 +305,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     else
     {
       Debug.LogError("Failed to get state from reply");
-      return null;
+      return new Tuple<StoryState, string>(StoryState.None, reply);
     }
   }
 
@@ -329,7 +328,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       else
       {
         Debug.LogError($"Failed to get item {i} from reply");
-        _captureMarkerSequences[i - 1].SetCommentary(DialogConstants.GetRandomFailedCommentary(rand));
+        _captureMarkerSequences[i - 1].SetCommentary(AdventureDialog.GetRandomFailedCommentary(rand));
       }
     }
   }
