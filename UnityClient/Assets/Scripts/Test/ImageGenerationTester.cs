@@ -21,9 +21,9 @@ public class ImageGenerationTester : MonoBehaviour
       imageCount: 4
     );
 
-    for (int i = 0; i < imageEncodings.Count; i++)
+    for (int i = 0; i < imageEncodings.images.Count; i++)
     {
-      Texture2D texture = ImageGenerationManager.Base64ToTexture(imageEncodings[i]);
+      Texture2D texture = ImageGenerationManager.Base64ToTexture(imageEncodings.images[i]);
       if (texture != null)
       {
         _uiImages[i].texture = texture;

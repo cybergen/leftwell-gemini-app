@@ -19,6 +19,10 @@ public class DialogConstants
   public const string CLOSE_PORTAL_QUESTION = "We make a great team! Close the portal down whenever you're ready.";
   public const string GO_AGAIN_QUESTION = "So whaddaya say? Wanna go again?";
 
+  //Error states
+  public const string FAILED_TO_GET_HERO_IMAGE = "This is bad! The portal's tunneled through to a reality with no visible light spectrum. We're not gonna be able to see anything on this one!";
+  public const string FAILED_TO_GET_ITEM_IMAGE = "Something's corrupted one of the items! It might not look any different...";
+
   public static List<string> ITEM_CAPTURE_RESPONSES = new List<string>
   {
     "Uh... Interesting. Tell me more.",
@@ -136,6 +140,21 @@ public class DialogConstants
     "Hey! You want... ",
   };
 
+  public static List<string> FAILED_COMMENTARY = new List<string>
+  {
+    "Uh, I hope this one works out",
+    "Not much to say about this that you haven't already covered",
+    "This Item speaks for itself",
+    "Weird Item choice, in retrospect",
+    "Well that's cool",
+    "Yeah sorry, not much to add here",
+    "You're sure it was vital to bring this?",
+    "Hope you're right about this one...",
+    "Good call",
+    "Smart!",
+    "Weird...",
+  };
+
   public static string GetRandomOptionPrecedent()
   {
     return MathHelpers.SelectFromRange(OPTION_PRECEDENTS, new Random());
@@ -172,5 +191,10 @@ public class DialogConstants
       list.Add(item);
     }
     return list;
+  }
+
+  public static string GetRandomFailedCommentary(Random rand)
+  {
+    return MathHelpers.SelectFromRange(FAILED_COMMENTARY, rand);
   }
 }

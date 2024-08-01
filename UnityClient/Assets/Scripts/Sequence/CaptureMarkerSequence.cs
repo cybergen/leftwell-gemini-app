@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Threading.Tasks;
+using static ImageGenerationManager;
 
 public class CaptureMarkerSequence : ISequence<Texture2D, string>
 {
@@ -18,7 +19,27 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   {
     _markerIndex = PortalManager.Instance.SpawnCaptureMarker();
 
-    _transformedTexture = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
+    (Texture2D image, ImageGenStatus status) imageGenResponse;
+    int tries = 0;
+    do
+    {
+      tries++;
+      Debug.Log($"Attempting generation of item image");
+      imageGenResponse = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
+    }
+    while (tries < 3 && (imageGenResponse.status == ImageGenStatus.FailedDueToSafetyGuidelines
+      || imageGenResponse.status == ImageGenStatus.FailedForOtherReason));
+
+    if (imageGenResponse.status != ImageGenStatus.Succeeded && imageGenResponse.status != ImageGenStatus.SucceededAfterRetry)
+    {
+      await SpeechManager.Instance.Speak(DialogConstants.FAILED_TO_GET_ITEM_IMAGE);
+      _transformedTexture = arg;
+    }
+    else
+    {
+      _transformedTexture = imageGenResponse.image;
+    }
+
     CheckFinished();
 
     while (!_activated) await Task.Delay(10);

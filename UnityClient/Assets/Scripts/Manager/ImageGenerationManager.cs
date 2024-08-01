@@ -8,17 +8,23 @@ using BriLib;
 
 public class ImageGenerationManager : Singleton<ImageGenerationManager>
 {
-  //private const string GENERATION_MODEL = "imagegeneration@006";
   private const string GENERATION_MODEL = "imagen-3.0-generate-001";
-  private const string UPSCALE_MODEL = "imagegeneration@002";
   private const string LOCATION = "us-central1";
   private const string PROJECT_ID = "gen-lang-client-0643048200";
-  private const string GENERATION_URL = NetworkSettings.PROXY_URL_BASE 
+  private const string GENERATION_URL = NetworkSettings.PROXY_URL_BASE
     + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
-  private const string UPSCALE_URL = NetworkSettings.PROXY_URL_BASE 
-    + "api/image/v1/projects/{1}/locations/{2}/publishers/google/models/{3}:predict";
+  private const int MAX_RETRIES = 3;
+  private const int TIMEOUT_SECONDS = 45;
 
-  public async Task<List<string>> GetImagesBase64Encoded(string prompt, string negativePrompt, int imageCount = 1)
+  public enum ImageGenStatus
+  {
+    Succeeded,
+    SucceededAfterRetry,
+    FailedDueToSafetyGuidelines,
+    FailedForOtherReason
+  }
+
+  public async Task<(List<string> images, ImageGenStatus status)> GetImagesBase64Encoded(string prompt, string negativePrompt, int imageCount = 1)
   {
     var url = string.Format(GENERATION_URL, LOCATION, PROJECT_ID, LOCATION, GENERATION_MODEL);
     var request = new ImageRequest
@@ -42,102 +48,66 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
 
     using (HttpClient client = new HttpClient())
     {
-      try
+      for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
       {
-        string jsonPayload = request.ToJson();
-        Debug.Log($"Making image gen request:\n{jsonPayload}");
-
-        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync(url, content);
-
-        if (response.IsSuccessStatusCode)
+        try
         {
-          string responseBody = await response.Content.ReadAsStringAsync();
+          client.Timeout = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+          string jsonPayload = request.ToJson();
+          Debug.Log($"Making image gen request:\n{jsonPayload}");
 
-          var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
-          var imageList = new List<string>();
-          foreach (var prediction in reply.predictions)
+          StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+          HttpResponseMessage response = await client.PostAsync(url, content);
+
+          if (response.IsSuccessStatusCode)
           {
-            imageList.Add(prediction.bytesBase64Encoded);
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
+            if (reply.predictions == null || reply.predictions.Count == 0)
+            {
+              Debug.LogWarning("Empty response received, retrying...");
+              continue; // Retry if empty response
+            }
+
+            var imageList = new List<string>();
+            foreach (var prediction in reply.predictions)
+            {
+              imageList.Add(prediction.bytesBase64Encoded);
+            }
+            return (imageList, attempt == 0 ? ImageGenStatus.Succeeded : ImageGenStatus.SucceededAfterRetry);
           }
-          return imageList;
+          else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+          {
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            Debug.LogError($"Image gen failed with status: {response.StatusCode} and response: {errorResponse}");
+            return (null, ImageGenStatus.FailedDueToSafetyGuidelines); //Return bad response so caller can update prompt and retry
+          }
+          else
+          {
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            Debug.LogError($"Image gen failed with status: {response.StatusCode} and response: {errorResponse}");
+            return (null, ImageGenStatus.FailedForOtherReason); //Return bad response so caller can decide what to do
+          }
         }
-        else
+        catch (TaskCanceledException)
         {
-          string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Image gen failed with status: {response.StatusCode} and response {errorResponse}");
-          return null;
+          Debug.LogError("Image gen request timed out. Retrying...");
+          continue;
+        }
+        catch (Exception e)
+        {
+          Debug.LogError($"Image gen failed: {e.Message}");
+          return (null, ImageGenStatus.FailedForOtherReason);
         }
       }
-      catch (Exception e)
-      {
-        Debug.LogError($"Image gen failed: {e.Message}");
-        return null;
-      }
+
+      Debug.LogError("Max retries reached. Image gen failed.");
+      return (null, ImageGenStatus.FailedForOtherReason);
     }
   }
 
-  public async Task<string> UpscaleImageBase64Ecoded(string base64EncodedImage, string prompt)
-  {
-    var url = string.Format(UPSCALE_URL, LOCATION, PROJECT_ID, LOCATION, UPSCALE_MODEL);
-    var request = new ImageRequest
-    {
-      instances = new List<ImageGenerationInstance>
-      {
-        new ImageGenerationInstance
-        {
-          prompt = prompt,
-          image = new ImageGenerationImage
-          {
-            bytesBase64Encoded = base64EncodedImage
-          }
-        }
-      },
-      parameters = new ImageGenerationParameters
-      {
-        sampleCount = GenerationSettings.UPSCALE_SAMPLE_COUNT,
-        mode = GenerationSettings.UPSCALE_MODE,
-        upscaleConfig = new UpscaleConfig
-        {
-          upscaleFactor = GenerationSettings.UPSCALE_FACTOR
-        }
-      }
-    };
-
-    using (HttpClient client = new HttpClient())
-    {
-      try
-      {
-        string jsonPayload = request.ToJson();
-        Debug.Log($"Making image upscale request:\n{jsonPayload}");
-        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync(url, content);
-
-        if (response.IsSuccessStatusCode)
-        {
-          string responseBody = await response.Content.ReadAsStringAsync();
-          Debug.Log($"Image response body {responseBody}");
-
-          var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
-          return reply.predictions[0].bytesBase64Encoded;
-        }
-        else
-        {
-          Debug.LogError($"Image upscale failed with status: {response.StatusCode}");
-          string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Error response: {errorResponse}");
-          return null;
-        }
-      }
-      catch (Exception e)
-      {
-        Debug.LogError($"Image upscale failed: {e.Message}");
-        return null;
-      }
-    }
-  }
-
-  public async Task<Texture2D> GetRandomlyEditedImage(Texture2D initialImage)
+  public async Task<(Texture2D image, ImageGenStatus status)> GetRandomlyEditedImage(Texture2D initialImage)
   {
     var bytes = initialImage.EncodeToPNG();
     var base64Encoded = Convert.ToBase64String(bytes);
@@ -180,39 +150,64 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
 
     using (HttpClient client = new HttpClient())
     {
-      try
+      for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
       {
-        string jsonPayload = request.ToJson();
-        Debug.Log($"Making image edit request:\n{JsonUtility.ToJson(editOptions)}");
-
-        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync(url, content);
-
-        if (response.IsSuccessStatusCode)
+        try
         {
-          string responseBody = await response.Content.ReadAsStringAsync();
-          var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
-          Debug.Log($"Got response for image edit with {reply.predictions.Count} samples");
-          var imageList = new List<string>();
-          foreach (var prediction in reply.predictions)
+          client.Timeout = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+          string jsonPayload = request.ToJson();
+          Debug.Log($"Making image edit request:\n{JsonUtility.ToJson(editOptions)}");
+
+          StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+          HttpResponseMessage response = await client.PostAsync(url, content);
+
+          if (response.IsSuccessStatusCode)
           {
-            imageList.Add(prediction.bytesBase64Encoded);
+            string responseBody = await response.Content.ReadAsStringAsync();
+            var reply = JsonUtility.FromJson<ImageResponse>(responseBody);
+            Debug.Log($"Got response for image edit with {reply.predictions.Count} samples");
+
+            if (reply.predictions.Count == 0)
+            {
+              Debug.LogWarning("Empty response received, retrying...");
+              continue;
+            }
+
+            var imageList = new List<string>();
+            foreach (var prediction in reply.predictions)
+            {
+              imageList.Add(prediction.bytesBase64Encoded);
+            }
+            return (Base64ToTexture(imageList[0]), attempt == 0 ? ImageGenStatus.Succeeded : ImageGenStatus.SucceededAfterRetry);
           }
-          return Base64ToTexture(imageList[0]);
+          else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+          {
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            Debug.LogError($"Image edit failed with status: {response.StatusCode} and response: {errorResponse}");
+            return (null, ImageGenStatus.FailedDueToSafetyGuidelines); //Let caller know it's a bad prompt immediately
+          }
+          else
+          {
+            Debug.LogError($"Image gen failed with status: {response.StatusCode}");
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            Debug.LogError($"Image gen error response: {errorResponse}");
+            return (null, ImageGenStatus.FailedForOtherReason); //Let caller know immediately
+          }
         }
-        else
+        catch (TaskCanceledException)
         {
-          Debug.LogError($"Image gen failed with status: {response.StatusCode}");
-          string errorResponse = await response.Content.ReadAsStringAsync();
-          Debug.LogError($"Image gen error response: {errorResponse}");
-          return null;
+          Debug.LogError("Image edit request timed out. Retrying...");
+          continue;
+        }
+        catch (Exception e)
+        {
+          Debug.LogError($"Image edit failed: {e.Message}");
+          return (null, ImageGenStatus.FailedForOtherReason);
         }
       }
-      catch (Exception e)
-      {
-        Debug.LogError($"Image gen failed: {e.Message}");
-        return null;
-      }
+
+      Debug.LogError("Max retries reached. Image edit failed.");
+      return (null, ImageGenStatus.FailedForOtherReason);
     }
   }
 

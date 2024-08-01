@@ -122,6 +122,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Immediately kick off final story sequence
     _ = new StoryAndImagePromptSeqeuence().RunAsync(_payload).ContinueWith((task) =>
     {
+      Debug.LogWarning("Got results back from story and image prompt sequence");
       _finalImage = task.Result.FinalImage;
       _payload = task.Result.Payload;
       _finalStory = ParseInfoFromReply(task.Result.Reply).Item2;
@@ -297,6 +298,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
   private void ApplyCommentaryToMarkers(string reply)
   {
+    //Persist random so we get the next random in sequence without repeating due to Time as seed
+    var rand = new System.Random();
     for (int i = 1; i <= 3; i++)
     {
       var pattern = @"^Item " + i + @":\s*(.*)$";
@@ -312,6 +315,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       else
       {
         Debug.LogError($"Failed to get item {i} from reply");
+        _captureMarkerSequences[i - 1].SetCommentary(DialogConstants.GetRandomFailedCommentary(rand));
       }
     }
   }

@@ -82,12 +82,12 @@ public class MultiTurnChatTester : MonoBehaviour, IPointerDownHandler, IPointerU
       var prompts = await ImagePromptGenerator.Instance.GetPromptAndNegativePrompt(_chatInProgress);
 
       //8.2. Get set of images from the image generator
-      var images = await ImageGenerationManager.Instance.GetImagesBase64Encoded(prompts.Item1, prompts.Item2);
+      var imageGenResponse = await ImageGenerationManager.Instance.GetImagesBase64Encoded(prompts.Item1, prompts.Item2);
 
       //8.3. Decode and assign images to UI
-      for (int i = 0; i < images.Count; i++)
+      for (int i = 0; i < imageGenResponse.images.Count; i++)
       {
-        Texture2D texture = ImageGenerationManager.Base64ToTexture(images[i]);
+        Texture2D texture = ImageGenerationManager.Base64ToTexture(imageGenResponse.images[i]);
         if (texture != null)
         {
           _images[i].texture = texture;
