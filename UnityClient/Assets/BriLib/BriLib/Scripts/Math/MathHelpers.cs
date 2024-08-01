@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace BriLib
@@ -119,6 +120,18 @@ namespace BriLib
         public static T SelectFromRange<T>(List<T> list, System.Random rand)
         {
             return list[rand.Next(list.Count)];
+        }
+
+
+        /// <summary>
+        /// Select one random entry from an enum
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <returns></returns>
+        public static T SelectFromEnum<T>(Random rand) where T : Enum
+        {
+            Array values = Enum.GetValues(typeof(T));
+            return (T)values.GetValue(rand.Next(values.Length));
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using LLM.Network;
 using Request = LLM.Network.LLMRequestPayload;
+using BriLib;
 
 public class AdventureSequence : ISequence<AdventureDependencies, AdventureResult>
 {
@@ -17,6 +18,11 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   private int _imagesUploaded = 0;
   private int _audioUploaded = 0;
   private Request _payload;
+  private List<CharacterStates> _talkingStates = new List<CharacterStates>
+  {
+    CharacterStates.TalkingDisappointed, CharacterStates.TalkingMad, CharacterStates.TalkingSurprised, CharacterStates.Talking
+  };
+  private CharacterAnimationController _charAnimator;
 
   public async Task<AdventureResult> RunAsync(AdventureDependencies dependencies)
   {
@@ -31,6 +37,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     }
 
     var character = dependencies.Character;
+    _charAnimator = character.gameObject.GetComponent<CharacterAnimationController>();
 
     //Get initial text from LLM
     var payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
@@ -43,12 +50,13 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     while (character.BusyPathing) await Task.Delay(10);
 
     //Run intro convo until state changes
-    if (!dependencies.IsRepeat) { _payload = (await RunConvoUntilStateChanges(_payload, StoryState.Intro)).Item1; }
+    if (!dependencies.IsRepeat) 
+    { 
+      _payload = (await RunConvoUntilStateChanges(_payload, StoryState.Intro, character)).Item1; 
+    }
     
     //Choose which story to play
-    //var convoResult = await RunConvoUntilStateChanges(_payload, StoryState.StorySelect);
-    //_payload = convoResult.Item1;
-    var storyOption = await new ChooseStorySequence().RunAsync();
+    var storyOption = await new ChooseStorySequence().RunAsync(character);
     _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart
     {
       text = storyOption
@@ -57,6 +65,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     _payload = payloadReplyPair.Item1;
     stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+    character.SetState(CharacterStates.TalkingSurprised);
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
@@ -64,6 +73,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     for (int i = 0; i < ITEM_COUNT; i++)
     {
       _ = SpeechManager.Instance.Speak(itemStrings[i]);
+      character.SetState(CharacterStates.TalkingDisappointed);
       var tex = await GetCameraImage(itemStrings[i]);
 
       //Add a delay so audio UI and picture UI don't stomp on each other
@@ -141,7 +151,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
     //Wait for results for big portal to be available before advancing at this point
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    if (string.IsNullOrEmpty(_finalStory) || _finalImage != null)
+    if (string.IsNullOrEmpty(_finalStory) || _finalImage == null)
     {
       _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
@@ -150,6 +160,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     PortalManager.Instance.SetHeroPortalActivatable(() => _bigPortalActivated = true);
     await Task.Delay(DialogConstants.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+    _charAnimator.SetAnimation(DragonAnimation.Jump);
     _ = SpeechManager.Instance.Speak(DialogConstants.PORTAL_READY);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
@@ -158,8 +169,10 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.PortalActivater.SetShowable(false, null);
     await Task.Delay(DialogConstants.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+    character.SetState(CharacterStates.Flabbergasted);
     _ = SpeechManager.Instance.Speak(DialogConstants.OPENING_PORTAL);
     await Task.Delay(4000);
+    character.SetState(CharacterStates.FlyingToPlayer);
 
     //Speak final story while showing the UI
     _ = SpeechManager.Instance.Speak(_finalStory);
@@ -205,7 +218,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       _payload = payloadReplyPair.Item1;
       stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
-      payloadReplyPair = await RunConvoUntilStateChanges(_payload, StoryState.FreeConversation);
+      payloadReplyPair = await RunConvoUntilStateChanges(_payload, StoryState.FreeConversation, character);
     }
 
     return new AdventureResult
@@ -239,7 +252,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.LongPressButton.Hide();
   }
 
-  private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state)
+  private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state, CharacterBehaviorController character)
   {
     var stateReplyPair = new Tuple<StoryState, string>(state, string.Empty);
     while (stateReplyPair.Item1 == state)
@@ -256,6 +269,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
       //Say latest message
       while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+      var randomTalkState = MathHelpers.SelectFromRange(_talkingStates, new System.Random());
+      character.SetState(randomTalkState);
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     }
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);

@@ -25,7 +25,7 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _flyInStartingAngleFromPlayerForward;
   [Header("Item Shown Position Configuration")]
   [Tooltip("Distance to point from camera")][SerializeField] private float _shownObjectDistanceForward;
-  [Tooltip("How far away from whcih to look at object")][SerializeField] private float _shownObjectLookDistance;
+  [Tooltip("How far away from which to look at object")][SerializeField] private float _shownObjectLookDistance;
   [SerializeField] private float _shownObjectAngleToSeekTo;
   [Header("Idle Procedural Animation")]
   [SerializeField] private float _upDownHoverAmplitude;
@@ -128,7 +128,7 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterStates.Flabbergasted:
         _animationController.SetAnimation(DragonAnimation.Die);
         _startPosition = transform.position;
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = _startPosition;
         _targetPosition.y = PlaneManager.Instance.GroundHeight;
         break;
       case CharacterStates.ShownObject:

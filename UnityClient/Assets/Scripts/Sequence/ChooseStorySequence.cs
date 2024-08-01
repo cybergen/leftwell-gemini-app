@@ -2,11 +2,11 @@ using System;
 using System.Threading.Tasks;
 using BriLib;
 
-public class ChooseStorySequence : ISequence<string>
+public class ChooseStorySequence : ISequence<CharacterBehaviorController, string>
 {
   private const int OPTION_COUNT = 3;
 
-  public async Task<string> RunAsync()
+  public async Task<string> RunAsync(CharacterBehaviorController character)
   {
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     await SpeechManager.Instance.Speak(DialogConstants.STORY_OPTIONS_INTRO);
@@ -16,6 +16,7 @@ public class ChooseStorySequence : ISequence<string>
 
     for (int i = 0; i < OPTION_COUNT; i++)
     {
+      character.SetState(CharacterStates.TalkingMad);
       await SpeechManager.Instance.Speak(DialogConstants.GetRandomOptionPrecedent());
       _ = SpeechManager.Instance.Speak(options[i]);
       var madeSelection = false;
