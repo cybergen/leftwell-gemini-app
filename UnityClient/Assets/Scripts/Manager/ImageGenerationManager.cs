@@ -70,6 +70,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
               continue; // Retry if empty response
             }
 
+            Debug.Log($"Resolved image gen for prompt: {request.instances[0].prompt}");
             var imageList = new List<string>();
             foreach (var prediction in reply.predictions)
             {
@@ -156,7 +157,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
         {
           client.Timeout = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
           string jsonPayload = request.ToJson();
-          Debug.Log($"Making image edit request:\n{JsonUtility.ToJson(editOptions)}");
+          Debug.Log($"Making image edit request prompt: {request.instances[0].prompt} and negative: {request.instances[0].negativePrompt}");
 
           StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
           HttpResponseMessage response = await client.PostAsync(url, content);
@@ -173,6 +174,7 @@ public class ImageGenerationManager : Singleton<ImageGenerationManager>
               continue;
             }
 
+            Debug.Log($"Resolved image edit for prompt: {request.instances[0].prompt}");
             var imageList = new List<string>();
             foreach (var prediction in reply.predictions)
             {

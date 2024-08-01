@@ -132,7 +132,6 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Immediately kick off final story sequence
     _ = new StoryAndImagePromptSeqeuence().RunAsync(_payload).ContinueWith((task) =>
     {
-      Debug.LogWarning("Got results back from story and image prompt sequence");
       _finalImage = task.Result.FinalImage;
       _payload = task.Result.Payload;
       _finalStory = ParseInfoFromReply(task.Result.Reply).Item2;

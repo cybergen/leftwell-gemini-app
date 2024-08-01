@@ -20,7 +20,6 @@ public class StoryAndImagePromptSeqeuence : ISequence<LLMRequestPayload, BigPort
     do
     {
       tries++;
-      Debug.Log($"Attempting generation of story result image");
       var imagePrompts = await ImagePromptGenerator.Instance.GetPromptAndNegativePrompt(arg);
       imageGenResponse = await ImageGenerationManager.Instance.GetImagesBase64Encoded(imagePrompts.Item1, imagePrompts.Item2);
     }

@@ -24,7 +24,6 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
     do
     {
       tries++;
-      Debug.Log($"Attempting generation of item image");
       imageGenResponse = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
     }
     while (tries < 3 && (imageGenResponse.status == ImageGenStatus.FailedDueToSafetyGuidelines

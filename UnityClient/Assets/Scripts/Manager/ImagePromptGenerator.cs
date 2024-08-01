@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using BriLib;
 using LLM.Network;
+using System.Text.RegularExpressions;
 
 public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
 {
@@ -46,16 +47,16 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
     //Parse out and return prompt strings
     string prompt = string.Empty;
     string negativePrompt = string.Empty;
-    var lines = responseTuple.Item2.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+    var lines = Regex.Split(responseTuple.Item2, @"\r\n|\n|\r");
     foreach (var line in lines)
     {
-      if (line.StartsWith("Prompt:"))
+      if (line.StartsWith(ImagePromptGenSettings.IMAGE_PROMPT_PRECEDENT))
       {
-        prompt = line.Substring("Prompt:".Length).Trim();
+        prompt = line.Substring(ImagePromptGenSettings.IMAGE_PROMPT_PRECEDENT.Length).Trim();
       }
-      else if (line.StartsWith("Negative Prompt:"))
+      else if (line.StartsWith(ImagePromptGenSettings.IMAGE_NEGATIVE_PROMPT_PRECEDENT))
       {
-        negativePrompt = line.Substring("Negative Prompt:".Length).Trim();
+        negativePrompt = line.Substring(ImagePromptGenSettings.IMAGE_NEGATIVE_PROMPT_PRECEDENT.Length).Trim();
       }
     }
 
