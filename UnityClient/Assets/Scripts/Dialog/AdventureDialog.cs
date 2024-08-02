@@ -155,6 +155,19 @@ public class AdventureDialog
     "Weird...",
   };
 
+  public static List<string> MAGIC_APPLIED_RESPONSES = new List<string>
+  {
+    "Tossing some magic on it!",
+    "Just a dash of mana and...",
+    "Sprinkling some magic on!",
+    "Let's see how this reacts...",
+    "And a little magic here...",
+    "Juicing it up!",
+    "Sparkle-fied",
+    "Blammo!",
+    "...there we go!",
+  };
+
   public static string GetRandomOptionPrecedent()
   {
     return MathHelpers.SelectFromRange(OPTION_PRECEDENTS, new Random());
@@ -163,6 +176,11 @@ public class AdventureDialog
   public static string GetRandomItemCaptureDialog()
   {
     return MathHelpers.SelectFromRange(ITEM_CAPTURE_RESPONSES, new Random());
+  }
+
+  public static string GetRandomMagicAppliedDialog()
+  {
+    return MathHelpers.SelectFromRange(MAGIC_APPLIED_RESPONSES, new Random());
   }
 
   public static List<string> GetItemStrings(int count)

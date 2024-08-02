@@ -98,7 +98,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       await SpeechManager.Instance.Speak(AdventureDialog.GetRandomItemCaptureDialog());
       await UseAudioCaptureUI();
 
-      character.SetState(CharacterStates.JumpingToPlayer);
+      character.SetState(CharacterStates.MagicingItem);
       _ = AudioCaptureManager.Instance.GetAudioAndUpload().ContinueWith((task) =>
       {
         _audioUploaded++;
@@ -110,9 +110,10 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
           text = $"Item {i}: {itemStrings[i]}"
         });
       });
+      _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomMagicAppliedDialog());
 
       //Add a delay so audio UI, picture UI, and dragon animation sequence don't stomp on each other
-      await Task.Delay(2500);
+      await Task.Delay(4000);
     }
 
     //Get starting pose for big portal

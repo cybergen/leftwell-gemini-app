@@ -45,6 +45,12 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _portalAngleToSeekTo = -15f;
   [Header("Audio Stuff")]
   [SerializeField] private GameObject _whooshSource;
+  [Header("Item Orbit")]
+  [SerializeField] private OrbitAnimator _orbiter;
+  [SerializeField] private GameObject _orbitParticles;
+  [SerializeField] private float _orbitSpeed;
+  [SerializeField] private float _rotationSpeed;
+
 
   private CharacterStates _currentState = CharacterStates.None;
 
@@ -72,12 +78,19 @@ public class CharacterBehaviorController : MonoBehaviour
         BusyPathing = false;
         break;
       case CharacterStates.InitialFlyIn:
+        _orbitParticles.SetActive(false);
+        BusyPathing = false;
+        break;
       case CharacterStates.FlyingToPlayer:
       case CharacterStates.FlyingToPortal:
         BusyPathing = false;
         break;
       case CharacterStates.Flabbergasted:
         _sineMotionAnimator.Resume();
+        break;
+      case CharacterStates.MagicingItem:
+        BusyPathing = false;
+        _orbitParticles.SetActive(false);
         break;
     }
 
@@ -89,6 +102,7 @@ public class CharacterBehaviorController : MonoBehaviour
     {
       case CharacterStates.InitialFlyIn:
         _whooshSource.SetActive(true);
+        _orbitParticles.SetActive(true);
         BusyPathing = true;
 
         var dir = Quaternion.AngleAxis(_flyInStartingAngleFromPlayerForward, Vector3.up) * GetFlat(_cameraTransform.forward);
@@ -107,7 +121,6 @@ public class CharacterBehaviorController : MonoBehaviour
 
         _startPosition = transform.position;
         _targetPosition = GetStandardPositionByPlayer();
-        _animationController.SetAnimation(DragonAnimation.FlyLeft);
         _prePathRotation = transform.rotation;
 
         _traverseProgress = 0f;
@@ -156,6 +169,12 @@ public class CharacterBehaviorController : MonoBehaviour
         _traverseProgress = 0f;
 
         _animationController.SetAnimation(DragonAnimation.Fly);
+        break;
+      case CharacterStates.MagicingItem:
+        BusyPathing = true;
+        _ = _orbiter.Play(_shownObjectLookPosition, _orbitSpeed, _rotationSpeed);
+        _orbitParticles.SetActive(true);
+        _animationController.SetAnimation(DragonAnimation.FlyLeft);
         break;
       case CharacterStates.PathToPlayerAndPresentPicture:
         _targetPosition = GetStandardPositionByPlayer();
@@ -230,6 +249,9 @@ public class CharacterBehaviorController : MonoBehaviour
         {
           BusyPathing = false;
         }
+        break;
+      case CharacterStates.MagicingItem:
+        if (!_orbiter.Animating) { SetState(CharacterStates.JumpingToPlayer); }
         break;
       case CharacterStates.JumpingToPlayer:
         var preJumpRot = GetFlattenedRotation(_targetPosition - _startPosition);
@@ -400,5 +422,6 @@ public enum CharacterStates
   Flabbergasted,
   FlyingToPortal,
   IdleByPortal,
-  FlyAway
+  FlyAway,
+  MagicingItem,
 }

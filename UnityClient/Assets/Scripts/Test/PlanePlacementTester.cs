@@ -83,6 +83,11 @@ public class PlanePlacementTester : MonoBehaviour
     _behaviorController.SetState(CharacterStates.FlyingToPlayer);
   }
 
+  public void OnMagicItemClicked()
+  {
+    _behaviorController.SetState(CharacterStates.MagicingItem);
+  }
+
   private void Start()
   {
     _planeManager.planesChanged += OnPlanesChanged;
