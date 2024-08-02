@@ -46,8 +46,9 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
     //Make wizard fly in and start talking while arriving
     character.SetState(CharacterStates.InitialFlyIn);
-    await SpeechManager.Instance.Speak(stateReplyPair.Item2);
+    _ = SpeechManager.Instance.Speak(stateReplyPair.Item2);
     while (character.BusyPathing) await Task.Delay(10);
+    CharacterHelpers.AnimateEventually(CharacterStates.TalkingSurprised, character);
 
     //Run intro convo until state changes
     if (!dependencies.IsRepeat) 
@@ -65,7 +66,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     _payload = payloadReplyPair.Item1;
     stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    character.SetState(CharacterStates.TalkingSurprised);
+    CharacterHelpers.AnimateEventually(CharacterStates.TalkingSurprised, character);
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
@@ -110,8 +111,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
         });
       });
 
-      //Add a delay so audio UI and picture UI don't stomp on each other
-      await Task.Delay(450);
+      //Add a delay so audio UI, picture UI, and dragon animation sequence don't stomp on each other
+      await Task.Delay(2500);
     }
 
     //Get starting pose for big portal
@@ -140,6 +141,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Wait for both edited image and commentary reply to come in before allowing activation
     while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+    _charAnimator.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
     _ = SpeechManager.Instance.Speak(AdventureDialog.ITEMS_READY);
 
     //Require user explores magical items before advancing
@@ -152,6 +154,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     if (string.IsNullOrEmpty(_finalStory) || _finalImage == null)
     {
+      _charAnimator.PlayOnce(DragonAnimation.Damage, DragonAnimation.Fly);
       _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_NOT_READY);
       while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
     }
@@ -159,7 +162,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     PortalManager.Instance.SetHeroPortalActivatable(() => _bigPortalActivated = true);
     await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    _charAnimator.SetAnimation(DragonAnimation.Jump);
+    _charAnimator.PlayOnce(DragonAnimation.Fire, DragonAnimation.Jump);
     _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_READY);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
 
@@ -168,12 +171,12 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.PortalActivater.SetShowable(false, null);
     await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    character.SetState(CharacterStates.Flabbergasted);
+    character.SetState(CharacterStates.FlyingToPlayer);
     _ = SpeechManager.Instance.Speak(AdventureDialog.OPENING_PORTAL);
     await Task.Delay(4000);
-    character.SetState(CharacterStates.FlyingToPlayer);
 
     //Speak final story while showing the UI
+    CharacterHelpers.AnimateEventually(CharacterStates.Talking, character);
     _ = SpeechManager.Instance.Speak(_finalStory);
     bool hidden = false;
     Action onHide = () => { hidden = true; };
@@ -268,7 +271,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       //Say latest message
       while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
       var randomTalkState = MathHelpers.SelectFromRange(_talkingStates, new System.Random());
-      character.SetState(randomTalkState);
+      CharacterHelpers.AnimateEventually(randomTalkState, character);
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     }
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);

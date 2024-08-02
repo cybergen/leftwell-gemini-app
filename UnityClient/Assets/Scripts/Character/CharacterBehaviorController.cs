@@ -28,8 +28,7 @@ public class CharacterBehaviorController : MonoBehaviour
   [Tooltip("How far away from which to look at object")][SerializeField] private float _shownObjectLookDistance;
   [SerializeField] private float _shownObjectAngleToSeekTo;
   [Header("Idle Procedural Animation")]
-  [SerializeField] private float _upDownHoverAmplitude;
-  [SerializeField] private float _upDownHoverSpeed;
+  [SerializeField] private SineMotionAnimator _sineMotionAnimator;
   [Header("Jump to Player Config")]
   [SerializeField] private float _pathingSpinDuration = 0.25f;
   [SerializeField] private float _pathingJumpDuration = 1f;
@@ -64,12 +63,21 @@ public class CharacterBehaviorController : MonoBehaviour
 
     switch (_currentState)
     {
-      case CharacterStates.InitialFlyIn:
       case CharacterStates.ShownObject:
+        _sineMotionAnimator.Resume();
+        BusyPathing = false;
+        break;
       case CharacterStates.JumpingToPlayer:
+        _sineMotionAnimator.Resume();
+        BusyPathing = false;
+        break;
+      case CharacterStates.InitialFlyIn:
       case CharacterStates.FlyingToPlayer:
       case CharacterStates.FlyingToPortal:
         BusyPathing = false;
+        break;
+      case CharacterStates.Flabbergasted:
+        _sineMotionAnimator.Resume();
         break;
     }
 
@@ -94,6 +102,7 @@ public class CharacterBehaviorController : MonoBehaviour
         _animationController.SetAnimation(DragonAnimation.FlyDown);
         break;
       case CharacterStates.JumpingToPlayer:
+        _sineMotionAnimator.Stop();
         BusyPathing = true;
 
         _startPosition = transform.position;
@@ -126,12 +135,14 @@ public class CharacterBehaviorController : MonoBehaviour
         _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
         break;
       case CharacterStates.Flabbergasted:
+        _sineMotionAnimator.Stop();
         _animationController.SetAnimation(DragonAnimation.Die);
         _startPosition = transform.position;
         _targetPosition = _startPosition;
         _targetPosition.y = PlaneManager.Instance.GroundHeight;
         break;
       case CharacterStates.ShownObject:
+        _sineMotionAnimator.Stop();
         BusyPathing = true;
 
         _shownObjectLookPosition = _cameraTransform.position + GetFlat(_cameraTransform.forward) * _shownObjectDistanceForward;
