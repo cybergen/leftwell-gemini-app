@@ -4,6 +4,13 @@ using UnityEngine;
 public class CharacterAnimationController : MonoBehaviour
 {
   [SerializeField] private Animator _animator;
+  [SerializeField] private GameObject _fireParticles;
+  [SerializeField] private PlayAfterDelay _fireSound;
+  [SerializeField] private HatJumpAnimator _hatJump;
+  [SerializeField] private int _hatJumpDelay = 600;
+  [SerializeField] private int _hatJumpDurationMillis = 600;
+  [SerializeField] private int _hatRoarDelay = 300;
+  [SerializeField] private int _hatRoarDurationMillis = 400;
 
   public void SetAnimation(DragonAnimation animation)
   {
@@ -25,13 +32,18 @@ public class CharacterAnimationController : MonoBehaviour
         delayTime = 1150;
         break;
       case DragonAnimation.Roar:
+        _hatJump.Play(_hatRoarDelay, _hatRoarDurationMillis);
         delayTime = 1550;
         break;
       case DragonAnimation.Jump:
+        _hatJump.Play(_hatJumpDelay, _hatJumpDurationMillis);
         delayTime = 950;
         break;
       case DragonAnimation.Fire:
         delayTime = 560;
+        _fireSound.Play();
+        _fireParticles.SetActive(false);
+        _fireParticles.SetActive(true);
         break;
       case DragonAnimation.Run:
         delayTime = 500;
@@ -47,6 +59,11 @@ public class CharacterAnimationController : MonoBehaviour
 
     //Transition to next animation when first one has resolved
     SetAnimation(subsequentAnimation);
+  }
+
+  private void Awake()
+  {
+    _fireParticles.SetActive(false);
   }
 }
 
