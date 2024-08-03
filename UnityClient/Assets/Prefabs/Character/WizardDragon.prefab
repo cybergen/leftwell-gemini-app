@@ -376,7 +376,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animationController: {fileID: -4685691666236101122}
   _cameraTransform: {fileID: 0}
-  _heightFromGroundToSeek: 0.3
+  _heightFromGroundToSeek: 0.65
   _distanceFromPlayerToSeek: 0.9
   _angleFromPlayerForwardToSeek: -10
   _distanceToTargetBeforeRotationStart: 0.38

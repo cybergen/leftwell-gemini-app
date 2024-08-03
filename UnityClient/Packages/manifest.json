@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.kyrylokuzyk.arfoundationremote": "file:../Assets/Plugins/ARFoundationRemoteInstaller/com.kyrylokuzyk.arfoundationremote.tgz",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.4.3",
     "com.unity.ext.nunit": "1.0.6",
@@ -16,6 +15,7 @@
     "com.unity.visualscripting": "1.9.4",
     "com.unity.xr.arcore": "5.1.5",
     "com.unity.xr.arfoundation": "5.1.5",
+    "com.unity.xr.arkit": "5.1.5",
     "com.unity.xr.interaction.toolkit": "2.5.4",
     "com.unity.xr.openxr": "1.11.0",
     "com.unity.modules.ai": "1.0.0",

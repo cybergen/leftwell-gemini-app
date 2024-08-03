@@ -8,6 +8,7 @@ public class RequestPermissionsSequence : ISequence<CameraRigBundle, bool>
     if (!PermissionsManager.Instance.CheckPermission(AppPermission.Camera))
     {
       await SpeechManager.Instance.Speak(FTEDialog.REQUEST_CAMERA);
+#if UNITY_ANDROID
       rigBundle.SetCameraActive(true);
 
       await Task.Delay(1000);
@@ -17,6 +18,27 @@ public class RequestPermissionsSequence : ISequence<CameraRigBundle, bool>
         await SpeechManager.Instance.Speak(FTEDialog.REJECTED_PERMISSION);
         return false;
       }
+#elif UNITY_IOS
+      bool gotResponse = false;
+      bool accepted = false;
+      PermissionsManager.Instance.RequestPermission(AppPermission.Camera, (response) =>
+      {
+        accepted = response;
+        gotResponse = true;
+      });
+      while (!gotResponse) { await Task.Delay(10); }
+    
+      if (accepted)
+      {
+        rigBundle.SetCameraActive(true);
+        await Task.Delay(2000); //Wait a bit for low end devices - my iPhoneXR goes crazy
+      }
+      else
+      {
+        await SpeechManager.Instance.Speak(FTEDialog.REJECTED_PERMISSION);
+        return false;
+      }
+#endif
 
       await SpeechManager.Instance.Speak(FTEDialog.GOT_CAMERA);
     }
