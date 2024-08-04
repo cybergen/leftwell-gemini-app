@@ -67,7 +67,7 @@ public class SpeechManager : Singleton<SpeechManager>
 
     var url = string.Format(
         apiUrl,
-        SpeechSettings.KING_OF_NY_VOICE_ID,
+        SpeechSettings.AERISITA_VOICE_ID,
         SpeechSettings.OUTPUT_FORMAT,
         SpeechSettings.OPTIMIZE_STREAM_LATENCY);
     string payload = JsonUtility.ToJson(body);
