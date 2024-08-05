@@ -184,6 +184,16 @@ namespace BriLib
       return 1 - BounceEaseOut(1f - time);
     }
 
+    public static float EaseInOutBack(float time)
+    {
+      float c1 = 1.70158f;
+      float c2 = c1 * 1.525f;
+
+      return time < 0.5
+        ? (Mathf.Pow(2 * time, 2) * ((c2 + 1) * 2 * time - c2)) / 2
+        : (Mathf.Pow(2 * time - 2, 2) * ((c2 + 1) * (time * 2 - 2) + c2) + 2) / 2;
+    }
+
     private static float TwoPartEquation(float time, Func<float, float> partOne, Func<float, float> partTwo)
     {
       if (time > 0.5f) return (partOne(1f) + partTwo((time - 0.5f) / 0.5f)) / 2f;

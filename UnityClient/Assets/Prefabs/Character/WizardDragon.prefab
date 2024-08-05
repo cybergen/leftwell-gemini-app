@@ -389,7 +389,7 @@ MonoBehaviour:
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
   _shownObjectDistanceForward: 1.2
-  _shownObjectLookDistance: 0.35
+  _shownObjectLookDistance: 0.4
   _shownObjectAngleToSeekTo: -35
   _sineMotionAnimator: {fileID: 5616403240992820260}
   _pathingSpinDuration: 0.3

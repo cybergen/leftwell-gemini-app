@@ -5,10 +5,10 @@ using BriLib;
 
 public class PortalManager : Singleton<PortalManager>
 {
+  public float MarkerSpawnDistance;
   [SerializeField] private GameObject _smallMarkerPrefab;
   [SerializeField] private GameObject _heroPortalPrefab;
   [SerializeField] private float _heroPortalSpawnHeight;
-  [SerializeField] private float _forwardSpawnDistance;
   [SerializeField] private float _heroPortalSpawnDistance;
 
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
@@ -17,7 +17,7 @@ public class PortalManager : Singleton<PortalManager>
   public int SpawnCaptureMarker()
   {
     var pose = CameraManager.Instance.GetCameraPose();
-    var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * _forwardSpawnDistance;
+    var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * MarkerSpawnDistance;
     var marker = Instantiate(_smallMarkerPrefab, pos, pose.Item2);
     var captureMarker = marker.GetComponent<ItemCaptureMarker>();
     var index = _captureMarkers.Count;

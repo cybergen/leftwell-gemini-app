@@ -158,7 +158,8 @@ public class CharacterBehaviorController : MonoBehaviour
         _sineMotionAnimator.Stop();
         BusyPathing = true;
 
-        _shownObjectLookPosition = _cameraTransform.position + GetFlat(_cameraTransform.forward) * _shownObjectDistanceForward;
+        _shownObjectLookPosition 
+          = _cameraTransform.position + _cameraTransform.forward * PortalManager.Instance.MarkerSpawnDistance;
 
         var objectToCameraDir = GetFlat(_cameraTransform.position - _shownObjectLookPosition);
         objectToCameraDir = Quaternion.AngleAxis(_shownObjectAngleToSeekTo, Vector3.up) * objectToCameraDir;
