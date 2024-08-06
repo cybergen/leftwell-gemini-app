@@ -116,7 +116,7 @@ public class AdventureDialog
     "The Golden Dirigible",
     "The Fairy Barrow",
     "The Robot Philosopher",
-    "The Twelth Monkey",
+    "The Twelfth Monkey",
     "The Lost Heir",
     "The Pirate's Curse",
     "The Secret of the Labyrinth",

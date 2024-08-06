@@ -1062,7 +1062,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1610374083733814606}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.9999843
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1204,6 +1204,8 @@ MonoBehaviour:
   _vortex: {fileID: 0}
   _text: {fileID: 2009630826396534605}
   _animSeconds: 0.45
+  _portalIcon: {fileID: 7523787401259064755}
+  _shareIcon: {fileID: 4850988386853934195}
 --- !u!1 &1723325035493230252
 GameObject:
   m_ObjectHideFlags: 0
@@ -2632,7 +2634,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: -100, y: 130}
-  m_SizeDelta: {x: 600, y: 200}
+  m_SizeDelta: {x: 620, y: 200}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &4075387945395255100
 CanvasRenderer:
@@ -2662,7 +2664,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: OPEN PORTAL
+  m_text: Share Transformed Item
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2f5bfc12c8adb444eb73eaa3c43e1833, type: 2}
   m_sharedMaterial: {fileID: -3510493502359328671, guid: 2f5bfc12c8adb444eb73eaa3c43e1833, type: 2}
@@ -3268,6 +3270,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6252209861336372445}
+  - {fileID: 2215688893087635630}
   - {fileID: 8134516530789282804}
   m_Father: {fileID: 1971591645633000896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3942,6 +3945,81 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39a1b4998f8fde54db4411f584ad6484, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &4850988386853934195
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2215688893087635630}
+  - component: {fileID: 5703145883676326829}
+  - component: {fileID: 1275923284915537607}
+  m_Layer: 5
+  m_Name: ShareImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &2215688893087635630
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4850988386853934195}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7988735703906667074}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -5, y: -3}
+  m_SizeDelta: {x: -36, y: -36}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5703145883676326829
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4850988386853934195}
+  m_CullTransparentMesh: 1
+--- !u!114 &1275923284915537607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4850988386853934195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: c42a6b846514f944ba7ee7d03ad439f1, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4861501395036449531
 GameObject:
   m_ObjectHideFlags: 0
@@ -6907,7 +6985,7 @@ GameObject:
   - component: {fileID: 6957911044085286941}
   - component: {fileID: 1564317197134986404}
   m_Layer: 5
-  m_Name: Image
+  m_Name: VortexImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

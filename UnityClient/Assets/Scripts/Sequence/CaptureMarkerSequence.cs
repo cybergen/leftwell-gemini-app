@@ -8,6 +8,12 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   private string _commentary;
   private int _markerIndex;
   private bool _activated;
+  private string _itemString;
+
+  public CaptureMarkerSequence(string itemString)
+  {
+    _itemString = itemString;
+  }
 
   public void SetCommentary(string commentary)
   {
@@ -19,29 +25,30 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
   {
     _markerIndex = PortalManager.Instance.SpawnCaptureMarker();
 
-    (Texture2D image, ImageGenStatus status) imageGenResponse;
+    (Texture2D image, ImageGenStatus status) imageResponse;
     int tries = 0;
     do
     {
       tries++;
-      imageGenResponse = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
+      imageResponse = await ImageGenerationManager.Instance.GetRandomlyEditedImage(arg);
     }
-    while (tries < 3 && (imageGenResponse.status == ImageGenStatus.FailedDueToSafetyGuidelines
-      || imageGenResponse.status == ImageGenStatus.FailedForOtherReason));
+    while (tries < 3 && (imageResponse.status == ImageGenStatus.FailedDueToSafetyGuidelines
+      || imageResponse.status == ImageGenStatus.FailedForOtherReason));
 
-    if (imageGenResponse.status != ImageGenStatus.Succeeded && imageGenResponse.status != ImageGenStatus.SucceededAfterRetry)
+    if (imageResponse.status != ImageGenStatus.Succeeded && imageResponse.status != ImageGenStatus.SucceededAfterRetry)
     {
       await SpeechManager.Instance.Speak(AdventureDialog.FAILED_TO_GET_ITEM_IMAGE);
       _transformedTexture = arg;
     }
     else
     {
-      _transformedTexture = imageGenResponse.image;
+      _transformedTexture = imageResponse.image;
     }
 
     CheckFinished();
 
     while (!_activated) await Task.Delay(10);
+    PortalManager.Instance.SetMarkerSharable(_markerIndex, "Share Transformed Item", null);
     return _commentary;
   }
 

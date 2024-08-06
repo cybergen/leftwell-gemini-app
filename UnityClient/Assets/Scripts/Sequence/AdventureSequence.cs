@@ -78,7 +78,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
       //Kick off image editing sequence in the background
       //Increment activated items after each one has been triggered to move on to the big portal
-      var captureMarkerSequence = new CaptureMarkerSequence();
+      var captureMarkerSequence = new CaptureMarkerSequence(itemStrings[i]);
       _ = captureMarkerSequence.RunAsync(tex).ContinueWith((task) => _activatedPortals++);
       _captureMarkerSequences.Add(captureMarkerSequence);
 

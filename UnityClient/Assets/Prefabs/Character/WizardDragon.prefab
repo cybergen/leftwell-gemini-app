@@ -382,7 +382,7 @@ MonoBehaviour:
   _distanceToTargetBeforeRotationStart: 0.25
   _movementSpeed: 1
   _rotationMultiplier: 5
-  _angleThresholdToTurnTowardPlayer: 35
+  _angleThresholdToTurnTowardPlayer: 15
   _distanceThresholdToMoveTowardPlayer: 1.5
   _distanceThresholdToMoveAwayFromPlayer: 0.5
   _flyInStartingHeight: 0.85

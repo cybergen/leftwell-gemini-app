@@ -45,9 +45,15 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers[markerIndex].MarkActivatable(finalImage, onActivated);
   }
 
-  public void SetMarkerSharable(int markerIndex)
+  public void SetMarkerSharable(int markerIndex, string shareText, Action onShared)
   {
-
+    Debug.LogWarning($"In SetMarkerSharable for cap index {markerIndex} and share text {shareText}");
+    if (!(_captureMarkers.Count > markerIndex) || markerIndex < 0)
+    {
+      Debug.LogError($"Attempted to set sharability for invalid capture marker index {markerIndex}");
+      return;
+    }
+    _captureMarkers[markerIndex].MarkSharable(shareText, onShared);
   }
 
   public void SetHeroPortalActivatable(Action onActivated)

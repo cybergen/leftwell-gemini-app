@@ -7,6 +7,8 @@ public class PortalActivater : MonoBehaviour
   [SerializeField] private VortexEffectController _vortex;
   [SerializeField] private TMP_Text _text;
   [SerializeField] private float _animSeconds = 0.45f;
+  [SerializeField] private GameObject _portalIcon;
+  [SerializeField] private GameObject _shareIcon;
   private Transform _cameraTransform;
   private bool _showable;
   private bool _wasActive;
@@ -32,7 +34,17 @@ public class PortalActivater : MonoBehaviour
     {
       _text.text = _currentActivatable.ActivationText;
       _screenUI.Show(_animSeconds);
-      _vortex.Show();
+      if (!_currentActivatable.ShareMode) 
+      {
+        _portalIcon.SetActive(true);
+        _shareIcon.SetActive(false);
+        _vortex.Show();
+      }
+      else
+      {
+        _portalIcon.SetActive(false);
+        _shareIcon.SetActive(true);
+      }
     }
     else if (!active && _wasActive)
     {

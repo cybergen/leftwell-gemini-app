@@ -10,6 +10,7 @@ public class HeroPortal : MonoBehaviour, IActivatable
       return _isOpen ? "Close Portal" : "Open Portal";
     }
   }
+  public bool ShareMode { get { return false; } }
   [SerializeField] private Animator _animator;
   [SerializeField] private AudioFader _loopingAudio;
   [SerializeField] private GameObject _openSoundOne;
