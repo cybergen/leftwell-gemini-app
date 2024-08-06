@@ -7,8 +7,7 @@ public class AdventureDialog
   public const string POSITION_PORTAL 
     = "I'll get these items ready. In the meantime, give me an open area where I can form the portal";
   public const string PORTAL_PLACED = "Perfect! I'll start working the big magic to get this spun up!";
-  public const string ITEMS_READY 
-    = "I used some magic on each of your items to reveal their true power! Go check out each one and activate it!";
+  public const string ITEMS_READY = "Your items have been transformed! Activate each one for me!";
   public const string PORTAL_NOT_READY = "Just a moment, I'm still trying to get this portal opened...";
   public const string PORTAL_READY = "The portal is ready!";
   public const string NO_STORY_CHOICE = "Picky picky! I'll choose for you then...";
@@ -157,15 +156,15 @@ public class AdventureDialog
 
   public static List<string> MAGIC_APPLIED_RESPONSES = new List<string>
   {
-    "Tossing some magic on it!",
+    "Tossing some magic on.",
     "Just a dash of mana and...",
     "Sprinkling some magic on!",
     "Let's see how this reacts...",
     "And a little magic here...",
-    "Juicing it up!",
+    "Juicing it up.",
     "Sparkle-fied",
-    "Blammo!",
-    "...there we go!",
+    // "Blammo!",
+    //"...there we go!",
   };
 
   public static string GetRandomOptionPrecedent()

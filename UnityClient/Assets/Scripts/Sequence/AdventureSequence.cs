@@ -28,7 +28,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     else 
     { 
       _payload = dependencies.ExistingPayload;
-      _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart { text = "Go again" });
+      _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart { text = StoryPromptSettings.RESTART_TRIGGER });
     }
 
     var character = dependencies.Character;
@@ -48,7 +48,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     //Run intro convo until state changes
     if (!dependencies.IsRepeat) 
     { 
-      _payload = (await RunConvoUntilStateChanges(_payload, StoryState.Intro, character)).Item1; 
+      _payload = (await TalkUntilStateChanges(_payload, StoryState.Intro, character)).Item1; 
     }
     
     //Choose which story to play
@@ -105,6 +105,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
           text = $"Item {i}: {itemStrings[i]}"
         });
       });
+      await Task.Delay(AdventureDialog.DIALOG_PAUSE);
       _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomMagicAppliedDialog());
 
       //Add a delay so audio UI, picture UI, and dragon animation sequence don't stomp on each other
@@ -188,6 +189,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     PortalManager.Instance.SetHeroPortalClosable(onPortalClosed);
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (!portalClosed) { await Task.Delay(10); }
+    UIManager.Instance.PortalActivater.SetShowable(false, Camera.main.transform);
     await Task.Delay(1000);
 
     //Ask whether to go again
@@ -209,13 +211,19 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     }
     else
     {
+      //Enable share UI again
+      UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
+
       character.SetState(CharacterState.FlyingToPlayer);
-      _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart { text = "Free converse" });
+      var textPart = new TextPart { text = StoryPromptSettings.FREE_CONVERSE_TRIGGER };
+      _payload.contents[_payload.contents.Count - 1].parts.Add(textPart);
       payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
       _payload = payloadReplyPair.Item1;
       stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
-      payloadReplyPair = await RunConvoUntilStateChanges(_payload, StoryState.FreeConversation, character);
+      Action onUIShown = () => { UIManager.Instance.PortalActivater.SetShowable(false, null); };
+      Action onUIHidden = () => { UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform); };
+      payloadReplyPair = await TalkUntilStateChanges(_payload, StoryState.FreeConversation, character, onUIShown, onUIHidden);
     }
 
     return new AdventureResult
@@ -249,12 +257,14 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.LongPressButton.Hide();
   }
 
-  private async Task<Tuple<Request, string>> RunConvoUntilStateChanges(Request payload, StoryState state, CharacterBehaviorController character)
+  private async Task<Tuple<Request, string>> TalkUntilStateChanges(Request payload, StoryState state, CharacterBehaviorController character, Action onUIShown = null, Action onUIHidden = null)
   {
     var stateReplyPair = new Tuple<StoryState, string>(state, string.Empty);
     while (stateReplyPair.Item1 == state)
     {
+      onUIShown?.Invoke();
       await UseAudioCaptureUI();
+      onUIHidden?.Invoke();
 
       //Capture audio, upload it, and use it in next LLM request
       payload = await AudioCaptureManager.Instance.GetAudioAndAddToRequest(payload);
@@ -366,7 +376,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     {
       new Content
       {
-        parts = new List<BasePart>{ new TextPart { text = "Begin" } },
+        parts = new List<BasePart>{ new TextPart { text = StoryPromptSettings.BEGIN_TRIGGER } },
         role = "user"
       }
     };

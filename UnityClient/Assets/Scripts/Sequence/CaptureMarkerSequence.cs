@@ -48,7 +48,7 @@ public class CaptureMarkerSequence : ISequence<Texture2D, string>
     CheckFinished();
 
     while (!_activated) await Task.Delay(10);
-    PortalManager.Instance.SetMarkerSharable(_markerIndex, "Share Transformed Item", null);
+    PortalManager.Instance.SetMarkerSharable(_markerIndex, "Share transformed item", null);
     return _commentary;
   }
 

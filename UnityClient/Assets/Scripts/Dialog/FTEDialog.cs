@@ -21,7 +21,7 @@ public class FTEDialog
   public const string TUT_CAM_TALK = "You must have potential! You created a capture spark. Now you'll need to say something about your Item for me and I'll hit it with my magic.";
   public const string TUT_CAM_TALK_SHORT = "Surely you've got more to say than that?";
   public const string TUT_CAM_TALK_SUCCESS = "Perfect! Let's see what it gets transmuted into...";
-  public const string TUT_ITEM_READY = "Your Item is transformed and ready to activate! I want you to look at the capture spark and press the button to activate it!";
+  public const string TUT_ITEM_READY = "Your Item is transformed! Look at the capture spark and tap the button to activate it!";
   public const string TUT_ITEM_GOOD = "There you go! You're practically ready to teach a thaumaturgy class at this point!";
   public const string TUT_ITEM_SHARABLE = "If you peek at your Item again, you can share a picture.";
   public const string TUT_DONE = "That's everything you need to know. We can run through this again if you'd like! Otherwise, good luck out there!";
