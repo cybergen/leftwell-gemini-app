@@ -14,6 +14,10 @@ public class CharacterAnimationController : MonoBehaviour
 
   public void SetAnimation(DragonAnimation animation)
   {
+    if (animation == DragonAnimation.Jump)
+    {
+      _hatJump.Play(_hatJumpDelay, _hatJumpDurationMillis);
+    }
     _animator.SetInteger("animation", (int)animation);
   }
 

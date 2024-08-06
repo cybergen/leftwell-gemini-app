@@ -117,7 +117,7 @@ namespace BriLib
         /// <param name="list"></param>
         /// <param name="rand"></param>
         /// <returns></returns>
-        public static T SelectFromRange<T>(List<T> list, System.Random rand)
+        public static T SelectFromRange<T>(List<T> list, Random rand)
         {
             return list[rand.Next(list.Count)];
         }

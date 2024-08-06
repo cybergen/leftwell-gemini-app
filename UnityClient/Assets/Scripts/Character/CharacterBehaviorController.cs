@@ -1,5 +1,6 @@
 using UnityEngine;
 using BriLib;
+using System.Collections.Generic;
 
 public class CharacterBehaviorController : MonoBehaviour
 {
@@ -53,10 +54,13 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _minTalkRetriggerDuration = 0.5f;
   [SerializeField] private float _maxTalkRetriggerDuration = 3f;
   private float _nextRetriggerTime = 0f;
-  private CharacterState _priorState;
-
-
   private CharacterState _currentState = CharacterState.None;
+  private CharacterState _priorState = CharacterState.None;
+  private List<DragonAnimation> _talkingStates = new List<DragonAnimation>
+  {
+    DragonAnimation.No, DragonAnimation.Roar, DragonAnimation.Yes, DragonAnimation.Damage
+  };
+  private System.Random _rand = new System.Random();
 
   //Static position traversal tracking
   private Vector3 _startPosition = Vector3.zero;
@@ -155,28 +159,10 @@ public class CharacterBehaviorController : MonoBehaviour
         _proceduralAnimator.Play();
         break;
       case CharacterState.Talking:
-        _animationController.PlayOnce(DragonAnimation.Fire, DragonAnimation.Fly);
+        var anim = MathHelpers.SelectFromRange(_talkingStates, _rand);
+        _animationController.PlayOnce(anim, DragonAnimation.Fly);
         _proceduralAnimator.Play();
-        _nextRetriggerTime
-          = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, new System.Random());
-        break;
-      case CharacterState.TalkingSurprised:
-        _proceduralAnimator.Play();
-        _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
-        _nextRetriggerTime 
-          = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, new System.Random());
-        break;
-      case CharacterState.TalkingDisappointed:
-        _proceduralAnimator.Play();
-        _animationController.PlayOnce(DragonAnimation.No, DragonAnimation.Fly);
-        _nextRetriggerTime
-          = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, new System.Random());
-        break;
-      case CharacterState.TalkingMad:
-        _proceduralAnimator.Play();
-        _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
-        _nextRetriggerTime
-          = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, new System.Random());
+        _nextRetriggerTime = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, _rand);
         break;
       case CharacterState.Flabbergasted:
         _proceduralAnimator.Stop();
@@ -192,11 +178,10 @@ public class CharacterBehaviorController : MonoBehaviour
         _shownObjectLookPosition 
           = _cameraTransform.position + _cameraTransform.forward * PortalManager.Instance.MarkerSpawnDistance;
 
-        var objectToCameraDir = GetFlat(_cameraTransform.position - _shownObjectLookPosition);
+        var objectToCameraDir = (_cameraTransform.position - _shownObjectLookPosition).normalized;
         objectToCameraDir = Quaternion.AngleAxis(_shownObjectAngleToSeekTo, Vector3.up) * objectToCameraDir;
 
         _targetPosition = _shownObjectLookPosition + objectToCameraDir * _shownObjectLookDistance;
-        _targetPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
         _startPosition = transform.position;
         _progress = 0f;
 
@@ -218,6 +203,7 @@ public class CharacterBehaviorController : MonoBehaviour
         _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Jump);
         break;
       case CharacterState.FlyingToPortal:
+        _progress = 0f;
         _startPosition = transform.position;
         var dirFromPortal = GetFlat(_cameraTransform.position - PortalManager.Instance.GetHeroPortalPosition());
         dirFromPortal = Quaternion.AngleAxis(_portalAngleToSeekTo, Vector3.up) * dirFromPortal;
@@ -241,9 +227,9 @@ public class CharacterBehaviorController : MonoBehaviour
 
   private Vector3 GetStandardPositionByPlayer()
   {
-    var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * GetFlat(_cameraTransform.forward);
+    var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
     var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
-    newPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
+    //newPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
     return newPosition;
   }
 
@@ -268,7 +254,7 @@ public class CharacterBehaviorController : MonoBehaviour
         if (_progress >= 1f)
         {
           BusyPathing = false;
-          SetState(CharacterState.IdleWithPlayer);
+          SetState(CharacterState.Talking);
         }
         break;
       case CharacterState.ShownObject:
@@ -323,21 +309,17 @@ public class CharacterBehaviorController : MonoBehaviour
         RunVisibilityCheck(delta);
         break;
       case CharacterState.Talking:
-      case CharacterState.TalkingSurprised:
-      case CharacterState.TalkingDisappointed:
-      case CharacterState.TalkingMad:
         RunVisibilityCheck(delta);
         _nextRetriggerTime -= delta;
         if (_nextRetriggerTime <= 0f )
         {
-          _nextRetriggerTime
-            = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, new System.Random());
-          DoAnimation(_currentState);
+          _nextRetriggerTime = MathHelpers.GetRandomFromRange(_minTalkRetriggerDuration, _maxTalkRetriggerDuration, _rand);
+          var anim = MathHelpers.SelectFromRange(_talkingStates, _rand);
+          _animationController.PlayOnce(anim, DragonAnimation.Fly);
         }
         break;
       case CharacterState.FlyingToPortal:
-        _progress 
-          = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
         if (_progress >= 1f) { BusyPathing = false; }
         break;
       case CharacterState.FlyAway:
@@ -372,30 +354,11 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
-  private void DoAnimation(CharacterState currentState)
-  {
-    switch (currentState)
-    {
-      case CharacterState.Talking:
-        _animationController.PlayOnce(DragonAnimation.Fire, DragonAnimation.Fly);
-        break;
-      case CharacterState.TalkingDisappointed:
-        _animationController.PlayOnce(DragonAnimation.No, DragonAnimation.Fly);
-        break;
-      case CharacterState.TalkingMad:
-        _animationController.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
-        break;
-      case CharacterState.TalkingSurprised:
-        _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
-        break;
-    }
-  }
-
   private void RunVisibilityCheck(float delta)
   {
     var distanceToCamera = Vector3.Distance(transform.position, _cameraTransform.position);
     var viewAngleThreshold = Mathf.Cos(_angleThresholdToTurnTowardPlayer * Mathf.Deg2Rad);
-    var currentDirDot = Vector3.Dot(GetFlat(_cameraTransform.forward), GetFlat(transform.position - _cameraTransform.position));
+    var currentDirDot = Vector3.Dot(_cameraTransform.forward, transform.position - _cameraTransform.position);
 
     //If player can't see dragon for too long, or if it is too close or too far, eventually path back
     if (currentDirDot < viewAngleThreshold || distanceToCamera > _distanceThresholdToMoveTowardPlayer
@@ -477,9 +440,6 @@ public enum CharacterState
   ReturnThenResume,
   IdleWithPlayer,
   Talking,
-  TalkingSurprised,
-  TalkingDisappointed,
-  TalkingMad,
   ShownObject,
   PathToPlayerAndPresentPicture,
   PresentingPicture,

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20a9241d38bd5174fa5e5e81e4505880, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MarkerSpawnDistance: 2
+  MarkerSpawnDistance: 1.25
   _smallMarkerPrefab: {fileID: 3446704381175424742, guid: 10340b27f9e3974499dbdd38abfe904e, type: 3}
   _heroPortalPrefab: {fileID: 4565741485230480569, guid: 0cdceb493be13c14db2c9ce17a3d77fb, type: 3}
   _heroPortalSpawnHeight: 0

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using LLM.Network;
 using Request = LLM.Network.LLMRequestPayload;
-using BriLib;
 
 public class AdventureSequence : ISequence<AdventureDependencies, AdventureResult>
 {
@@ -18,10 +17,6 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   private int _imagesUploaded = 0;
   private int _audioUploaded = 0;
   private Request _payload;
-  private List<CharacterState> _talkingStates = new List<CharacterState>
-  {
-    CharacterState.TalkingDisappointed, CharacterState.TalkingMad, CharacterState.TalkingSurprised, CharacterState.Talking
-  };
   private CharacterAnimationController _charAnimator;
 
   public async Task<AdventureResult> RunAsync(AdventureDependencies dependencies)
@@ -48,7 +43,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     character.SetState(CharacterState.InitialFlyIn);
     _ = SpeechManager.Instance.Speak(stateReplyPair.Item2);
     while (character.BusyPathing) await Task.Delay(10);
-    CharacterHelpers.AnimateEventually(CharacterState.TalkingSurprised, character);
+    CharacterHelpers.AnimateEventually(CharacterState.Talking, character);
 
     //Run intro convo until state changes
     if (!dependencies.IsRepeat) 
@@ -66,7 +61,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     _payload = payloadReplyPair.Item1;
     stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    CharacterHelpers.AnimateEventually(CharacterState.TalkingSurprised, character);
+    CharacterHelpers.AnimateEventually(CharacterState.Talking, character);
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
@@ -74,8 +69,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     for (int i = 0; i < ITEM_COUNT; i++)
     {
       _ = SpeechManager.Instance.Speak(itemStrings[i]);
-      var randomTalkState = MathHelpers.SelectFromRange(_talkingStates, new System.Random());
-      character.SetState(randomTalkState);
+      character.SetState(CharacterState.Talking);
       var tex = await GetCameraImage(itemStrings[i]);
 
       //Add a delay so audio UI and picture UI don't stomp on each other
@@ -175,7 +169,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     character.SetState(CharacterState.FlyingToPlayer);
     _ = SpeechManager.Instance.Speak(AdventureDialog.OPENING_PORTAL);
-    await Task.Delay(4000);
+    await Task.Delay(6000);
 
     //Speak final story while showing the UI
     CharacterHelpers.AnimateEventually(CharacterState.Talking, character);
@@ -272,8 +266,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
 
       //Say latest message
       while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-      var randomTalkState = MathHelpers.SelectFromRange(_talkingStates, new System.Random());
-      CharacterHelpers.AnimateEventually(randomTalkState, character);
+      CharacterHelpers.AnimateEventually(CharacterState.Talking, character);
       await SpeechManager.Instance.Speak(stateReplyPair.Item2);
     }
     return new Tuple<Request, string>(payload, stateReplyPair.Item2);

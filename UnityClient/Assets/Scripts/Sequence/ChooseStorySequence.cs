@@ -16,7 +16,7 @@ public class ChooseStorySequence : ISequence<CharacterBehaviorController, string
 
     for (int i = 0; i < OPTION_COUNT; i++)
     {
-      character.SetState(CharacterState.TalkingMad);
+      character.SetState(CharacterState.Talking);
       await SpeechManager.Instance.Speak(AdventureDialog.GetRandomOptionPrecedent());
       _ = SpeechManager.Instance.Speak(options[i]);
       var madeSelection = false;

@@ -65,7 +65,7 @@ public class PlanePlacementTester : MonoBehaviour
 
   public void OnTalkingMadClicked()
   {
-    _behaviorController.SetState(CharacterState.TalkingMad);
+    _behaviorController.SetState(CharacterState.Talking);
   }
 
   public void OnPresentingPictureClicked()
