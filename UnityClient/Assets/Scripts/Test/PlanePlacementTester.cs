@@ -15,17 +15,17 @@ public class PlanePlacementTester : MonoBehaviour
 
   public void OnFlyInClicked()
   {
-    _behaviorController.SetState(CharacterStates.InitialFlyIn);
+    _behaviorController.SetState(CharacterState.InitialFlyIn);
   }
 
   public void OnShowObjectClicked()
   {
-    _behaviorController.SetState(CharacterStates.ShownObject);
+    _behaviorController.SetState(CharacterState.ShownObject);
   }
 
   public void OnIdleClicked()
   {
-    _behaviorController.SetState(CharacterStates.IdleWithPlayer);
+    _behaviorController.SetState(CharacterState.IdleWithPlayer);
   }
 
   public void OnPlayYesClicked()
@@ -60,32 +60,32 @@ public class PlanePlacementTester : MonoBehaviour
 
   public void OnPathToPlayerClicked()
   {
-    _behaviorController.SetState(CharacterStates.JumpingToPlayer);
+    _behaviorController.SetState(CharacterState.JumpingToPlayer);
   }
 
   public void OnTalkingMadClicked()
   {
-    _behaviorController.SetState(CharacterStates.TalkingMad);
+    _behaviorController.SetState(CharacterState.TalkingMad);
   }
 
   public void OnPresentingPictureClicked()
   {
-    _behaviorController.SetState(CharacterStates.PathToPlayerAndPresentPicture);
+    _behaviorController.SetState(CharacterState.PathToPlayerAndPresentPicture);
   }
 
   public void OnFlabbergastedClicked()
   {
-    _behaviorController.SetState(CharacterStates.Flabbergasted);
+    _behaviorController.SetState(CharacterState.Flabbergasted);
   }
 
   public void OnFlyBackToPlayerClicked()
   {
-    _behaviorController.SetState(CharacterStates.FlyingToPlayer);
+    _behaviorController.SetState(CharacterState.FlyingToPlayer);
   }
 
   public void OnMagicItemClicked()
   {
-    _behaviorController.SetState(CharacterStates.MagicingItem);
+    _behaviorController.SetState(CharacterState.MagicingItem);
   }
 
   private void Start()

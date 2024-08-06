@@ -4,13 +4,17 @@ using BriLib;
 
 public class HatJumpAnimator : MonoBehaviour
 {
+  public bool Playing { get; private set; } = false;
   [SerializeField] private float _popHeight;
   private Transform _self;
   private Vector3 _startLocalPosition;
   private int _milliStep = 16;
 
-  public async void Play(int delayMillis=0, int durationMillis=500)
+  public async void Play(int delayMillis = 0, int durationMillis = 500)
   {
+    if (Playing) { return; }
+
+    Playing = true;
     await Task.Delay(delayMillis);
 
     var halfMillis = durationMillis / 2f;
@@ -40,6 +44,7 @@ public class HatJumpAnimator : MonoBehaviour
     }
 
     _self.localPosition = _startLocalPosition;
+    Playing = false;
   }
 
   private void Awake()

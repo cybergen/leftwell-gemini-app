@@ -18,9 +18,9 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   private int _imagesUploaded = 0;
   private int _audioUploaded = 0;
   private Request _payload;
-  private List<CharacterStates> _talkingStates = new List<CharacterStates>
+  private List<CharacterState> _talkingStates = new List<CharacterState>
   {
-    CharacterStates.TalkingDisappointed, CharacterStates.TalkingMad, CharacterStates.TalkingSurprised, CharacterStates.Talking
+    CharacterState.TalkingDisappointed, CharacterState.TalkingMad, CharacterState.TalkingSurprised, CharacterState.Talking
   };
   private CharacterAnimationController _charAnimator;
 
@@ -45,10 +45,10 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     var stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
 
     //Make wizard fly in and start talking while arriving
-    character.SetState(CharacterStates.InitialFlyIn);
+    character.SetState(CharacterState.InitialFlyIn);
     _ = SpeechManager.Instance.Speak(stateReplyPair.Item2);
     while (character.BusyPathing) await Task.Delay(10);
-    CharacterHelpers.AnimateEventually(CharacterStates.TalkingSurprised, character);
+    CharacterHelpers.AnimateEventually(CharacterState.TalkingSurprised, character);
 
     //Run intro convo until state changes
     if (!dependencies.IsRepeat) 
@@ -66,7 +66,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     _payload = payloadReplyPair.Item1;
     stateReplyPair = ParseInfoFromReply(payloadReplyPair.Item2);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    CharacterHelpers.AnimateEventually(CharacterStates.TalkingSurprised, character);
+    CharacterHelpers.AnimateEventually(CharacterState.TalkingSurprised, character);
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
@@ -74,12 +74,13 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     for (int i = 0; i < ITEM_COUNT; i++)
     {
       _ = SpeechManager.Instance.Speak(itemStrings[i]);
-      character.SetState(CharacterStates.TalkingDisappointed);
+      var randomTalkState = MathHelpers.SelectFromRange(_talkingStates, new System.Random());
+      character.SetState(randomTalkState);
       var tex = await GetCameraImage(itemStrings[i]);
 
       //Add a delay so audio UI and picture UI don't stomp on each other
       await Task.Delay(450);
-      character.SetState(CharacterStates.ShownObject);
+      character.SetState(CharacterState.ShownObject);
 
       //Kick off image editing sequence in the background
       //Increment activated items after each one has been triggered to move on to the big portal
@@ -98,7 +99,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
       await SpeechManager.Instance.Speak(AdventureDialog.GetRandomItemCaptureDialog());
       await UseAudioCaptureUI();
 
-      character.SetState(CharacterStates.MagicingItem);
+      character.SetState(CharacterState.MagicingItem);
       _ = AudioCaptureManager.Instance.GetAudioAndUpload().ContinueWith((task) =>
       {
         _audioUploaded++;
@@ -120,7 +121,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     _ = SpeechManager.Instance.Speak(AdventureDialog.POSITION_PORTAL);
     await UseFullScreenTapUI("Tap to spawn big portal", false);
     PortalManager.Instance.SpawnHeroPortal();
-    character.SetState(CharacterStates.FlyingToPortal);
+    character.SetState(CharacterState.FlyingToPortal);
     _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_PLACED);
 
     //Ensure all images and audio are ready in the payload before advancing
@@ -172,12 +173,12 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.PortalActivater.SetShowable(false, null);
     await Task.Delay(AdventureDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
-    character.SetState(CharacterStates.FlyingToPlayer);
+    character.SetState(CharacterState.FlyingToPlayer);
     _ = SpeechManager.Instance.Speak(AdventureDialog.OPENING_PORTAL);
     await Task.Delay(4000);
 
     //Speak final story while showing the UI
-    CharacterHelpers.AnimateEventually(CharacterStates.Talking, character);
+    CharacterHelpers.AnimateEventually(CharacterState.Talking, character);
     _ = SpeechManager.Instance.Speak(_finalStory);
     bool hidden = false;
     Action onHide = () => { hidden = true; };
@@ -208,13 +209,13 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     if (repeatAdventure)
     {
       await SpeechManager.Instance.Speak(FTEDialog.BE_RIGHT_BACK);
-      character.SetState(CharacterStates.FlyAway);
+      character.SetState(CharacterState.FlyAway);
       await Task.Delay(FTEDialog.DIALOG_PAUSE);
       PortalManager.Instance.DestroyEverything();
     }
     else
     {
-      character.SetState(CharacterStates.FlyingToPlayer);
+      character.SetState(CharacterState.FlyingToPlayer);
       _payload.contents[_payload.contents.Count - 1].parts.Add(new TextPart { text = "Free converse" });
       payloadReplyPair = await LLMInteractionManager.Instance.SendRequestAndUpdateSequence(_payload);
       _payload = payloadReplyPair.Item1;

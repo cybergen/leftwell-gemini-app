@@ -139,7 +139,7 @@ public class AppStateManager : Singleton<AppStateManager>
       case AppState.LLMError:
         if (_character != null)
         {
-          _character.SetState(CharacterStates.JumpingToPlayer);
+          _character.SetState(CharacterState.JumpingToPlayer);
           while (_character.BusyPathing) { await Task.Delay(10); }
         }
         await SpeechManager.Instance.Speak(FTEDialog.LLM_ERROR);

@@ -1,18 +1,17 @@
 using UnityEngine;
 using BriLib;
 
-public class ForwardRollAnimator : MonoBehaviour
+public class ForwardRollAnimator : MonoBehaviour, IProceduralAnimator
 {
   public bool Animating { get; private set; } = false;
   public bool Cancelling { get; private set; } = false;
-  private float _duration;
+  [SerializeField] private float _duration = 1.5f;
   private float _elapsedTime;
   private Quaternion _startLocalRotation;
   private Transform _self;
 
-  public void Play(float duration)
+  public void Play()
   {
-    _duration = duration;
     _elapsedTime = 0f;
     _startLocalRotation = _self.localRotation;
     Animating = true;
@@ -32,10 +31,9 @@ public class ForwardRollAnimator : MonoBehaviour
       _elapsedTime += Time.deltaTime;
       float progress = Mathf.Clamp01(_elapsedTime / _duration);
       float easedProgress = Easing.EaseInOutBack(progress);
-      float angleX = easedProgress * 360; // Forward roll
-      float angleZ = easedProgress * 360; // Roll
+      float angleX = easedProgress * 360;
 
-      _self.localRotation = _startLocalRotation * Quaternion.Euler(angleX, 0, angleZ);
+      _self.localRotation = _startLocalRotation * Quaternion.Euler(angleX, 0, 0);
 
       if (progress >= 1f)
       {

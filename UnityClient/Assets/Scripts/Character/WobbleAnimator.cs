@@ -1,19 +1,17 @@
 using UnityEngine;
 
-public class WobbleAnimator : MonoBehaviour
+public class WobbleAnimator : MonoBehaviour, IProceduralAnimator
 {
   public bool Animating { get; private set; } = false;
   public bool Cancelling { get; private set; } = false;
-  private float _duration;
-  private float _maxAngle;
+  [SerializeField] private float _maxAngle = 10f;
+  [SerializeField] private float _duration = 0.5f;
   private float _elapsedTime;
   private Quaternion _startLocalRotation;
   private Transform _self;
 
-  public void Play(float duration, float maxAngle)
+  public void Play()
   {
-    _duration = duration;
-    _maxAngle = maxAngle;
     _elapsedTime = 0f;
     _startLocalRotation = _self.localRotation;
     Animating = true;

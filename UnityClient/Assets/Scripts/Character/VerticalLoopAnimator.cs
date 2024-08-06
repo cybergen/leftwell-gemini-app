@@ -1,20 +1,20 @@
 using UnityEngine;
+using BriLib;
 
-public class VerticalLoopAnimator : MonoBehaviour
+public class VerticalLoopAnimator : MonoBehaviour, IProceduralAnimator
 {
   public bool Animating { get; private set; } = false;
   public bool Cancelling { get; private set; } = false;
-  private float _radius;
-  private float _duration;
+  [SerializeField] private float _radius;
+  [SerializeField] private float _duration = 3f;
+  [SerializeField] private float _cancelMultiplier = 3f;
   private float _elapsedTime;
   private Vector3 _startLocalPosition;
   private Quaternion _startLocalRotation;
   private Transform _self;
 
-  public void Play(float radius, float duration)
+  public void Play()
   {
-    this._radius = radius;
-    this._duration = duration;
     _elapsedTime = 0f;
     _startLocalPosition = _self.localPosition;
     _startLocalRotation = _self.localRotation;
@@ -33,13 +33,17 @@ public class VerticalLoopAnimator : MonoBehaviour
     if (Animating)
     {
       _elapsedTime += Time.deltaTime;
-      float progress = Mathf.Clamp01(_elapsedTime / _duration);
-      float angle = progress * 2 * Mathf.PI;
-      float y = Mathf.Sin(angle) * _radius;
-      float z = Mathf.Cos(angle) * _radius;
+      var progress = Easing.Ease(0, 1, 0, 1, Mathf.Clamp01(_elapsedTime / _duration), Easing.Method.ExpoInOut);
+      float angle = progress * 360f;
+      float angleY = (angle - 180f) * Mathf.Deg2Rad; //Shift the curve by pi radians
+      float angleZ = angle * Mathf.Deg2Rad;
+      float y = Mathf.Cos(angleY) * _radius + _radius; //Should go from position 0 to 1 to 0
+      float z = Mathf.Sin(angleZ) * _radius; //Should go from 0 to +0.5 to 0 to -0.5 to 0
 
-      _self.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y + y, _startLocalPosition.z + z);
-      _self.localRotation = Quaternion.LookRotation(Vector3.Cross(Vector3.right, new Vector3(0, y, z)).normalized);
+      var newPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y + y, _startLocalPosition.z + z);
+      _self.localPosition = newPosition;
+      var rotationDelta = Quaternion.Euler(-angle, 0, 0); //Rotate around the x-axis by current traversed degrees
+      _self.localRotation = _startLocalRotation * rotationDelta;
 
       if (progress >= 1f)
       {
@@ -51,8 +55,8 @@ public class VerticalLoopAnimator : MonoBehaviour
     {
       float positionThreshold = 0.01f;
       float rotationThreshold = 1f;
-      var posAmount = Time.deltaTime * _radius / _duration;
-      var rotAmount = Time.deltaTime * 360 / _duration;
+      var posAmount = Time.deltaTime * _cancelMultiplier * _radius / _duration;
+      var rotAmount = Time.deltaTime * _cancelMultiplier * 360 / _duration;
 
       _self.localPosition = Vector3.MoveTowards(_self.localPosition, _startLocalPosition, posAmount);
       _self.localRotation = Quaternion.RotateTowards(_self.localRotation, _startLocalRotation, rotAmount);

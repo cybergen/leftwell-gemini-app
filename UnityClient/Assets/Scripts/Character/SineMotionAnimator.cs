@@ -1,39 +1,62 @@
 using UnityEngine;
 
-public class SineMotionAnimator : MonoBehaviour
+public class SineMotionAnimator : MonoBehaviour, IProceduralAnimator
 {
-  [SerializeField] private float _amplitude;
-  [Tooltip("Waves per second")][SerializeField] private float _frequency;
+  public bool Animating { get; private set; } = false;
+  public bool Cancelling { get; private set; } = false;
+  [SerializeField] private float _amplitude = 0.15f;
+  [SerializeField] private float _duration = 2f;
+  private float _elapsedTime;
+  private Vector3 _startLocalPosition;
   private Transform _self;
-  private Vector3 _localPosition; //This position should be expected to otherwise be static
-  private bool _active;
-  private float _startTime;
+
+  public void Play()
+  {
+    _elapsedTime = 0f;
+    _startLocalPosition = _self.localPosition;
+    Animating = true;
+    Cancelling = false;
+  }
 
   public void Stop()
   {
-    _active = false;
-  }
-
-  public void Resume()
-  {
-    _active = true;
-    _startTime = Time.time;
+    Animating = false;
+    Cancelling = true;
   }
 
   private void Update()
   {
-    if (!_active) { return; }
-    var time = (Time.time - _startTime) % _frequency;
-    var rad = (time / _frequency) * 360f * Mathf.Deg2Rad;
-    var displacement = Mathf.Sin(rad) * _amplitude;
-    var newLocal = new Vector3(_localPosition.x, displacement, _localPosition.z);
-    _self.localPosition = newLocal;
+    if (Animating)
+    {
+      _elapsedTime += Time.deltaTime;
+      float progress = Mathf.Clamp01(_elapsedTime / _duration);
+      var rad = progress * 360f * Mathf.Deg2Rad;
+      var displacement = Mathf.Sin(rad) * _amplitude;
+      var newLocal = new Vector3(_startLocalPosition.x, displacement, _startLocalPosition.z);
+      _self.localPosition = newLocal;
+
+      if (progress >= 1f)
+      {
+        Animating = false;
+        Cancelling = true;
+      }
+    }
+    else if (Cancelling)
+    {
+      float positionThreshold = 0.01f;
+      var posAmount = Time.deltaTime * 4f * _amplitude;
+
+      _self.localPosition = Vector3.MoveTowards(_self.localPosition, _startLocalPosition, posAmount);
+
+      if (Vector3.Distance(_self.localPosition, _startLocalPosition) < positionThreshold)
+      {
+        Cancelling = false;
+      }
+    }
   }
 
   private void Awake()
   {
     _self = transform;
-    _localPosition = transform.localPosition;
-    Resume();
   }
 }

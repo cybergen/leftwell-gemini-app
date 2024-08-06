@@ -8,7 +8,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
 
   public async Task<bool> RunAsync(CharacterBehaviorController dragon)
   {
-    dragon.SetState(CharacterStates.InitialFlyIn);
+    dragon.SetState(CharacterState.InitialFlyIn);
     while (dragon.BusyPathing) { await Task.Delay(10); }
 
     //Learn to use push to talk button
@@ -41,7 +41,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     //Learn to capture image of Item of Power
     await SpeechManager.Instance.Speak(FTEDialog.TUT_CAM_INTRO);
     var capturedImage = await AdventureSequence.GetCameraImage("Tap to capture an Item of Power");
-    dragon.SetState(CharacterStates.ShownObject);
+    dragon.SetState(CharacterState.ShownObject);
     var captureSequence = new CaptureMarkerSequence();
     //Set our dialog for tutorial finish on activation of the capture marker
     bool activatedPortal = false;
@@ -69,7 +69,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
       while (!pressedAndReleasedButton) { await Task.Delay(10); }
       UIManager.Instance.LongPressButton.Hide();
     }
-    dragon.SetState(CharacterStates.JumpingToPlayer);
+    dragon.SetState(CharacterState.JumpingToPlayer);
     await SpeechManager.Instance.Speak(FTEDialog.TUT_CAM_TALK_SUCCESS);
     await Task.Delay(FTEDialog.DIALOG_PAUSE);
 
@@ -94,7 +94,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
 
     //Fly away and break everything down
     await SpeechManager.Instance.Speak(FTEDialog.BE_RIGHT_BACK);
-    dragon.SetState(CharacterStates.FlyAway);
+    dragon.SetState(CharacterState.FlyAway);
     await Task.Delay(FTEDialog.DIALOG_PAUSE);
     PortalManager.Instance.DestroyEverything();
 

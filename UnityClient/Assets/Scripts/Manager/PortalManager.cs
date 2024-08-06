@@ -45,6 +45,11 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers[markerIndex].MarkActivatable(finalImage, onActivated);
   }
 
+  public void SetMarkerSharable(int markerIndex)
+  {
+
+  }
+
   public void SetHeroPortalActivatable(Action onActivated)
   {
     if (_heroPortal == null)

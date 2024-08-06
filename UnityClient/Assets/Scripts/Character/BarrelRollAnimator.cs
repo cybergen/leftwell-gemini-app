@@ -1,18 +1,17 @@
 using UnityEngine;
 using BriLib;
 
-public class BarrelRollAnimator : MonoBehaviour
+public class BarrelRollAnimator : MonoBehaviour, IProceduralAnimator
 {
   public bool Animating { get; private set; } = false;
   public bool Cancelling { get; private set; } = false;
-  private float _duration;
+  [SerializeField] private float _duration = 1.5f;
   private float _elapsedTime;
   private Quaternion _startLocalRotation;
   private Transform _self;
 
-  public void Play(float duration)
+  public void Play()
   {
-    _duration = duration;
     _elapsedTime = 0f;
     _startLocalRotation = transform.localRotation;
     Animating = true;
@@ -31,7 +30,7 @@ public class BarrelRollAnimator : MonoBehaviour
     {
       _elapsedTime += Time.deltaTime;
       float progress = Mathf.Clamp01(_elapsedTime / _duration);
-      float easedProgress = Easing.ElasticEaseOut(progress);
+      float easedProgress = Easing.EaseInOutBack(progress);
       float angle = easedProgress * 360;
 
       _self.localRotation = _startLocalRotation * Quaternion.Euler(0, 0, angle);
