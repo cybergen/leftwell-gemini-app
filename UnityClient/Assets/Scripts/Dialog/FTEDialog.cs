@@ -17,8 +17,8 @@ public class FTEDialog
   public const string TUT_SPEECH_INTRO = "Pick your jaw up off the floor and let's get you educated on how to interact with my magic! We'll start with your spell invocation. Press and hold the talk button while you say your best spell!";
   public const string TUT_SPEECH_SHORT = "Whoops! You have to keep holding the button while you talk. Let's try again.";
   public const string TUT_SPEECH_GOOD = "There you go! I'll make a mage of you yet.";
-  public const string TUT_CAM_INTRO = "Now let's capture an Item of Power for use as an anchor in the spell. Press the camera button to take a picture of something special for me, will ya?";
-  public const string TUT_CAM_TALK = "You must have potential! You created a capture spark. Now say something about your Item for me and I'll hit it with my magic.";
+  public const string TUT_CAM_INTRO = "Now let's capture an Item of Power to use as an anchor in my spell. Press the camera button to take a picture of something special for me, will ya?";
+  public const string TUT_CAM_TALK = "You created a capture spark! That means you've got potential. Now tell me about your Item, then I'll hit it with my magic.";
   public const string TUT_CAM_TALK_SHORT = "Surely you've got more to say than that?";
   public const string TUT_CAM_TALK_SUCCESS = "Perfect! Let's see what it gets transmuted into...";
   public const string TUT_ITEM_READY = "Your Item is transformed! Look at the capture spark and tap the button to activate it!";

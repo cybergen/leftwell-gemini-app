@@ -7,6 +7,7 @@ public class CameraTracker : MonoBehaviour
 
   private Quaternion _startRotation;
   private bool _isAnimating = false;
+  private bool _returnedToStart = false;
   private Transform _self;
 
   private void Awake()
@@ -31,22 +32,26 @@ public class CameraTracker : MonoBehaviour
       var newRot = Quaternion.Slerp(oldRot, limitedRotation, Time.deltaTime * _rotationRate);
       _self.localRotation = newRot;
     }
-    else if (Quaternion.Angle(_self.localRotation, _startRotation) > Mathf.Epsilon)
+    else if (!_returnedToStart)
     {
       _self.localRotation = Quaternion.RotateTowards(_self.localRotation, _startRotation, Time.deltaTime * _rotationRate);
+      if (Quaternion.Angle(_self.localRotation, _startRotation) <= Mathf.Epsilon)
+      {
+        _returnedToStart = true;
+      }
     }
   }
 
   public void StartSlerping()
   {
-    Debug.Log("Camera tracker active");
     _isAnimating = true;
+    _returnedToStart = false;
   }
 
   public void StopSlerping()
   {
-    Debug.Log("Camera tracker disabled");
     _isAnimating = false;
+    _returnedToStart = false;
   }
 
   private Quaternion LimitRotation(Quaternion startRotation, Quaternion targetRotation)

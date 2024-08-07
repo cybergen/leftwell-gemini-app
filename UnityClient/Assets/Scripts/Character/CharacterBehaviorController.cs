@@ -446,6 +446,7 @@ public class CharacterBehaviorController : MonoBehaviour
     {
       Debug.LogError($"Failed to find camera during character initialization");
     }
+    _emptySparkTransform.SetParent(null);
   }
 }
 

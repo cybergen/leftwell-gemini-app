@@ -30,6 +30,7 @@ public class ProceduralAnimator : MonoBehaviour, IProceduralAnimator
     Animating = false;
     Cancelling = true;
     if (_currentAnimator != null) { _currentAnimator.Stop(); }
+    _cameraTracker.StopSlerping();
   }
 
   private void Update()
