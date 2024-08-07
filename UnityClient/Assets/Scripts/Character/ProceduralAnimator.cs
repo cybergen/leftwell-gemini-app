@@ -7,7 +7,8 @@ public class ProceduralAnimator : MonoBehaviour, IProceduralAnimator
 {
   public bool Animating { get; private set; } = false;
   public bool Cancelling { get; private set; } = false;
-  [SerializeField] private int _sineMotionRepeatsBeforeRandom = 3;  
+  [SerializeField] private int _sineMotionRepeatsBeforeRandom = 3;
+  [SerializeField] private CameraTracker _cameraTracker;
   private List<IProceduralAnimator> _proceduralAnimators;
   private SineMotionAnimator _sineMotion;
   private IProceduralAnimator _currentAnimator;
@@ -45,11 +46,13 @@ public class ProceduralAnimator : MonoBehaviour, IProceduralAnimator
     {
       if (_currentSineMotionCount < _sineMotionRepeatsBeforeRandom)
       {
+        _cameraTracker.StartSlerping();
         _currentSineMotionCount++;
         _currentAnimator = _sineMotion;
       }
       else
       {
+        _cameraTracker.StopSlerping();
         _currentSineMotionCount = 0;
         _currentAnimator = MathHelpers.SelectFromRange(_proceduralAnimators, new System.Random());
       }

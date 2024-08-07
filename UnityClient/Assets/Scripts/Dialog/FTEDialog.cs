@@ -13,8 +13,8 @@ public class FTEDialog
   public const int POST_TUTORIAL_PAUSE = 2000;
   public const int SHARE_PAUSE = 5000;
 
-  public const string TUT_INTRO = "Hail and well met! First time encountering a dragon wizard? It's kinda obvious.";
-  public const string TUT_SPEECH_INTRO = "Let's get you educated on how to interact with my magic! I wanna start by hearing your spell invocation. Press and hold the talk button while you say it! Give me your best spell!";
+  public const string TUT_INTRO = "Hail and well met! Uh, this your first time encountering a dragon wizard? No offense kid, but it's kinda obvious.";
+  public const string TUT_SPEECH_INTRO = "Pick your jaw up off the floor and let's get you educated on how to interact with my magic! We'll start with your spell invocation. Press and hold the talk button while you say your best spell!";
   public const string TUT_SPEECH_SHORT = "Whoops! You have to keep holding the button while you talk. Let's try again.";
   public const string TUT_SPEECH_GOOD = "There you go! I'll make a mage of you yet.";
   public const string TUT_CAM_INTRO = "Now let's capture an Item of Power for use as an anchor in the spell. Press the camera button to take a picture of something special for me, will ya?";

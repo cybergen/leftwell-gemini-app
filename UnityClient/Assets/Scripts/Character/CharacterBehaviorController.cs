@@ -5,18 +5,23 @@ using System.Collections.Generic;
 public class CharacterBehaviorController : MonoBehaviour
 {
   public bool BusyPathing { get; private set; } = false;
+
   [Header("Scene References")]
   [SerializeField] private CharacterAnimationController _animationController;
   [SerializeField] private Transform _cameraTransform;
-  [Header("Active Position and Motion Configuration")]
-  [SerializeField] private float _heightFromGroundToSeek;
+  [SerializeField] private Transform _emptySparkTransform;
+  [SerializeField] private ProceduralAnimator _proceduralAnimator;
+  [SerializeField] private GameObject _whooshSource;
+  [Header("---------------")]
+  [Header("Basic Position and Motion Configuration")]
   [SerializeField] private float _distanceFromPlayerToSeek;
   [SerializeField] private float _angleFromPlayerForwardToSeek;
   [SerializeField] private float _distanceToTargetBeforeRotationStart;
   [SerializeField] private float _heightAdditionWhenAvoidCenter;
+  [SerializeField] private float _standardModeYOffset = 0.1f;
   [Tooltip("Meters per second")][SerializeField] private float _movementSpeed;
   [SerializeField] private float _rotationMultiplier;
-  [Header("Adjustment Thresholds")]
+  [Header("Position Adjustment Thresholds")]
   [SerializeField] private float _angleThresholdToTurnTowardPlayer;
   [SerializeField] private float _distanceThresholdToMoveTowardPlayer;
   [SerializeField] private float _distanceThresholdToMoveAwayFromPlayer;
@@ -25,11 +30,8 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _flyInStartingDistance;
   [SerializeField] private float _flyInStartingAngleFromPlayerForward;
   [Header("Item Shown Position Configuration")]
-  [Tooltip("Distance to point from camera")][SerializeField] private float _shownObjectDistanceForward;
   [Tooltip("How far away from which to look at object")][SerializeField] private float _shownObjectLookDistance;
   [SerializeField] private float _shownObjectAngleToSeekTo;
-  [Header("Idle Procedural Animation")]
-  [SerializeField] private ProceduralAnimator _proceduralAnimator;
   [Header("Jump to Player Config")]
   [SerializeField] private float _pathingSpinDuration = 0.25f;
   [SerializeField] private float _pathingJumpDuration = 1f;
@@ -40,12 +42,10 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _flyAwayAngle = -90f;
   [SerializeField] private float _flyAwayDistance = 30f;
   [Tooltip("Meters per second")][SerializeField] private float _flyAwaySpeed;
-  [Header("Assorted Config")]
+  [Header("Portal Position Config")]
   [SerializeField] private float _dieAnimDuration = 0.6f;
   [SerializeField] private float _distanceFromPortal;
   [SerializeField] private float _portalAngleToSeekTo = -15f;
-  [Header("Audio Stuff")]
-  [SerializeField] private GameObject _whooshSource;
   [Header("Item Orbit")]
   [SerializeField] private OrbitAnimator _orbiter;
   [SerializeField] private GameObject _orbitParticles;
@@ -69,7 +69,6 @@ public class CharacterBehaviorController : MonoBehaviour
   private float _progress = 0f;
   private float _stateTimeElapsed = 0f;
   private float _uncomfortableTimeElapsed = 0f;
-  private Vector3 _shownObjectLookPosition = Vector3.zero;
   private Quaternion _prePathRotation;
   private CharacterMode _mode;
 
@@ -181,14 +180,14 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterState.ShownObject:
         _proceduralAnimator.Stop();
         BusyPathing = true;
+        
+        var pos = _cameraTransform.position + _cameraTransform.forward * PortalManager.Instance.MarkerSpawnDistance;
+        _emptySparkTransform.position = pos;
 
-        _shownObjectLookPosition 
-          = _cameraTransform.position + _cameraTransform.forward * PortalManager.Instance.MarkerSpawnDistance;
-
-        var objectToCameraDir = (_cameraTransform.position - _shownObjectLookPosition).normalized;
+        var objectToCameraDir = (_cameraTransform.position - pos).normalized;
         objectToCameraDir = Quaternion.AngleAxis(_shownObjectAngleToSeekTo, Vector3.up) * objectToCameraDir;
 
-        _targetPosition = _shownObjectLookPosition + objectToCameraDir * _shownObjectLookDistance;
+        _targetPosition = pos + objectToCameraDir * _shownObjectLookDistance;
         _startPosition = transform.position;
         _progress = 0f;
 
@@ -196,7 +195,7 @@ public class CharacterBehaviorController : MonoBehaviour
         break;
       case CharacterState.MagicingItem:
         BusyPathing = true;
-        _ = _orbiter.Play(_shownObjectLookPosition, _orbitSpeed, _rotationSpeed);
+        _ = _orbiter.Play(_emptySparkTransform.position, _orbitSpeed, _rotationSpeed);
         _orbitParticles.SetActive(true);
         _animationController.SetAnimation(DragonAnimation.FlyLeft);
         break;
@@ -232,23 +231,6 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
-  private Vector3 GetPositionByPlayer()
-  {
-    if (_mode == CharacterMode.Standard)
-    {
-      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
-      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
-      return newPosition;
-    }
-    else
-    {
-      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
-      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
-      newPosition.y += _heightAdditionWhenAvoidCenter;
-      return newPosition;
-    }
-  }
-
   private void Update()
   {
     //TODO: Apply hover amplitude in a way that doesn't impact movement calcs
@@ -258,7 +240,7 @@ public class CharacterBehaviorController : MonoBehaviour
     switch (_currentState)
     {
       case CharacterState.InitialFlyIn:
-        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _movementSpeed);
 
         var distanceToPoint = Vector3.Distance(transform.position, _targetPosition);
         if (distanceToPoint > _distanceToTargetBeforeRotationStart)
@@ -274,7 +256,7 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterState.ShownObject:
-        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _shownObjectLookPosition, _movementSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _emptySparkTransform, _movementSpeed);
 
         //If reach point, mark no longer pathing but don't change state
         if (_progress >= 1f)
@@ -314,11 +296,11 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterState.FlyingToPlayer:
-        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _flyBackToPlayerSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _flyBackToPlayerSpeed);
         if (_progress >= 1f) { SetState(CharacterState.IdleWithPlayer); }
         break;
       case CharacterState.ReturnThenResume:
-        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _flyBackToPlayerSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _flyBackToPlayerSpeed);
         if (_progress >= 1f) { SetState(_priorState); }
         break;
       case CharacterState.IdleWithPlayer:
@@ -335,7 +317,7 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterState.FlyingToPortal:
-        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
+        _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _movementSpeed);
         if (_progress >= 1f) { BusyPathing = false; }
         break;
       case CharacterState.FlyAway:
@@ -349,7 +331,7 @@ public class CharacterBehaviorController : MonoBehaviour
         {
           BusyPathing = false;
           _progress
-            = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
+            = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _movementSpeed);
         }
         break;
       case CharacterState.Flabbergasted:
@@ -360,7 +342,7 @@ public class CharacterBehaviorController : MonoBehaviour
         if (_progress < 1f)
         {
           _progress
-            = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform.position, _movementSpeed);
+            = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _movementSpeed);
         }
         else
         {
@@ -370,11 +352,31 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
+  private Vector3 GetPositionByPlayer()
+  {
+    if (_mode == CharacterMode.Standard)
+    {
+      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
+      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
+      var up = _cameraTransform.up;
+      newPosition += up * _standardModeYOffset;
+      return newPosition;
+    }
+    else
+    {
+      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
+      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
+      newPosition.y += _heightAdditionWhenAvoidCenter;
+      return newPosition;
+    }
+  }
+
   private void RunVisibilityCheck(float delta)
   {
     var distanceToCamera = Vector3.Distance(transform.position, _cameraTransform.position);
     var viewAngleThreshold = Mathf.Cos(_angleThresholdToTurnTowardPlayer * Mathf.Deg2Rad);
-    var currentDirDot = Vector3.Dot(_cameraTransform.forward, transform.position - _cameraTransform.position);
+    var camToCharacter = (transform.position - _cameraTransform.position).normalized;
+    var currentDirDot = Vector3.Dot(_cameraTransform.forward, camToCharacter);
 
     //If player can't see dragon for too long, or if it is too close or too far, eventually path back
     if (currentDirDot < viewAngleThreshold || distanceToCamera > _distanceThresholdToMoveTowardPlayer
@@ -392,7 +394,7 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
-  private float DoMoveToPointAndLookToTarget(float delta, float progress, Vector3 positionToLookAt, float speed, System.Action doAtTurn = null)
+  private float DoMoveToPointAndLookToTarget(float delta, float progress, Transform positionToLookAt, float speed, System.Action doAtTurn = null)
   {
     //Path toward position if not there yet
     var flightDistance = Vector3.Distance(_startPosition, _targetPosition);
@@ -420,7 +422,7 @@ public class CharacterBehaviorController : MonoBehaviour
       var startRot = GetFlattenedRotation(_targetPosition - _startPosition);
 
       //Slerp to final rotation - looking at look point from target point
-      var targetRot = GetFlattenedRotation(positionToLookAt - _targetPosition);
+      var targetRot = GetFlattenedRotation(positionToLookAt.position - _targetPosition);
       transform.rotation = Quaternion.Slerp(startRot, targetRot, rotProgress);
     }
 
