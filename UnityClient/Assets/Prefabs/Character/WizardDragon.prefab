@@ -380,6 +380,7 @@ MonoBehaviour:
   _distanceFromPlayerToSeek: 1.2
   _angleFromPlayerForwardToSeek: -8
   _distanceToTargetBeforeRotationStart: 0.25
+  _heightAdditionWhenAvoidCenter: 0.4
   _movementSpeed: 1
   _rotationMultiplier: 5
   _angleThresholdToTurnTowardPlayer: 15
@@ -389,8 +390,8 @@ MonoBehaviour:
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
   _shownObjectDistanceForward: 0
-  _shownObjectLookDistance: 0.35
-  _shownObjectAngleToSeekTo: -35
+  _shownObjectLookDistance: 0.4
+  _shownObjectAngleToSeekTo: -40
   _proceduralAnimator: {fileID: 5616403240992820260}
   _pathingSpinDuration: 0.3
   _pathingJumpDuration: 1
@@ -662,7 +663,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1865184225420164710}
-  m_Mesh: {fileID: -6550278857182652925, guid: 851934a5f757b8049a9a9a9962570633, type: 3}
+  m_Mesh: {fileID: -6550278857182652925, guid: 8829fc5d725818741b37c04a028fe4a2, type: 3}
 --- !u!23 &207881758094073779
 MeshRenderer:
   m_ObjectHideFlags: 0

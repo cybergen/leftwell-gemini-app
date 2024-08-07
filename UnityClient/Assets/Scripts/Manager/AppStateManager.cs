@@ -33,6 +33,9 @@ public class AppStateManager : Singleton<AppStateManager>
 
   private async void SetState(AppState state)
   {
+    //Reset character mode in case we exited a prior state at a weird time
+    if (_character != null) { _character.SetMode(CharacterMode.Standard); }
+
     Debug.Log($"App state: {state}");
     switch (state)
     {

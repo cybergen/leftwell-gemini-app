@@ -13,6 +13,7 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _distanceFromPlayerToSeek;
   [SerializeField] private float _angleFromPlayerForwardToSeek;
   [SerializeField] private float _distanceToTargetBeforeRotationStart;
+  [SerializeField] private float _heightAdditionWhenAvoidCenter;
   [Tooltip("Meters per second")][SerializeField] private float _movementSpeed;
   [SerializeField] private float _rotationMultiplier;
   [Header("Adjustment Thresholds")]
@@ -70,6 +71,12 @@ public class CharacterBehaviorController : MonoBehaviour
   private float _uncomfortableTimeElapsed = 0f;
   private Vector3 _shownObjectLookPosition = Vector3.zero;
   private Quaternion _prePathRotation;
+  private CharacterMode _mode;
+
+  public void SetMode(CharacterMode mode)
+  {
+    _mode = mode;
+  }
 
   public void SetState(CharacterState state)
   {
@@ -119,7 +126,7 @@ public class CharacterBehaviorController : MonoBehaviour
         _startPosition.y = PlaneManager.Instance.GroundHeight + _flyInStartingHeight;
 
         transform.position = _startPosition;
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = GetPositionByPlayer();
         _progress = 0f;
 
         _animationController.SetAnimation(DragonAnimation.FlyDown);
@@ -129,7 +136,7 @@ public class CharacterBehaviorController : MonoBehaviour
         BusyPathing = true;
 
         _startPosition = transform.position;
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = GetPositionByPlayer();
         _prePathRotation = transform.rotation;
 
         _progress = 0f;
@@ -138,7 +145,7 @@ public class CharacterBehaviorController : MonoBehaviour
         BusyPathing = true;
 
         _startPosition = transform.position;
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = GetPositionByPlayer();
         _animationController.PlayOnce(DragonAnimation.Run, DragonAnimation.Fly);
         _prePathRotation = transform.rotation;
 
@@ -148,7 +155,7 @@ public class CharacterBehaviorController : MonoBehaviour
         BusyPathing = true;
 
         _startPosition = transform.position;
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = GetPositionByPlayer();
         _animationController.PlayOnce(DragonAnimation.Run, DragonAnimation.Fly);
         _prePathRotation = transform.rotation;
 
@@ -194,7 +201,7 @@ public class CharacterBehaviorController : MonoBehaviour
         _animationController.SetAnimation(DragonAnimation.FlyLeft);
         break;
       case CharacterState.PathToPlayerAndPresentPicture:
-        _targetPosition = GetStandardPositionByPlayer();
+        _targetPosition = GetPositionByPlayer();
         _startPosition = transform.position;
         _progress = 0f;
         BusyPathing = true;
@@ -225,12 +232,21 @@ public class CharacterBehaviorController : MonoBehaviour
     }
   }
 
-  private Vector3 GetStandardPositionByPlayer()
+  private Vector3 GetPositionByPlayer()
   {
-    var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
-    var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
-    //newPosition.y = PlaneManager.Instance.GroundHeight + _heightFromGroundToSeek;
-    return newPosition;
+    if (_mode == CharacterMode.Standard)
+    {
+      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
+      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
+      return newPosition;
+    }
+    else
+    {
+      var rotatedDir = Quaternion.AngleAxis(_angleFromPlayerForwardToSeek, Vector3.up) * _cameraTransform.forward;
+      var newPosition = _cameraTransform.position + rotatedDir * _distanceFromPlayerToSeek;
+      newPosition.y += _heightAdditionWhenAvoidCenter;
+      return newPosition;
+    }
   }
 
   private void Update()
@@ -448,4 +464,10 @@ public enum CharacterState
   IdleByPortal,
   FlyAway,
   MagicingItem,
+}
+
+public enum CharacterMode
+{
+  Standard,
+  AvoidCenter,
 }

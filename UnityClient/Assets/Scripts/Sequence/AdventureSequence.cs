@@ -65,7 +65,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     await SpeechManager.Instance.Speak(stateReplyPair.Item2);
 
     //Add images of magical items (and audio descriptions) to payload one by one
-    var itemStrings = AdventureDialog.GetItemStrings(ITEM_COUNT);// GetItemStrings(convoResult.Item2);
+    character.SetMode(CharacterMode.AvoidCenter); //Start avoiding center to not obscure picture taking
+    var itemStrings = AdventureDialog.GetItemStrings(ITEM_COUNT);
     for (int i = 0; i < ITEM_COUNT; i++)
     {
       _ = SpeechManager.Instance.Speak(itemStrings[i]);
@@ -171,6 +172,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     character.SetState(CharacterState.FlyingToPlayer);
     _ = SpeechManager.Instance.Speak(AdventureDialog.OPENING_PORTAL);
     await Task.Delay(6000);
+
+    character.SetMode(CharacterMode.Standard); //Go back to normal positioning after portal was triggered
 
     //Speak final story while showing the UI
     CharacterHelpers.AnimateEventually(CharacterState.Talking, character);

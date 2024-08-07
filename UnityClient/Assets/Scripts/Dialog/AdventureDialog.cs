@@ -162,7 +162,7 @@ public class AdventureDialog
     "Let's see how this reacts...",
     "And a little magic here...",
     "Juicing it up.",
-    "Sparkle-fied",
+    //"Sparkle-fied",
     // "Blammo!",
     //"...there we go!",
   };

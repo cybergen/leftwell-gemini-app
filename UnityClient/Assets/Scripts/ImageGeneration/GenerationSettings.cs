@@ -26,36 +26,78 @@ public class GenerationSettings
       new EditOptions
       {
         Model = "imagen-3.0-fast-generate-001",
-        Prompt = "made of magical smoke, colorful, magical, fantasy, glowing",
-        NegativePrompt = "ugly, bland, grey, dull",
+        Prompt = "watercolor, colorful",
+        NegativePrompt = "scary, ugly",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
         Model = "imagen-3.0-fast-generate-001",
-        Prompt = "watercolor, beautiful, artistic, colorful, stylish",
-        NegativePrompt = "scary, people, ugly",
+        Prompt = "pencil sketch, drawn, sketch, charcoal",
+        NegativePrompt = "scary, ugly",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
         Model = "imagen-3.0-fast-generate-001",
-        Prompt = "pencil sketch, drawn, black and white, cross-hatching, sketchy, charcoal",
-        NegativePrompt = "scary, people, ugly",
-        PersonGeneration = "dont_allow",
-      },
-      new EditOptions
-      {
-        Model = "imagen-3.0-fast-generate-001",
-        Prompt = "cartoon, cartoony, line art, vibrant colors",
+        Prompt = "cartoon, line art, vibrant color",
         NegativePrompt = "ugly",
         PersonGeneration = "dont_allow",
       },
       new EditOptions
       {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "low poly, geometric, toon shading, ps1, retro 3d",
+        NegativePrompt = "ugly, desaturated",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "van gogh",
+        NegativePrompt = "photo, desaturated, realistic",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "picasso, cubism",
+        NegativePrompt = "photo, desaturated, realistic",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "hokusai, ukiyoe",
+        NegativePrompt = "photo, desaturated, realistic",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "warhol",
+        NegativePrompt = "painting",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "comic book, half tone, line art, primary colors, bright",
+        NegativePrompt = "realistic, photo",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
+        Model = "imagen-3.0-fast-generate-001",
+        Prompt = "dali",
+        NegativePrompt = "realistic, photo",
+        PersonGeneration = "dont_allow",
+      },
+      new EditOptions
+      {
         Model = "imagegeneration@006",
-        Prompt = "fantasy, magical, colorful, exalted, powerful, emanating force, waves, color",
-        NegativePrompt = "ugly colors, concrete, grey, boring",
+        Prompt = "fantasy, magical, colorful smoke, waves, clouds",
+        NegativePrompt = "ugly, grey",
         PersonGeneration = "dont_allow",
         EditMode = "product-image"
       },
@@ -63,7 +105,7 @@ public class GenerationSettings
       {
         Model = "imagegeneration@006",
         Prompt = "explosion, flames, smoke, blast, bright, colorful, orange, flare, lava, glowing, eruption, tense, centered",
-        NegativePrompt = "ugly colors, concrete, grey, boring",
+        NegativePrompt = "ugly, grey, boring",
         PersonGeneration = "dont_allow",
         EditMode = "product-image"
       },

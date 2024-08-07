@@ -51,6 +51,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     await Task.Delay(FTEDialog.DIALOG_PAUSE);
 
     //Learn to capture image of Item of Power
+    dragon.SetMode(CharacterMode.AvoidCenter);
     dragon.SetState(CharacterState.Talking);
     await SpeechManager.Instance.Speak(FTEDialog.TUT_CAM_INTRO);
     dragon.SetState(CharacterState.IdleWithPlayer);
@@ -116,6 +117,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     dragon.SetState(CharacterState.IdleWithPlayer);
     await Task.Delay(FTEDialog.SHARE_PAUSE);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
+    dragon.SetMode(CharacterMode.Standard);
 
     //Ask whether to reply tutorial
     dragon.SetState(CharacterState.Talking);
