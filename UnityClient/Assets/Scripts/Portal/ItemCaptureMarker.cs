@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Threading.Tasks;
 using UnityEngine;
 using static NativeShare;
@@ -119,7 +118,7 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     _imagePlane.transform.localScale = scale;
   }
 
-  private void Start()
+  private void OnEnable()
   {
     _state = MarkerState.Loading;
     _loopingSound.FadeIn();

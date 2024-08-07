@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using BriLib;
+using UnityEngine.XR.OpenXR.Input;
 
 public class PortalManager : Singleton<PortalManager>
 {
@@ -14,12 +15,38 @@ public class PortalManager : Singleton<PortalManager>
   private List<ItemCaptureMarker> _captureMarkers = new List<ItemCaptureMarker>();
   private HeroPortal _heroPortal;
 
+  //Some very basic pooling to prevent game object instantiation hitches
+  private Stack<GameObject> _cachedCaptureMarkers = new Stack<GameObject>();
+  private GameObject _cachedHeroPortal;  
+
+  public void Initialize()
+  {
+    DestroyEverything();
+
+    //Spawn 3 capture markers
+    for (int i = 0; i < 3; i++)
+    {
+      var go = Instantiate(_smallMarkerPrefab);
+      go.SetActive(false);
+      go.transform.position = new Vector3(1000000f, 1000000f, 0f);
+      _cachedCaptureMarkers.Push(go);
+    }
+
+    //Spawn hero portal
+    _cachedHeroPortal = Instantiate(_heroPortalPrefab);
+    _cachedHeroPortal.SetActive(false);
+    _cachedHeroPortal.transform.position = new Vector3(1000000f, 1000000f, 0f);
+  }
+
   public int SpawnCaptureMarker()
   {
     var pose = CameraManager.Instance.GetCameraPose();
     var pos = pose.Item1 + (pose.Item2 * Vector3.forward) * MarkerSpawnDistance;
-    var marker = Instantiate(_smallMarkerPrefab, pos, pose.Item2);
-    var captureMarker = marker.GetComponent<ItemCaptureMarker>();
+    var go = _cachedCaptureMarkers.Count > 0 ? _cachedCaptureMarkers.Pop() : Instantiate(_smallMarkerPrefab);
+    go.transform.position = pos;
+    go.transform.rotation = pose.Item2;
+    go.SetActive(true);
+    var captureMarker = go.GetComponent<ItemCaptureMarker>();
     var index = _captureMarkers.Count;
     _captureMarkers.Add(captureMarker);
     return index;
@@ -31,8 +58,12 @@ public class PortalManager : Singleton<PortalManager>
     var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _heroPortalSpawnDistance;
     spawnPoint.y = PlaneManager.Instance.GroundHeight + _heroPortalSpawnHeight;
     var forwardDir = Vector3.ProjectOnPlane(camPose.Item1 - spawnPoint, Vector3.up).normalized;
-    var marker = Instantiate(_heroPortalPrefab, spawnPoint, Quaternion.LookRotation(forwardDir));
-    _heroPortal = marker.GetComponent<HeroPortal>();
+    var go = _cachedHeroPortal != null ? _cachedHeroPortal : Instantiate(_heroPortalPrefab);
+    go.transform.position = spawnPoint;
+    go.transform.rotation = Quaternion.LookRotation(forwardDir);
+    go.SetActive(true);
+    _cachedHeroPortal = null;
+    _heroPortal = go.GetComponent<HeroPortal>();
   }
 
   public void SetMarkerActivatable(int markerIndex, Texture2D finalImage, Action onActivated)
@@ -101,6 +132,11 @@ public class PortalManager : Singleton<PortalManager>
     _captureMarkers.Clear();
     if (_heroPortal != null) { Destroy(_heroPortal.gameObject); }
     _heroPortal = null;
+
+    foreach (var marker in _cachedCaptureMarkers) { Destroy(marker); }
+    _cachedCaptureMarkers.Clear();
+    if (_cachedHeroPortal != null) { Destroy(_cachedHeroPortal); }
+    _cachedHeroPortal = null;
   }
 
   public Vector3 GetHeroPortalPosition()

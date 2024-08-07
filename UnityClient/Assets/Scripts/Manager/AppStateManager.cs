@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using BriLib;
@@ -19,6 +18,7 @@ public class AppStateManager : Singleton<AppStateManager>
   private CharacterBehaviorController _character;
   private AudioSource _characterAudioSource;
   private LLMRequestPayload _previousLog;
+  private AppState _currentState;
 
   public override void Begin()
   {
@@ -33,6 +33,17 @@ public class AppStateManager : Singleton<AppStateManager>
 
   private async void SetState(AppState state)
   {
+    switch (_currentState)
+    {
+      case AppState.Tutorial:
+      case AppState.Adventure:
+      case AppState.AdventureAgain:
+        PortalManager.Instance.Initialize();
+        break;
+    }
+
+    _currentState = state;
+
     //Reset character mode in case we exited a prior state at a weird time
     if (_character != null) { _character.SetMode(CharacterMode.Standard); }
 
@@ -41,6 +52,7 @@ public class AppStateManager : Singleton<AppStateManager>
     {
       case AppState.Initialize:
         ImagePromptGenerator.Instance.Initialize();
+        PortalManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
         SetState(AppState.CheckPermissions);
         break;

@@ -88,11 +88,13 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
 
     //Sprinkle some magic and congratulate player
     dragon.SetState(CharacterState.MagicingItem);
+    await Task.Delay(AdventureDialog.DIALOG_PAUSE);
+    _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomMagicAppliedDialog());
     while (dragon.BusyPathing) { await Task.Delay(10); }
     dragon.SetState(CharacterState.JumpingToPlayer);
 
     dragon.SetState(CharacterState.Talking);
-    await SpeechManager.Instance.Speak(FTEDialog.TUT_CAM_TALK_SUCCESS);
+    await SpeechManager.Instance.Speak(FTEDialog.TUT_CAM_TALK_SUCCESS); //Congratulate player and mention sharing
     dragon.SetState(CharacterState.IdleWithPlayer);
     await Task.Delay(FTEDialog.DIALOG_PAUSE);
     
@@ -110,24 +112,20 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     while (!activatedPortal) { await Task.Delay(10); }
     await Task.Delay(FTEDialog.DIALOG_PAUSE);
     while (SpeechManager.Instance.Speaking) { await Task.Delay(10); }
-    await Task.Delay(FTEDialog.DIALOG_PAUSE);
+    await Task.Delay(FTEDialog.SHARE_PAUSE); //Do long pause here to wait for player to share if they want
 
+    //Ask whether to replay tutorial
     dragon.SetState(CharacterState.Talking);
-    await SpeechManager.Instance.Speak(FTEDialog.TUT_ITEM_SHARABLE);
+    await SpeechManager.Instance.Speak(FTEDialog.TUT_REPEAT);
     dragon.SetState(CharacterState.IdleWithPlayer);
-    await Task.Delay(FTEDialog.SHARE_PAUSE);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
     dragon.SetMode(CharacterMode.Standard);
 
-    //Ask whether to reply tutorial
-    dragon.SetState(CharacterState.Talking);
-    _ = SpeechManager.Instance.Speak(FTEDialog.TUT_DONE);
     var repliedToYesNo = false;
     var repeatTutorial = false;
     Action onYes = () => { repliedToYesNo = true; repeatTutorial = true; };
     Action onNo = () => { repliedToYesNo = true; repeatTutorial = false; };
     UIManager.Instance.YesNoScreen.Show("Repeat the tutorial?", onYes, onNo);
-    dragon.SetState(CharacterState.IdleWithPlayer);
     while (!repliedToYesNo) { await Task.Delay(10); }
 
     //Fly away and break everything down
