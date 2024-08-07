@@ -82,12 +82,12 @@ Shader "LiteParticleEffect/Effect Blended Premultiply"
 
 			half4 frag(v2f i) : SV_Target
 			{
-#ifdef SOFTPARTICLES_ON
-				float sceneZ = LinearEyeDepth (SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
-				float partZ = i.projPos.z;
-				float fade = saturate (_InvFade * (sceneZ-partZ));
-				i.color.a *= fade;
-#endif
+// #ifdef SOFTPARTICLES_ON
+// 				float sceneZ = LinearEyeDepth (SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
+// 				float partZ = i.projPos.z;
+// 				float fade = saturate (_InvFade * (sceneZ-partZ));
+// 				i.color.a *= fade;
+// #endif
 				fixed4 c = tex2D(_MainTex, i.uv_MainTex);
 				c *= i.color  * i.color.a  ;
 				fixed ca = tex2D(_CutTex, i.uv_CutOut).a;
