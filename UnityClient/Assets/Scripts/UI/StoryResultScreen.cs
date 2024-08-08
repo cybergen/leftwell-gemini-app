@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,8 +49,12 @@ public class StoryResultScreen : MonoBehaviour
 
   public void OnShare()
   {
-    var share = new NativeShare();
-    share.AddFile(_texture);
+    string filePath = Path.Combine(Application.temporaryCachePath, "share_img.png");
+    File.WriteAllBytes(filePath, _texture.EncodeToPNG());
+
+    var share = AppStateManager.Instance.NativeShare;
+    share.Clear();
+    share.AddFile(filePath);
     share.SetTitle("Teleportation Turmoil story results!");
     share.SetText(_text.text);
     share.SetCallback(OnShareResult);

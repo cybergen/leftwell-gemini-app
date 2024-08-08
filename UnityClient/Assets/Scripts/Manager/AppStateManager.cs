@@ -5,6 +5,8 @@ using LLM.Network;
 
 public class AppStateManager : Singleton<AppStateManager>
 {
+  public NativeShare NativeShare;
+
   [SerializeField] private GameObject _arRig;
   [SerializeField] private AudioListener _preCameraAudioListener;
   [SerializeField] private AudioSource _preCharacterAudioSource;
@@ -12,6 +14,7 @@ public class AppStateManager : Singleton<AppStateManager>
   [SerializeField] private GameObject _wizardPrefab;
   [SerializeField] private LongPressButton _pushToTalkButton;
   [SerializeField] private FadingAndSlidingScreen _takePictureButton;
+  [SerializeField] private Texture2D _initializeImage;
 
   private const string HAS_RUN_TUTORIAL_KEY = "HasRunTutorial";
 
@@ -54,6 +57,14 @@ public class AppStateManager : Singleton<AppStateManager>
         ImagePromptGenerator.Instance.Initialize();
         PortalManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
+        NativeShare = new NativeShare();
+        NativeShare.AddFile(_initializeImage);
+        NativeShare.SetTitle("Social share initializer");
+        NativeShare.SetText("Initialization");
+        NativeShare.SetCallback(null);
+        //NativeShare.Share();
+        NativeShare.Clear();
+        await Task.Delay(4000);
         SetState(AppState.CheckPermissions);
         break;
       case AppState.CheckPermissions:

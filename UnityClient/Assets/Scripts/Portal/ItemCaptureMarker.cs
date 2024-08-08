@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -88,8 +89,12 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
     }
     else if (_state == MarkerState.Sharable)
     {
-      var share = new NativeShare();
-      share.AddFile(_finalImage);
+      string filePath = Path.Combine(Application.temporaryCachePath, "share_img.png");
+      File.WriteAllBytes(filePath, _finalImage.EncodeToPNG());
+
+      var share = AppStateManager.Instance.NativeShare;
+      share.Clear();
+      share.AddFile(filePath);
       share.SetTitle("Teleportation Turmoil item transformation!");
       share.SetCallback(OnShareResult);
       share.Share();
@@ -98,7 +103,7 @@ public class ItemCaptureMarker : MonoBehaviour, IActivatable
 
   private void OnShareResult(ShareResult result, string shareTarget)
   {
-    Debug.Log($"Got share result {result}");
+    AppStateManager.Instance.NativeShare.Clear();
     _onShare?.Invoke();
   }
 

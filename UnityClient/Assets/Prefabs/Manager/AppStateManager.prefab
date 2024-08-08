@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2242839127216781783}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -53,6 +53,7 @@ MonoBehaviour:
   _wizardPrefab: {fileID: 502021234568225906, guid: d090b47acfbfa2a4ea31c32df470bd91, type: 3}
   _pushToTalkButton: {fileID: 0}
   _takePictureButton: {fileID: 0}
+  _initializeImage: {fileID: 2800000, guid: cd245f5a379e55c41aaeddba276b2268, type: 3}
 --- !u!81 &4405418693741377189
 AudioListener:
   m_ObjectHideFlags: 0
