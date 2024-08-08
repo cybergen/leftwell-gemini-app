@@ -266,8 +266,10 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   public static async Task<Texture2D> GetCameraImage(string buttonText)
   {
     await UseFullScreenTapUI(buttonText);
+#if UNITY_EDITOR
     //Run twice because TryAcquireLatestCpuImage is BROKEN AND RETURNS AN OLD FRAME
     await CameraManager.Instance.GetNextAvailableCameraImage();
+#endif
     var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
     return camImage.Texture;
   }

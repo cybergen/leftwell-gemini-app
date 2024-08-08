@@ -61,7 +61,8 @@ public class SpeechManager : Singleton<SpeechManager>
       {
         stability = SpeechSettings.STABILITY_BOOST,
         similarity_boost = SpeechSettings.SIMILARITY_BOOST,
-        style = SpeechSettings.STYLE
+        style = SpeechSettings.STYLE,
+        use_speaker_boost = true,
       }
     };
 

@@ -51,6 +51,7 @@ public class StoryResultScreen : MonoBehaviour
     var share = new NativeShare();
     share.AddFile(_texture);
     share.SetTitle("Teleportation Turmoil story results!");
+    share.SetText(_text.text);
     share.SetCallback(OnShareResult);
     share.Share();
   }

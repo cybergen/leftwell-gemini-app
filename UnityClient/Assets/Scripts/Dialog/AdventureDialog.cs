@@ -176,7 +176,6 @@ public class AdventureDialog
     "Just a bit more...",
     "Almost there!",
     "Almost got it!",
-    //"Getting closer.", 
     "Just a little more...",
   };
 

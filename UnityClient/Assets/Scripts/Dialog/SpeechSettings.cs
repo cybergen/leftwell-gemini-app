@@ -1,7 +1,7 @@
 public class SpeechSettings
 {
-  public const float STABILITY_BOOST = 0.7f;
-  public const float SIMILARITY_BOOST = 0.55f;
+  public const float STABILITY_BOOST = 0.85f;
+  public const float SIMILARITY_BOOST = 0.3f;
   public const float STYLE = 0.7f;
   public const string NY_NICK_VOICE_ID = "QH0iMHD2kQD6054yg01N";
   public const string KING_OF_NY_VOICE_ID = "2ovNLFOsfyKPEWV5kqQi";
