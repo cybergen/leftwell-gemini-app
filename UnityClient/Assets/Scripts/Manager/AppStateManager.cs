@@ -54,6 +54,8 @@ public class AppStateManager : Singleton<AppStateManager>
     switch (state)
     {
       case AppState.Initialize:
+        UIManager.Instance.LoadingScreen.Show();
+
         ImagePromptGenerator.Instance.Initialize();
         PortalManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
@@ -62,9 +64,15 @@ public class AppStateManager : Singleton<AppStateManager>
         NativeShare.SetTitle("Social share initializer");
         NativeShare.SetText("Initialization");
         NativeShare.SetCallback(null);
-        //NativeShare.Share();
         NativeShare.Clear();
-        await Task.Delay(4000);
+
+        while (!ImagePromptGenerator.Instance.ReadyToGenerate)
+        {
+            await Task.Delay(10);
+            UIManager.Instance.LoadingScreen.SetProgress(ImagePromptGenerator.Instance.Progress);
+        }
+        UIManager.Instance.LoadingScreen.Hide();
+
         SetState(AppState.CheckPermissions);
         break;
       case AppState.CheckPermissions:

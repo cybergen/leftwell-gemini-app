@@ -9,4 +9,5 @@ public class UIManager : Singleton<UIManager>
   public StoryResultScreen StoryResult;
   public TitleScreen TitleScreen;
   public YesNoScreen YesNoScreen;
+  public LoadingScreen LoadingScreen;
 }
