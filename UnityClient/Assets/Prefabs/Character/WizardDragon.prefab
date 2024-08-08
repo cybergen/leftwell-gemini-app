@@ -393,9 +393,9 @@ MonoBehaviour:
   _flyInStartingHeight: 0.85
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
-  _shownObjectLookDistance: 0.35
-  _shownObjectHeightOffset: 0.05
-  _shownObjectAngleToSeekTo: -200
+  _shownObjectLookDistance: 0.3
+  _shownObjectHeightOffset: 0.15
+  _shownObjectAngleToSeekTo: -80
   _pathingSpinDuration: 0.3
   _pathingJumpDuration: 1
   _uncomfortableDurationThreshold: 0.5
@@ -406,6 +406,7 @@ MonoBehaviour:
   _dieAnimDuration: 0.6
   _distanceFromPortal: 1
   _portalAngleToSeekTo: 90
+  _distanceFromTutorialImage: 0.45
   _orbiter: {fileID: 5951346061098058788}
   _orbitParticles: {fileID: 6573819467975551543}
   _orbitSpeed: 2.5

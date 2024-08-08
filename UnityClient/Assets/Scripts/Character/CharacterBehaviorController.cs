@@ -47,6 +47,7 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _dieAnimDuration = 0.6f;
   [SerializeField] private float _distanceFromPortal;
   [SerializeField] private float _portalAngleToSeekTo = -15f;
+  [SerializeField] private float _distanceFromTutorialImage = 0.35f;
   [Header("Item Orbit")]
   [SerializeField] private OrbitAnimator _orbiter;
   [SerializeField] private GameObject _orbitParticles;
@@ -223,6 +224,18 @@ public class CharacterBehaviorController : MonoBehaviour
       case CharacterState.IdleByPortal:
         transform.rotation = Quaternion.LookRotation(GetFlat(_cameraTransform.position - transform.position));
         break;
+      case CharacterState.FlyingToTutorialImage:
+        _progress = 0f;
+        _startPosition = transform.position;
+        var dirFromImage = GetFlat(_cameraTransform.position - _emptySparkTransform.position);
+        dirFromImage = Quaternion.AngleAxis(_portalAngleToSeekTo, Vector3.up) * dirFromImage;
+        _targetPosition = _emptySparkTransform.position + dirFromImage * _distanceFromTutorialImage;
+        _animationController.PlayOnce(DragonAnimation.Yes, DragonAnimation.Fly);
+        BusyPathing = true;
+        break;
+      case CharacterState.IdleByTutorialImage:
+        transform.rotation = Quaternion.LookRotation(GetFlat(_cameraTransform.position - transform.position));
+        break;
       case CharacterState.FlyAway:
         _startPosition = transform.position;
         var cameraLeft = Quaternion.AngleAxis(_flyAwayAngle, Vector3.up) * _cameraTransform.forward;
@@ -320,6 +333,7 @@ public class CharacterBehaviorController : MonoBehaviour
         }
         break;
       case CharacterState.FlyingToPortal:
+      case CharacterState.FlyingToTutorialImage:
         _progress = DoMoveToPointAndLookToTarget(delta, _progress, _cameraTransform, _movementSpeed);
         if (_progress >= 1f) { BusyPathing = false; }
         break;
@@ -468,6 +482,8 @@ public enum CharacterState
   Flabbergasted,
   FlyingToPortal,
   IdleByPortal,
+  FlyingToTutorialImage,
+  IdleByTutorialImage,
   FlyAway,
   MagicingItem,
 }

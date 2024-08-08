@@ -115,9 +115,8 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     _currentWaitMillis = 0;
 
     //Learn to activate a transformed Item
-    dragon.SetState(CharacterState.Talking);
+    dragon.SetState(CharacterState.FlyingToTutorialImage);
     await SpeechManager.Instance.Speak(FTEDialog.TUT_ITEM_READY);
-    dragon.SetState(CharacterState.IdleWithPlayer);
 
     UIManager.Instance.PortalActivater.SetShowable(true, Camera.main.transform);
     while (!activatedPortal) { await Task.Delay(10); }
@@ -126,9 +125,7 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     await Task.Delay(FTEDialog.SHARE_PAUSE); //Do long pause here to wait for player to share if they want
 
     //Ask whether to replay tutorial
-    dragon.SetState(CharacterState.Talking);
     await SpeechManager.Instance.Speak(FTEDialog.TUT_REPEAT);
-    dragon.SetState(CharacterState.IdleWithPlayer);
     UIManager.Instance.PortalActivater.SetShowable(false, null);
     dragon.SetMode(CharacterMode.Standard);
 
