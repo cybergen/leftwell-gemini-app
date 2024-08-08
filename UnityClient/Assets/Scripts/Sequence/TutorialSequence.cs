@@ -5,6 +5,8 @@ using UnityEngine;
 public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
 {
   private const float MIN_SPEAK_DURATION = 0.5f;
+  private const int WAIT_TOO_LONG_DURATION_MILLIS = 3500;
+  private int _currentWaitMillis;
 
   public async Task<bool> RunAsync(CharacterBehaviorController dragon)
   {
@@ -100,8 +102,17 @@ public class TutorialSequence : ISequence<CharacterBehaviorController, bool>
     
     //Set dialog and wait for marker to finish image edit and become activatable before proceeding
     captureSequence.SetCommentary(FTEDialog.TUT_ITEM_GOOD);
-    while (!PortalManager.Instance.GetAllMarkersActivatable()) { await Task.Delay(10); }
-    Action onActivated = () => { activatedPortal = true; };
+    while (!PortalManager.Instance.GetAllMarkersActivatable()) 
+    { 
+      await Task.Delay(10);
+      _currentWaitMillis += 10;
+      if (_currentWaitMillis >= WAIT_TOO_LONG_DURATION_MILLIS)
+      {
+        _currentWaitMillis = 0;
+        _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomTakingLong());
+      }
+    }
+    _currentWaitMillis = 0;
 
     //Learn to activate a transformed Item
     dragon.SetState(CharacterState.Talking);

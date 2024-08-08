@@ -10,13 +10,15 @@ public class PlaneManager : Singleton<PlaneManager>
   public bool Ready { get; private set; } = false;
   [SerializeField] private ARPlaneManager _planeManager;
   [SerializeField] private Transform _cameraTransform;
-  [SerializeField] private Transform _shadowReceiverPlane;
+  [SerializeField] private GameObject _shadowReceiverPlanePrefab;
   [SerializeField] private float boundarySize = 3f;
   private List<ARPlane> _knownPlanes = new List<ARPlane>();
+  private Transform _shadowReceiverPlane;
 
   public override void Begin()
   {
     base.Begin();
+    _shadowReceiverPlane = Instantiate(_shadowReceiverPlanePrefab).transform;
     _planeManager.planesChanged += OnPlanesChanged;
   }
 
@@ -24,6 +26,7 @@ public class PlaneManager : Singleton<PlaneManager>
   {
     base.End();
     _planeManager.planesChanged -= OnPlanesChanged;
+    Destroy(_shadowReceiverPlane.gameObject);
   }
 
   private void Update()

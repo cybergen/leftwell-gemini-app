@@ -30,7 +30,8 @@ public class CharacterBehaviorController : MonoBehaviour
   [SerializeField] private float _flyInStartingDistance;
   [SerializeField] private float _flyInStartingAngleFromPlayerForward;
   [Header("Item Shown Position Configuration")]
-  [Tooltip("How far away from which to look at object")][SerializeField] private float _shownObjectLookDistance;
+  [SerializeField] private float _shownObjectLookDistance;
+  [SerializeField] private float _shownObjectHeightOffset = 0.2f;
   [SerializeField] private float _shownObjectAngleToSeekTo;
   [Header("Jump to Player Config")]
   [SerializeField] private float _pathingSpinDuration = 0.25f;
@@ -184,10 +185,12 @@ public class CharacterBehaviorController : MonoBehaviour
         var pos = _cameraTransform.position + _cameraTransform.forward * PortalManager.Instance.MarkerSpawnDistance;
         _emptySparkTransform.position = pos;
 
-        var objectToCameraDir = (_cameraTransform.position - pos).normalized;
+        var objectToCameraDir = GetFlat(_cameraTransform.position - pos);
         objectToCameraDir = Quaternion.AngleAxis(_shownObjectAngleToSeekTo, Vector3.up) * objectToCameraDir;
+        pos += objectToCameraDir * _shownObjectLookDistance;
+        pos.y += _shownObjectHeightOffset;
 
-        _targetPosition = pos + objectToCameraDir * _shownObjectLookDistance;
+        _targetPosition = pos;
         _startPosition = transform.position;
         _progress = 0f;
 

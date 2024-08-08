@@ -383,18 +383,19 @@ MonoBehaviour:
   _distanceFromPlayerToSeek: 1.2
   _angleFromPlayerForwardToSeek: -8
   _distanceToTargetBeforeRotationStart: 0.25
-  _heightAdditionWhenAvoidCenter: 0.4
-  _standardModeYOffset: 0.35
+  _heightAdditionWhenAvoidCenter: 0.45
+  _standardModeYOffset: 0.45
   _movementSpeed: 1
   _rotationMultiplier: 5
-  _angleThresholdToTurnTowardPlayer: 20
+  _angleThresholdToTurnTowardPlayer: 28
   _distanceThresholdToMoveTowardPlayer: 1.5
   _distanceThresholdToMoveAwayFromPlayer: 0.5
   _flyInStartingHeight: 0.85
   _flyInStartingDistance: 3
   _flyInStartingAngleFromPlayerForward: 30
-  _shownObjectLookDistance: 0.4
-  _shownObjectAngleToSeekTo: -40
+  _shownObjectLookDistance: 0.35
+  _shownObjectHeightOffset: 0.05
+  _shownObjectAngleToSeekTo: -200
   _pathingSpinDuration: 0.3
   _pathingJumpDuration: 1
   _uncomfortableDurationThreshold: 0.5

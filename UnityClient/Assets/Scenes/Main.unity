@@ -882,6 +882,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2819381479651223455, guid: 8a0077b75a1db994094ebeb648eeeb06, type: 3}
+      propertyPath: MarkerSpawnDistance
+      value: 0.85
+      objectReference: {fileID: 0}
     - target: {fileID: 4337576990052241886, guid: 8a0077b75a1db994094ebeb648eeeb06, type: 3}
       propertyPath: m_Name
       value: PortalManager
@@ -1381,7 +1385,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8111228304269793289, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.00006897759
+      value: 0.000007628065
       objectReference: {fileID: 0}
     - target: {fileID: 8312904184502478281, guid: 7dfceace1052a464a81e80032b1c2443, type: 3}
       propertyPath: m_Size

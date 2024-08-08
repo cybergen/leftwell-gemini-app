@@ -29,17 +29,18 @@ public class AdventureDialog
     "Anything I should know...?",
     "Why this choice?",
     "Looks powerful. Care to explain?",
-    "Haven't seen one of these in ages!",
-    "Are you sure? Well, it's your funeral...",
-    "Tell me more...",
-    "Wise choice!",
-    "Weird, but maybe you have some good reasoning?",
-    "That's a first. Any reason why?",
+    "This needs an explanation...",
+    "You sure? Why?",
+    "Tell me more.",
+    "Wise choice! Tell me about this.",
+    "Weird, but maybe you have a good reason?",
+    "That's a first. Why this choice?",
     "I'm sensing a palpable aura. Why's that?",
     "Ha! Care to elaborate?",
-    "That's... almost unbelievable. Want to explain?",
+    "Unbelievable choice. Want to explain?",
     "What are you showing me?",
-    "You sure this is the right call to bring?"
+    "Is this the right call?",
+    "More info please.",
   };
 
   public static List<string> ITEMS_OF_POWER = new List<string>
@@ -162,9 +163,21 @@ public class AdventureDialog
     "Let's see how this reacts...",
     "And a little magic here...",
     "Juicing it up.",
-    //"Sparkle-fied",
-    // "Blammo!",
-    //"...there we go!",
+  };
+
+  public static List<string> TAKING_LONG_OPTIONS = new List<string>
+  {
+    "This is taking awhile...",
+    "Complicated spell...",
+    "Still working, kid!",
+    "Making progress!",
+    "This is hard work",
+    "Almost done I think...",
+    "Just a bit more...",
+    "Almost there!",
+    "Almost got it!",
+    //"Getting closer.", 
+    "Just a little more...",
   };
 
   public static string GetRandomOptionPrecedent()
@@ -180,6 +193,11 @@ public class AdventureDialog
   public static string GetRandomMagicAppliedDialog()
   {
     return MathHelpers.SelectFromRange(MAGIC_APPLIED_RESPONSES, new Random());
+  }
+
+  public static string GetRandomTakingLong()
+  {
+    return MathHelpers.SelectFromRange(TAKING_LONG_OPTIONS, new Random());
   }
 
   public static List<string> GetItemStrings(int count)

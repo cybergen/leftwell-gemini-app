@@ -18,6 +18,8 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   private int _audioUploaded = 0;
   private Request _payload;
   private CharacterAnimationController _charAnimator;
+  private const int WAIT_TOO_LONG_DURATION_MILLIS = 3500;
+  private int _currentWaitMillis;
 
   public async Task<AdventureResult> RunAsync(AdventureDependencies dependencies)
   {
@@ -137,7 +139,20 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     });
 
     //Wait for both edited image and commentary reply to come in before allowing activation
-    while (!PortalManager.Instance.GetAllMarkersActivatable()) await Task.Delay(10);
+    while (!PortalManager.Instance.GetAllMarkersActivatable())
+    {
+      await Task.Delay(10);
+      _currentWaitMillis += 10;
+
+      //If wait has gone for very long, say something to indicate still working
+      if (_currentWaitMillis >= WAIT_TOO_LONG_DURATION_MILLIS)
+      {
+        _currentWaitMillis = 0;
+        _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomTakingLong());
+      }
+    }
+    _currentWaitMillis = 0;
+
     while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
     _charAnimator.PlayOnce(DragonAnimation.Roar, DragonAnimation.Fly);
     _ = SpeechManager.Instance.Speak(AdventureDialog.ITEMS_READY);
@@ -154,7 +169,17 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     {
       _charAnimator.PlayOnce(DragonAnimation.Damage, DragonAnimation.Fly);
       _ = SpeechManager.Instance.Speak(AdventureDialog.PORTAL_NOT_READY);
-      while (string.IsNullOrEmpty(_finalStory) || _finalImage == null) await Task.Delay(10);
+      while (string.IsNullOrEmpty(_finalStory) || _finalImage == null)
+      {
+        await Task.Delay(10);
+        _currentWaitMillis += 10;
+        if (_currentWaitMillis >= WAIT_TOO_LONG_DURATION_MILLIS)
+        {
+          _currentWaitMillis = 0;
+          _ = SpeechManager.Instance.Speak(AdventureDialog.GetRandomTakingLong());
+        }
+      }
+      _currentWaitMillis = 0;
     }
 
     PortalManager.Instance.SetHeroPortalActivatable(() => _bigPortalActivated = true);
