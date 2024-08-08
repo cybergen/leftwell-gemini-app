@@ -7,11 +7,12 @@ using UnityEngine.Networking;
 using BriLib;
 using LLM.Network;
 using System.Text.RegularExpressions;
+using UnityEngine.Rendering;
 
 public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
 {
   public bool ReadyToGenerate { get; private set; } = false;
-    public float Progress { get; private set; } = 0f;
+  public float Progress { get; private set; } = 0f;
   private List<Content> _promptPriming;
 
   public void Initialize()
@@ -107,18 +108,20 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
     request.contents = contentSet;
 
     //Upload all images in the prompting guide
-    for (int i = 1; i < 20; i += 3)
+    for (int i = 1; i < 16; i += 4)
     {
+      Progress = i / 16f;
+
       var pathOne = Path.Combine(Application.streamingAssetsPath, i + ".png");
       var pathTwo = Path.Combine(Application.streamingAssetsPath, (i + 1) + ".png");
       var pathThree = Path.Combine(Application.streamingAssetsPath, (i + 2) + ".png");
-      
-      var files = await ReadFilesAndUpload(new List<string> { pathOne, pathTwo, pathThree });
+      var pathFour = Path.Combine(Application.streamingAssetsPath, (i + 3) + ".png");
+
+      var files = await ReadFilesAndUpload(new List<string> { pathOne, pathTwo, pathThree, pathFour });
       foreach (var file in files)
       {
         content.parts.Add(file);
       }
-      Progress = i / 15f;
     }
 
     //Prime the LLM with the guide
@@ -127,7 +130,7 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
       text = "Prompt guide"
     });
 
-    //Add a faked system reply, then persist primed content set    
+    //Add a faked system reply, then persist primed content set
     _promptPriming = new List<Content>
     {
       content,
@@ -144,36 +147,59 @@ public class ImagePromptGenerator : Singleton<ImagePromptGenerator>
     Debug.Log($"Image prompt generator is ready for use");
   }
 
+  //Execute batches of uploads in parallel during loading phase
   private async Task<List<FilePart>> ReadFilesAndUpload(List<string> files)
+  {
+    var result = new List<FilePart>();
+    var uploadTasks = new List<Task<FilePart>>();
+
+    foreach (var file in files)
     {
-        var result = new List<FilePart>();
-        foreach (var file in files)
+      byte[] imageBytes;
+
+      if (Application.platform == RuntimePlatform.Android)
+      {
+        UnityWebRequest www = UnityWebRequest.Get(file);
+        www.SendWebRequest();
+        while (!www.isDone) { await Task.Delay(10); }
+
+        if (www.result != UnityWebRequest.Result.Success) 
         {
-            if (!System.IO.File.Exists(file)) { continue; }
-
-            byte[] imageBytes;
-            if (Application.platform == RuntimePlatform.Android)
-            {
-                UnityWebRequest www = UnityWebRequest.Get(file);
-                www.SendWebRequest();
-                while (!www.isDone) { await Task.Delay(10); }
-                imageBytes = www.downloadHandler.data;
-            }
-            else
-            {
-                imageBytes = System.IO.File.ReadAllBytes(file);
-            }
-
-            var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Prompt guid image", imageBytes);
-            result.Add(new FilePart
-            {
-                fileData = new FilePartData
-                {
-                    mimeType = fileInfo.file.mimeType,
-                    fileUri = fileInfo.file.uri
-                }
-            });
+          Debug.Log($"Did not succeed in file load for android: {file}");
+          continue; 
         }
-        return result;
+        imageBytes = www.downloadHandler.data;
+      }
+      else if (Application.platform == RuntimePlatform.IPhonePlayer)
+      {
+        if (!System.IO.File.Exists(file)) { continue; }
+        imageBytes = System.IO.File.ReadAllBytes(file);
+      }
+      else
+      {
+        if (!System.IO.File.Exists(file)) { continue; }
+        imageBytes = System.IO.File.ReadAllBytes(file);
+      }
+
+      var uploadTask = Task.Run(async () =>
+      {
+        var fileInfo = await FileUploadManager.Instance.UploadFile("image/png", "Prompt guid image", imageBytes);
+        return new FilePart
+        {
+          fileData = new FilePartData
+          {
+            mimeType = fileInfo.file.mimeType,
+            fileUri = fileInfo.file.uri
+          }
+        };
+      });
+      uploadTasks.Add(uploadTask);
     }
+
+    var uploadResults = await Task.WhenAll(uploadTasks);
+    result.AddRange(uploadResults);
+
+    return result;
+  }
+
 }

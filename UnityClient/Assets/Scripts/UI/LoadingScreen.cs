@@ -3,27 +3,27 @@ using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour
 {
-    [SerializeField] private Image _fillImage;
+  [SerializeField] private Image _fillImage;
 
-    public void Show()
-    {
-        _fillImage.fillAmount = 0f;
-        gameObject.SetActive(true);
-    }
+  public void Show()
+  {
+    _fillImage.fillAmount = 0f;
+    gameObject.SetActive(true);
+  }
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+  public void Hide()
+  {
+    gameObject.SetActive(false);
+  }
 
-    public void SetProgress(float amount)
-    {
-        _fillImage.fillAmount = amount;
-    }
+  public void SetProgress(float amount)
+  {
+    _fillImage.fillAmount = amount;
+  }
 
-    private void Awake()
-    {
-        _fillImage.fillAmount = 0f;
-        gameObject.SetActive(false);
-    }
+  private void Awake()
+  {
+    _fillImage.fillAmount = 0f;
+    gameObject.SetActive(false);
+  }
 }

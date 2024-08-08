@@ -68,8 +68,8 @@ public class AppStateManager : Singleton<AppStateManager>
 
         while (!ImagePromptGenerator.Instance.ReadyToGenerate)
         {
-            await Task.Delay(10);
-            UIManager.Instance.LoadingScreen.SetProgress(ImagePromptGenerator.Instance.Progress);
+          await Task.Delay(10);
+          UIManager.Instance.LoadingScreen.SetProgress(ImagePromptGenerator.Instance.Progress);
         }
         UIManager.Instance.LoadingScreen.Hide();
 
