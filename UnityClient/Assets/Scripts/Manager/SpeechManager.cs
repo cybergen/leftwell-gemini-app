@@ -10,8 +10,7 @@ public class SpeechManager : Singleton<SpeechManager>
   public bool Speaking { get; private set; } = false;
   public bool Loading { get; private set; } = false;
   private const string _urlBase = NetworkSettings.PROXY_URL_BASE + "api/speech/";
-  private const string apiUrl = _urlBase
-    + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
+  private const string apiUrl = _urlBase + "{0}?output_format={1}&enable_logging=true&optimize_streaming_latency={2}";
   private AudioSource _speechSource;
   private const int MAX_RETRIES = 3;
   private const int TIMEOUT_SECONDS = 45;
@@ -44,7 +43,7 @@ public class SpeechManager : Singleton<SpeechManager>
     _speechSource.Stop();
     _speechSource.clip = clip;
     _speechSource.Play();
-    await Task.Delay((int)(_speechSource.clip.length * 1000));
+    while (_speechSource.isPlaying) { await Task.Delay(10); }
     Speaking = false;
   }
 

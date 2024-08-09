@@ -3,6 +3,8 @@ using BriLib;
 
 public class VortexEffectController : MonoBehaviour
 {
+  public bool Shown { get; private set; } = false;
+
   [SerializeField] private Material _vortexMaterial;
   [Header("Phase Effect Config")]
   [SerializeField] private float _shownOpacity;
@@ -18,12 +20,14 @@ public class VortexEffectController : MonoBehaviour
 
   public void Show()
   {
+    Shown = true;
     gameObject.SetActive(true);
     StartAnimation(true);
   }
 
   public void Hide()
   {
+    Shown = false;
     StartAnimation(false);
   }
 

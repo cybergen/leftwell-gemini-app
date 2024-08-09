@@ -799,6 +799,7 @@ GameObject:
   - component: {fileID: 3443236378506006268}
   - component: {fileID: 5416669877376058887}
   - component: {fileID: 881059075830892633}
+  - component: {fileID: 6919924725799009102}
   m_Layer: 5
   m_Name: FinalImage
   m_TagString: Untagged
@@ -860,6 +861,29 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!223 &6919924725799009102
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963939553150399214}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 1
+  m_TargetDisplay: 0
 --- !u!1 &1190917719898188993
 GameObject:
   m_ObjectHideFlags: 0
@@ -2671,7 +2695,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2955140317143077428}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0.61
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -5622,7 +5646,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7250282060313315321}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.99604034
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7621,7 +7645,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8495346306472413467}
   m_HandleRect: {fileID: 3035567115063370082}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8457,7 +8481,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3643091192918038082}
   m_Direction: 2
   m_Value: 1.0000012
-  m_Size: 0.5384935
+  m_Size: 0.5079678
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

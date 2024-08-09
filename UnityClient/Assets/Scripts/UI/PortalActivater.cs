@@ -11,7 +11,6 @@ public class PortalActivater : MonoBehaviour
   [SerializeField] private GameObject _shareIcon;
   private Transform _cameraTransform;
   private bool _showable;
-  private bool _wasActive;
   private IActivatable _currentActivatable;
 
   public void SetShowable(bool showable, Transform camera)
@@ -30,15 +29,16 @@ public class PortalActivater : MonoBehaviour
   private void Update()
   {
     var active = _showable && _currentActivatable != null && _currentActivatable.Activatable;
-    if (active && !_wasActive)
+    if (active)
     {
       _text.text = _currentActivatable.ActivationText;
-      _screenUI.Show(_animSeconds);
+      if (!_screenUI.Shown) { _screenUI.Show(_animSeconds); }
+
       if (!_currentActivatable.ShareMode) 
       {
         _portalIcon.SetActive(true);
         _shareIcon.SetActive(false);
-        _vortex.Show();
+        if (!_vortex.Shown) { _vortex.Show(); }
       }
       else
       {
@@ -46,13 +46,12 @@ public class PortalActivater : MonoBehaviour
         _shareIcon.SetActive(true);
       }
     }
-    else if (!active && _wasActive)
+    else if (!active)
     {
-      _screenUI.Hide(_animSeconds);
-      _vortex.Hide();
+      if (_screenUI.Shown) { _screenUI.Hide(_animSeconds); }
+      if (_vortex.Shown) { _vortex.Hide(); }
       _text.text = string.Empty;
     }
-    _wasActive = active;
   }
 
   private void FixedUpdate()

@@ -56,7 +56,6 @@ public class PortalManager : Singleton<PortalManager>
   {
     var camPose = CameraManager.Instance.GetCameraPose();
     var spawnPoint = camPose.Item1 + (camPose.Item2 * Vector3.forward) * _heroPortalSpawnDistance;
-    spawnPoint.y = PlaneManager.Instance.GroundHeight + _heroPortalSpawnHeight;
     var forwardDir = Vector3.ProjectOnPlane(camPose.Item1 - spawnPoint, Vector3.up).normalized;
     var go = _cachedHeroPortal != null ? _cachedHeroPortal : Instantiate(_heroPortalPrefab);
     go.transform.position = spawnPoint;

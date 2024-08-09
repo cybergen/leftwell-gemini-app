@@ -267,7 +267,7 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
   {
     await UseFullScreenTapUI(buttonText);
 #if UNITY_EDITOR
-    //Run twice because TryAcquireLatestCpuImage is BROKEN AND RETURNS AN OLD FRAME
+    //Run twice because TryAcquireLatestCpuImage is BROKEN AND RETURNS AN OLD FRAME with remote
     await CameraManager.Instance.GetNextAvailableCameraImage();
 #endif
     var camImage = await CameraManager.Instance.GetNextAvailableCameraImage();
@@ -287,11 +287,18 @@ public class AdventureSequence : ISequence<AdventureDependencies, AdventureResul
     UIManager.Instance.LongPressButton.Hide();
   }
 
-  private async Task<Tuple<Request, string>> TalkUntilStateChanges(Request payload, StoryState state, CharacterBehaviorController character, Action onUIShown = null, Action onUIHidden = null)
+  private async Task<Tuple<Request, string>> TalkUntilStateChanges(
+    Request payload, 
+    StoryState state, 
+    CharacterBehaviorController character, 
+    Action onUIShown = null, 
+    Action onUIHidden = null)
   {
     var stateReplyPair = new Tuple<StoryState, string>(state, string.Empty);
     while (stateReplyPair.Item1 == state)
     {
+      while (SpeechManager.Instance.Speaking || SpeechManager.Instance.Loading) { await Task.Delay(10); }
+
       onUIShown?.Invoke();
       await UseAudioCaptureUI();
       onUIHidden?.Invoke();

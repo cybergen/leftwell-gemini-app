@@ -4,6 +4,7 @@ using BriLib;
 public class VerticalSlidingElement : MonoBehaviour
 {
   public bool Animating { get; private set; } = false;
+  public bool Shown { get; private set; } = false;
   private RectTransform _self;
   private float _finalY;
   private float _animationDuration;
@@ -13,6 +14,7 @@ public class VerticalSlidingElement : MonoBehaviour
 
   public void Show(float animationDuration)
   {
+    Shown = true;
     _animationDuration = animationDuration;
     gameObject.SetActive(true);
     StartAnimation(true);
@@ -20,6 +22,7 @@ public class VerticalSlidingElement : MonoBehaviour
 
   public void Hide(float animationDuration)
   {
+    Shown = false;
     _animationDuration = animationDuration;
     StartAnimation(false);
   }
