@@ -2600,9 +2600,9 @@ MonoBehaviour:
     packingMode: 0
     atlasWidth: 512
     atlasHeight: 512
-    characterSetSelectionMode: 0
-    characterSequence: 32 - 126, 160, 8203, 8230, 9633
-    referencedFontAssetGUID: 
+    characterSetSelectionMode: 6
+    characterSequence: 20-7E
+    referencedFontAssetGUID: 2f5bfc12c8adb444eb73eaa3c43e1833
     referencedTextAssetGUID: 
     fontStyle: 0
     fontStyleModifier: 0
@@ -2642,7 +2642,7 @@ Texture2D:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: alagard SDF Atlas
+  m_Name: alagardTitle Atlas
   m_ImageContentsHash:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000

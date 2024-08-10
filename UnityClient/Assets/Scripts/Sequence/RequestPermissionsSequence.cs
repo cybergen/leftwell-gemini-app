@@ -72,9 +72,10 @@ public class CameraRigBundle
   public AudioListener PreCameraAudioListener;
   public GameObject PreCameraBackdrop;
 
-  public void SetCameraActive(bool active)
+  public async void SetCameraActive(bool active)
   {
     CameraRig.SetActive(active);
+    await Task.Delay(1000); //Wait a moment before dismissing camera backdrop
     PreCameraAudioListener.enabled = !active;
     PreCameraBackdrop.SetActive(!active);
   }

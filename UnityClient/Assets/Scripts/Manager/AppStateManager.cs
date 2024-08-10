@@ -54,24 +54,22 @@ public class AppStateManager : Singleton<AppStateManager>
     switch (state)
     {
       case AppState.Initialize:
+        _preCameraBackdrop.SetActive(false);
         UIManager.Instance.LoadingScreen.Show();
 
         ImagePromptGenerator.Instance.Initialize();
         PortalManager.Instance.Initialize();
         SpeechManager.Instance.SetSpeechSource(_preCharacterAudioSource);
         NativeShare = new NativeShare();
-        NativeShare.AddFile(_initializeImage);
-        NativeShare.SetTitle("Social share initializer");
-        NativeShare.SetText("Initialization");
-        NativeShare.SetCallback(null);
-        NativeShare.Clear();
 
         while (!ImagePromptGenerator.Instance.ReadyToGenerate)
         {
           await Task.Delay(10);
           UIManager.Instance.LoadingScreen.SetProgress(ImagePromptGenerator.Instance.Progress);
         }
+        _preCameraBackdrop.SetActive(true);
         UIManager.Instance.LoadingScreen.Hide();
+        await Task.Delay(300);
 
         SetState(AppState.CheckPermissions);
         break;
@@ -83,9 +81,10 @@ public class AppStateManager : Singleton<AppStateManager>
         }
         else
         {
+          _arRig.SetActive(true);
+          await Task.Delay(1000); //Wait a moment before dismissing camera backdrop
           _preCameraAudioListener.enabled = false;
           _preCameraBackdrop.SetActive(false);
-          _arRig.SetActive(true);
           SetState(AppState.TitleScreen);
         }
         break;
