@@ -59,7 +59,7 @@ const createServer = () => {
     limit: '50mb',
     proxyReqPathResolver: (req) => {
       //console.log(`Req path ${req.path} and req url ${req.url}`);
-      return '/v1/text-to-speech/2ovNLFOsfyKPEWV5kqQi?output_format=mp3_22050_32&enable_logging=true&optimize_streaming_latency=5';
+      return '/v1/text-to-speech/' + process.env.VOICE_ID + '?output_format=mp3_22050_32&enable_logging=true&optimize_streaming_latency=4';
     },
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
       proxyReqOpts.headers['xi-api-key'] = process.env.ELEVEN_LABS_API_KEY;
