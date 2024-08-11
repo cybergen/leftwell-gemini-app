@@ -39,6 +39,7 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 * If you reject camera permissions on iOS, you will become unable to progress due to inability to show request dialog again, resulting in need to reinstall app
 * The LLM rarely starts describing Sizzlewhisker's actions in third person, but it does not disrupt progression
 * AR tracking sometimes gets lost while the app is backgrounded during use of social share
+* Proxy server does not currently have an auth flow - this is a mission critical feature I'll be building very soon, and the reason why my repository isn't public
 
 ## About the Dev Process
 I didn't find out about the competition until early July, so I was a bit behind, especially working as a solo dev. Luckily, I have been building on top of various LLM's and generative art tools for the last year or so, and previously built a lot of AR experiences, so I was able to make rapid progress.
