@@ -16,6 +16,12 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 * Lore-friendly permissions request flow
 * Lore-friendly tutorial
 
+## How to Test with Minimal Effort
+### Android
+* Install release APK 0.1.4 on an ARCore-compatible Android device (Pixel 4-onwards works)
+* Ensure you have a stable internet connection or wifi
+* Launch the game
+
 ## Technology Used
 * Unity 2022.3.36f1
 * Gemini 1.5 Pro
@@ -34,11 +40,6 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 * The LLM rarely starts describing Sizzlewhisker's actions in third person, but it does not disrupt progression
 * AR tracking sometimes gets lost while the app is backgrounded during use of social share
 
-## How to Test with Minimal Effort
-### Android
-* Install release APK 0.1.4 on an ARCore-compatible Android device (Pixel 4-onwards works)
-* Ensure you have a stable internet connection or wifi
-* Launch the game
 ## About the Dev Process
 I didn't find out about the competition until early July, so I was a bit behind, especially working as a solo dev. Luckily, I have been building on top of various LLM's and generative art tools for the last year or so, and previously built a lot of AR experiences, so I was able to make rapid progress.
 
