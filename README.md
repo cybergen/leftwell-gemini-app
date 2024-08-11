@@ -1,5 +1,7 @@
 # Teleportation Turmoil
-Teleportation Turmoil is a storytelling app for younger players. Help Sizzlewhisker the junior wizard (and sarcastic, Brooklyn-accent wielding dragon), prepare for his teleportation exam at Thromwell Magical Correspondence School by creating a magical tale together. Pick a story prompt and capture items throughout your house that will get transformed into powerful artifacts for use in an adventure that Sizzlewhisker makes up and narrates. Generate enough creative energy, and you can open up a magic portal to another world. 
+Teleportation Turmoil is a storytelling app for younger players. Help Sizzlewhisker the junior wizard (and sarcastic, Brooklyn-accent wielding dragon), prepare for his teleportation exam at Thromwell Magical Correspondence School by creating a magical tale together. Pick a story prompt and capture items throughout your house that will get transformed into powerful artifacts for use in an adventure that Sizzlewhisker makes up and narrates. Generate enough creative energy, and you can open up a magic portal to another world.
+
+![Flying Dragon Wizard in a purple conical hat](https://github.com/cybergen/leftwell-gemini-app/blob/main/UnityClient/Assets/Images/Textures/Zoomed-BG.png?raw=true)
 
 ## Platforms
 Works on ARCore-capable Android devices and ARKit-capable iOS devices
@@ -24,6 +26,8 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 * NodeJS proxy server for managing Gemini, Imagen, and ElevenLabs interactions
 * GCP VM instance for hosting proxy server
 * BriLib - personal library for Unity games that I open-sourced back in 2016 or so
+
+![Flying Dragon Wizard on the ground in front of a dark forest with a looming figure](https://github.com/cybergen/leftwell-gemini-app/blob/main/UnityClient/Assets/Images/Textures/FailedHeroImage.png?raw=true)
 
 ## Known Issues
 * If you reject camera permissions on iOS, you will become unable to progress due to inability to show request dialog again, resulting in need to reinstall app
