@@ -90,7 +90,7 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 
 ### Android Client Build
 * Pull the repo
-* Load in the indicated version of Unity
+* Load UnityClient folder in the indicated version of Unity
 * Set platform to Android
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARCore-compatible Android device (I've confirmed that Pixel 4-onward works)
@@ -99,7 +99,7 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 
 ### iOS Client Build
 * Pull the repo
-* Load in the indicated version of Unity
+* Load UnityClient folder in the indicated version of Unity
 * Set platform to iOS
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARKit-compatible iPhone (I've confirmed that iPhoneXR-onward works)
