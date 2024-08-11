@@ -91,7 +91,8 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 ### Android Client Build
 * Pull the repo
 * Load UnityClient folder in the indicated version of Unity
-* Set platform to Android
+* You may get an issue about a missing package for AR Remoting - click continue to move forward without this package, which I used for testing but only had one license for
+* Switch platform to Android via build dialog
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARCore-compatible Android device (I've confirmed that Pixel 4-onward works)
 * Set phone to dev mode
@@ -100,7 +101,8 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 ### iOS Client Build
 * Pull the repo
 * Load UnityClient folder in the indicated version of Unity
-* Set platform to iOS
+* You may get an issue about a missing package for AR Remoting - click continue to move forward without this package, which I used for testing but only had one license for
+* Switch platform to iOS via build dialog
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARKit-compatible iPhone (I've confirmed that iPhoneXR-onward works)
 * Ensure device is trusted for development
