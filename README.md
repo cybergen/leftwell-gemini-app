@@ -18,7 +18,7 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 
 ## How to Test with Minimal Effort
 ### Android
-* Install release APK 0.1.4 on an ARCore-compatible Android device (Pixel 4-onwards works)
+* Install [release APK 0.1.4](https://drive.google.com/file/d/1MY1rXkWPfDktPgspPZ23o-jDdPyhkRBm/view?usp=drive_link) on an ARCore-compatible Android device (Pixel 4-onwards works)
 * Ensure you have a stable internet connection or wifi
 * Launch the game
 
@@ -76,10 +76,10 @@ In order to interact with Vertex AI services and ElevenLabs, I built a minimal p
 * Point valid DNS entries at your server's external IP
 * Generate a valid certificate for https support via letsencrypt and remember your certificate locations
 * Pull this repo and push the Server folder up to your server
-* Create a .env file in the Server folder root like so:
+* Create a .env file in the Server folder root and populate it with your API keys, port, etc:
 ```
 PORT=LOCAL_PORT
-ELEVEN_LABS_API_KEY=
+ELEVEN_LABS_API_KEY=GET_FROM_ELEVEN_LABS
 API_KEY=GOOGLE_CLOUD_API_KEY
 CERT_PRIVATE_KEY=PATH_TO_PRIVKEY_PEM
 CERT=PATH_TO_CERT_PEM
