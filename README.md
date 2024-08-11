@@ -1,6 +1,8 @@
 # Teleportation Turmoil
 Teleportation Turmoil is a storytelling app for younger players. Help Sizzlewhisker the junior wizard (and sarcastic, Brooklyn-accent wielding dragon), prepare for his teleportation exam at Thromwell Magical Correspondence School by creating an exciting or hilarious tale together. Pick a story prompt and capture items throughout your house that will get transformed into powerful artifacts for use in an adventure that Sizzlewhisker makes up and narrates. Generate enough creative energy, and you can open up a magic portal to another world!
 
+[Demo Video](https://www.youtube.com/watch?v=ADICV-VjrJI)
+
 ![Flying Dragon Wizard in a purple conical hat](https://github.com/cybergen/leftwell-gemini-app/blob/main/UnityClient/Assets/Images/Textures/Zoomed-BG.png?raw=true)
 
 ## Platforms
@@ -63,7 +65,9 @@ I didn't find out about the competition until early July, so I was a bit behind,
 
 ### Upcoming Features
 * Allow redoing tutorial
-* New story structures that can focus on specific lessons or concepts Sizzlewhisker should make games around
+* Persistent story history (via compact summarization of prior sessions)
+* Previous story gallery
+* New story structures that can focus on specific lessons or concepts Sizzlewhisker can make games around to help learning
 
 ## How to Build for Yourself
 ### Server Build
