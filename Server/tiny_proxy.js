@@ -15,7 +15,7 @@ const createServer = () => {
   app.use((req, res, next) => {
     logger.info(`Incoming request: ${req.method} ${req.originalUrl}`);
     logger.debug(`Headers: ${JSON.stringify(req.headers)}`);
-    const origin = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const origin = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     logger.debug(`Origin: ${origin}`);
 
     res.on('error', (err) => {
@@ -44,7 +44,7 @@ const createServer = () => {
       return `/upload/v1beta/files?key=${process.env.API_KEY}&alt=json&uploadType=multipart`;
     },
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-      proxyReqOpts.headers['x-forwarded-for'] = srcReq.connection.remoteAddress;
+      proxyReqOpts.headers['x-forwarded-for'] = srcReq.socket.remoteAddress;
       return proxyReqOpts;
     },
     proxyErrorHandler: (err, res, next) => {
@@ -59,7 +59,7 @@ const createServer = () => {
       return `/v1beta${req.url}?key=${process.env.API_KEY}`;
     },
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-      proxyReqOpts.headers['x-forwarded-for'] = srcReq.connection.remoteAddress;
+      proxyReqOpts.headers['x-forwarded-for'] = srcReq.socket.remoteAddress;
       return proxyReqOpts;
     }
   }));
@@ -72,7 +72,7 @@ const createServer = () => {
     },
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
       proxyReqOpts.headers['xi-api-key'] = process.env.ELEVEN_LABS_API_KEY;
-      proxyReqOpts.headers['x-forwarded-for'] = srcReq.connection.remoteAddress;
+      proxyReqOpts.headers['x-forwarded-for'] = srcReq.socket.remoteAddress;
       return proxyReqOpts;
     }
   }));
@@ -84,7 +84,7 @@ const createServer = () => {
         limit: '50mb',
         proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
           proxyReqOpts.headers['Authorization'] = `Bearer ${oauthToken}`;
-          proxyReqOpts.headers['x-forwarded-for'] = srcReq.connection.remoteAddress;
+          proxyReqOpts.headers['x-forwarded-for'] = srcReq.socket.remoteAddress;
           return proxyReqOpts;
         }
       })(req, res, next);
@@ -113,11 +113,19 @@ const startServer = (useHttps = false) => {
     };
 
     const httpsServer = https.createServer(credentials, app);
+    httpsServer.setTimeout(30000);
+    httpsServer.keepAliveTimeout = 60000;
+    httpsServer.headersTimeout = 65000;
+
     httpsServer.listen(port, () => {
-      logger.info(`HTTPS Server running on port ${port}`);
+      logger.info(`HTTPS Server running on port ${port} with timeout ${httpsServer.timeout}`);
     });
   } else {
-    const httpServer = http.createServer(app);
+    const httpServer = http.createServer(app);    
+    httpServer.setTimeout(30000);
+    httpServer.keepAliveTimeout = 60000;
+    httpServer.headersTimeout = 65000;
+
     httpServer.listen(port, () => {
       logger.info(`HTTP Server running on port ${port}`);
     });
