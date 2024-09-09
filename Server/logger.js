@@ -21,6 +21,7 @@ const logger = createLogger({
         logFormat
       )
     }),
+    new transports.File({ filename: 'error.log', level: 'error' }),
     new transports.File({ filename: 'server.log', level: 'debug' })
   ]
 });

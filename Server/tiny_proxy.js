@@ -17,6 +17,11 @@ const createServer = () => {
     logger.debug(`Headers: ${JSON.stringify(req.headers)}`);
     const origin = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     logger.debug(`Origin: ${origin}`);
+
+    res.on('error', (err) => {
+      logger.error(`Request error: ${req.method} ${req.originalUrl}, Error: ${err.message}`);
+    });
+    
     next();
   });
 
@@ -41,6 +46,10 @@ const createServer = () => {
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
       proxyReqOpts.headers['x-forwarded-for'] = srcReq.connection.remoteAddress;
       return proxyReqOpts;
+    },
+    proxyErrorHandler: (err, res, next) => {
+      logger.error('Error in /api/file-upload proxy', { error: err.message });
+      res.status(500).send('Proxy error');
     }
   }));
 
