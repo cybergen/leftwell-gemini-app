@@ -1,5 +1,7 @@
 # Teleportation Turmoil
-Teleportation Turmoil is a storytelling app for younger players. Help Sizzlewhisker the junior wizard (and sarcastic, Brooklyn-accent wielding dragon), prepare for his teleportation exam at Thromwell Magical Correspondence School by creating a magical tale together. Pick a story prompt and capture items throughout your house that will get transformed into powerful artifacts for use in an adventure that Sizzlewhisker makes up and narrates. Generate enough creative energy, and you can open up a magic portal to another world!
+Teleportation Turmoil is a storytelling app for younger players. Help Sizzlewhisker the junior wizard (and sarcastic, Brooklyn-accent wielding dragon), prepare for his teleportation exam at Thromwell Magical Correspondence School by creating an exciting or hilarious tale together. Pick a story prompt and capture items throughout your house that will get transformed into powerful artifacts for use in an adventure that Sizzlewhisker makes up and narrates. Generate enough creative energy, and you can open up a magic portal to another world!
+
+[Demo Video](https://www.youtube.com/watch?v=ADICV-VjrJI)
 
 ![Flying Dragon Wizard in a purple conical hat](https://github.com/cybergen/leftwell-gemini-app/blob/main/UnityClient/Assets/Images/Textures/Zoomed-BG.png?raw=true)
 
@@ -39,6 +41,7 @@ Works on ARCore-capable Android devices and ARKit-capable iOS devices
 * If you reject camera permissions on iOS, you will become unable to progress due to inability to show request dialog again, resulting in need to reinstall app
 * The LLM rarely starts describing Sizzlewhisker's actions in third person, but it does not disrupt progression
 * AR tracking sometimes gets lost while the app is backgrounded during use of social share
+* Proxy server does not currently have an auth flow - this is a mission critical feature I'll be building very soon, and the reason why my repository isn't public
 
 ## About the Dev Process
 I didn't find out about the competition until early July, so I was a bit behind, especially working as a solo dev. Luckily, I have been building on top of various LLM's and generative art tools for the last year or so, and previously built a lot of AR experiences, so I was able to make rapid progress.
@@ -62,7 +65,9 @@ I didn't find out about the competition until early July, so I was a bit behind,
 
 ### Upcoming Features
 * Allow redoing tutorial
-* New story structures that can focus on specific lessons or concepts Sizzlewhisker should make games around
+* Persistent story history (via compact summarization of prior sessions)
+* Previous story gallery
+* New story structures that can focus on specific lessons or concepts Sizzlewhisker can make games around to help learning
 
 ## How to Build for Yourself
 ### Server Build
@@ -90,8 +95,9 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 
 ### Android Client Build
 * Pull the repo
-* Load in the indicated version of Unity
-* Set platform to Android
+* Load UnityClient folder in the indicated version of Unity
+* You may get an issue about a missing package for AR Remoting - click continue to move forward without this package, which I used for testing but only had one license for
+* Switch platform to Android via build dialog
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARCore-compatible Android device (I've confirmed that Pixel 4-onward works)
 * Set phone to dev mode
@@ -99,8 +105,9 @@ VOICE_ID=2ovNLFOsfyKPEWV5kqQi
 
 ### iOS Client Build
 * Pull the repo
-* Load in the indicated version of Unity
-* Set platform to iOS
+* Load UnityClient folder in the indicated version of Unity
+* You may get an issue about a missing package for AR Remoting - click continue to move forward without this package, which I used for testing but only had one license for
+* Switch platform to iOS via build dialog
 * Edit the settings file at UnityClient/Assets/Scripts/Network/NetworkSettings.cs to point at the path where your proxy server lives (or use mine at leftwell.com)
 * Connect an ARKit-compatible iPhone (I've confirmed that iPhoneXR-onward works)
 * Ensure device is trusted for development
